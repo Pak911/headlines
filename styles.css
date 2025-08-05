@@ -102,27 +102,27 @@ h1 {
 
 /* Color coding for letters */
 .grid-cell.correct {
-    background-color: #6aaa64;
+    background-color: #4CAF50;
     color: white;
-    box-shadow: 0 2px 4px rgba(106, 170, 100, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .grid-cell.wrong-position {
-    background-color: #f5a623;
+    background-color: #FF9800;
     color: white;
-    box-shadow: 0 2px 4px rgba(245, 166, 35, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .grid-cell.connected-word {
-    background-color: #9b59b6;
+    background-color: #9C27B0;
     color: white;
-    box-shadow: 0 2px 4px rgba(155, 89, 182, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(156, 39, 176, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .grid-cell.wrong-word {
-    background-color: #86888a;
+    background-color: #9E9E9E;
     color: white;
-    box-shadow: 0 2px 4px rgba(134, 136, 138, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(158, 158, 158, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Selection states */
@@ -177,7 +177,7 @@ h1 {
 }
 
 .victory-content h2 {
-    color: #6aaa64;
+    color: #4CAF50;
     font-size: 2rem;
     margin-bottom: 20px;
 }
@@ -216,7 +216,7 @@ h1 {
     display: inline-block;
     margin-top: 10px;
     padding: 10px 25px;
-    background: #6aaa64;
+    background: #4CAF50;
     color: white;
     border: none;
     border-radius: 5px;
@@ -226,7 +226,7 @@ h1 {
 }
 
 .new-game-btn:hover {
-    background: #5a9a54;
+    background: #45a049;
 }
 
 .new-game-btn-header {
@@ -269,9 +269,8 @@ h1 {
 .color-legend h3 {
     margin: 0 0 15px 0;
     font-size: 1.1rem;
-    color: #1a1a1a;
-    font-weight: 700;
-    letter-spacing: -0.01em;
+    color: #333;
+    font-weight: 600;
 }
 
 .legend-list {
@@ -285,7 +284,7 @@ h1 {
     align-items: center;
     gap: 15px;
     font-size: 1rem;
-    color: #4a4a4a;
+    color: #333;
     margin-bottom: 12px;
     padding: 8px 0;
     border-bottom: 1px solid #e9ecef;
@@ -312,8 +311,7 @@ h1 {
 .debug-toggle-hint {
     margin-top: 10px;
     text-align: center;
-    color: #9ca3af;
-    font-size: 0.9rem;
+    color: #888;
 }
 
 /* Debug Panel Styles */
