@@ -21,43 +21,207 @@ function findCommonLetters(word1, word2) {
     return common;
 }
 
-// Generate crossword layout ensuring words share letters at intersections
+// Score a layout based on compactness and intersections
+function scoreLayout(layout, words) {
+    if (layout.words.length === 0) return 0;
+    
+    // Calculate grid bounds
+    let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
+    layout.words.forEach(wordInfo => {
+        const word = words[wordInfo.word];
+        
+        // Calculate start position
+        const startRow = wordInfo.row;
+        const startCol = wordInfo.col;
+        
+        // Calculate end position
+        let endRow = startRow;
+        let endCol = startCol;
+        
+        if (wordInfo.direction === 'horizontal') {
+            endCol = startCol + word.length - 1;
+        } else {
+            endRow = startRow + word.length - 1;
+        }
+        
+        // Update bounds
+        minRow = Math.min(minRow, startRow);
+        maxRow = Math.max(maxRow, endRow);
+        minCol = Math.min(minCol, startCol);
+        maxCol = Math.max(maxCol, endCol);
+    });
+    
+    // Calculate area (smaller is better)
+    const width = maxCol - minCol + 1;
+    const height = maxRow - minRow + 1;
+    const area = width * height;
+    
+    // Prefer more square layouts (penalize long skinny grids)
+    const aspectRatio = Math.max(width, height) / Math.min(width, height);
+    const aspectPenalty = aspectRatio > 2 ? (aspectRatio - 2) * 20 : 0;
+    
+    // Count intersections (more is better)
+    let intersectionCount = 0;
+    const occupiedPositions = new Map(); // Map of position -> set of word indices
+    
+    layout.words.forEach(wordInfo => {
+        const word = words[wordInfo.word];
+        for (let i = 0; i < word.length; i++) {
+            let row = wordInfo.row;
+            let col = wordInfo.col;
+            if (wordInfo.direction === 'horizontal') {
+                col += i;
+            } else {
+                row += i;
+            }
+            const key = `${row},${col}`;
+            if (!occupiedPositions.has(key)) {
+                occupiedPositions.set(key, new Set());
+            }
+            occupiedPositions.get(key).add(wordInfo.word);
+        }
+    });
+    
+    // Count positions with multiple words (intersections)
+    for (let [position, wordSet] of occupiedPositions) {
+        if (wordSet.size > 1) {
+            intersectionCount += wordSet.size - 1;
+        }
+    }
+    
+    // Bonus for words that cross multiple other words
+    let multiCrossBonus = 0;
+    let wordsWithMultipleCrossings = 0;
+    layout.words.forEach(wordInfo => {
+        const word = words[wordInfo.word];
+        let crosses = 0;
+        for (let i = 0; i < word.length; i++) {
+            let row = wordInfo.row;
+            let col = wordInfo.col;
+            if (wordInfo.direction === 'horizontal') {
+                col += i;
+            } else {
+                row += i;
+            }
+            const key = `${row},${col}`;
+            const wordSet = occupiedPositions.get(key);
+            if (wordSet && wordSet.size > 1) {
+                crosses += wordSet.size - 1;
+            }
+        }
+        if (crosses > 1) {
+            multiCrossBonus += crosses;
+            wordsWithMultipleCrossings++;
+        }
+    });
+    
+    // Bonus for layouts where words cross multiple other words
+    const multiCrossingBonus = wordsWithMultipleCrossings * 15;
+    
+    // Lower score is better (we want smaller area)
+    // But we want to reward intersections and multi-crossings
+    return area + aspectPenalty - (intersectionCount * 8) - (multiCrossBonus * 3) - multiCrossingBonus;
+}
+
+// Generate multiple layout variations and return the best one
 function generateCrosswordLayout(words) {
+    const maxAttempts = 50;
+    let bestLayout = null;
+    let bestScore = Infinity;
+    
+    // Try multiple starting positions and configurations
+    for (let attempt = 0; attempt < maxAttempts; attempt++) {
+        const layout = tryGenerateLayout(words, attempt);
+        if (layout.words.length === words.length) { // Only consider complete layouts
+            // Validate layout connectivity and parallel spacing
+            if (isLayoutConnected(layout, words) && hasProperParallelSpacing(layout, words)) {
+                const score = scoreLayout(layout, words);
+                if (score < bestScore) {
+                    bestScore = score;
+                    bestLayout = layout;
+                }
+            }
+        }
+    }
+    
+    // If we couldn't generate a good layout, fall back to simple layout
+    if (bestLayout === null || bestLayout.words.length < words.length) {
+        const simpleLayout = generateSimpleLayout(words);
+        // Validate simple layout too
+        if (isLayoutConnected(simpleLayout, words) && hasProperParallelSpacing(simpleLayout, words)) {
+            normalizeLayout(simpleLayout, words);
+            return simpleLayout;
+        }
+        // If even simple layout fails, we might need to reject this caption
+        return null;
+    }
+    
+    // Normalize the best layout
+    normalizeLayout(bestLayout, words);
+    return bestLayout;
+}
+
+// Score a potential word placement
+function scoreWordPlacement(layout, placement, words) {
+    // Create a temporary layout with this placement added
+    const tempLayout = { words: [...layout.words, placement] };
+    return scoreLayout(tempLayout, words);
+}
+
+// Try to generate a layout with different starting conditions
+function tryGenerateLayout(words, attempt) {
     const layout = { words: [] };
     const placed = new Set();
     
-    // Place first word horizontally in the middle
+    // Different starting strategies based on attempt number
+    const startStrategies = [
+        // Strategy 1: Start in middle
+        () => ({ row: 5, col: 2 }),
+        // Strategy 2: Start at origin
+        () => ({ row: 0, col: 0 }),
+        // Strategy 3: Start with offset
+        () => ({ row: 3, col: 3 }),
+        // Strategy 4: Start with larger offset
+        () => ({ row: 10, col: 5 })
+    ];
+    
+    const strategy = startStrategies[attempt % startStrategies.length];
+    const startPos = strategy();
+    
+    // Place first word
     layout.words.push({
         word: 0,
-        row: 5,
-        col: 2,
-        direction: 'horizontal'
+        row: startPos.row,
+        col: startPos.col,
+        direction: attempt % 2 === 0 ? 'horizontal' : 'vertical'
     });
     placed.add(0);
     
     // Try to place remaining words
-    let attempts = 0;
-    while (placed.size < words.length && attempts < 100) {
-        attempts++;
+    let maxIterations = words.length * 30; // Increased iterations for better exploration
+    let iterations = 0;
+    
+    while (placed.size < words.length && iterations < maxIterations) {
+        iterations++;
         
+        // Try each unplaced word
         for (let i = 0; i < words.length; i++) {
             if (placed.has(i)) continue;
             
-            // Try to intersect with already placed words
-            let bestPlacement = null;
+            // Try to intersect with all already placed words
+            const placements = [];
             
             for (let placedIdx of placed) {
                 const placedWord = layout.words.find(w => w.word === placedIdx);
                 const commonLetters = findCommonLetters(words[placedIdx], words[i]);
                 
-                if (commonLetters.length > 0) {
-                    // Pick a random common letter
-                    const common = commonLetters[Math.floor(Math.random() * commonLetters.length)];
+                // Try all common letters, not just a random one
+                commonLetters.forEach(common => {
+                    let newPlacement;
                     
-                    // Calculate position for the new word
                     if (placedWord.direction === 'horizontal') {
                         // Place new word vertically
-                        bestPlacement = {
+                        newPlacement = {
                             word: i,
                             row: placedWord.row - common.word2Index,
                             col: placedWord.col + common.word1Index,
@@ -65,7 +229,7 @@ function generateCrosswordLayout(words) {
                         };
                     } else {
                         // Place new word horizontally
-                        bestPlacement = {
+                        newPlacement = {
                             word: i,
                             row: placedWord.row + common.word1Index,
                             col: placedWord.col - common.word2Index,
@@ -73,21 +237,49 @@ function generateCrosswordLayout(words) {
                         };
                     }
                     
-                    // Check if placement is valid (doesn't create conflicts)
-                    if (isValidPlacement(layout, bestPlacement, words)) {
-                        layout.words.push(bestPlacement);
-                        placed.add(i);
-                        break;
+                    // Check if placement is valid
+                    if (isValidPlacement(layout, newPlacement, words)) {
+                        placements.push({
+                            placement: newPlacement,
+                            score: scoreWordPlacement(layout, newPlacement, words)
+                        });
                     }
+                });
+            }
+            
+            // Sort placements by score (lower is better)
+            placements.sort((a, b) => a.score - b.score);
+            
+            // If we found valid placements, try to pick the best one that maximizes intersections
+            if (placements.length > 0) {
+                // Try up to 3 best placements to see which one works best
+                let bestPlacement = null;
+                let bestTempScore = Infinity;
+                
+                for (let j = 0; j < Math.min(3, placements.length); j++) {
+                    const tempLayout = { words: [...layout.words, placements[j].placement] };
+                    const tempScore = scoreLayout(tempLayout, words);
+                    if (tempScore < bestTempScore) {
+                        bestTempScore = tempScore;
+                        bestPlacement = placements[j].placement;
+                    }
+                }
+                
+                if (bestPlacement) {
+                    layout.words.push(bestPlacement);
+                    placed.add(i);
+                    break; // Move to next iteration to try placing other words
                 }
             }
         }
     }
     
-    // If we couldn't place all words with intersections, fall back to a simple layout
-    if (placed.size < words.length) {
-        return generateSimpleLayout(words);
-    }
+    return layout;
+}
+
+// Normalize layout positions to start from padding
+function normalizeLayout(layout, words) {
+    if (layout.words.length === 0) return;
     
     // Calculate grid bounds
     let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
@@ -128,8 +320,148 @@ function generateCrosswordLayout(words) {
         rows: maxRow - minRow + 1 + (padding * 2), 
         cols: maxCol - minCol + 1 + (padding * 2) 
     };
+}
+
+// Check if all words in a layout are connected (form a single component)
+function isLayoutConnected(layout, words) {
+    if (layout.words.length <= 1) return true;
     
-    return layout;
+    // Build adjacency graph
+    const graph = new Map();
+    layout.words.forEach((wordInfo, index) => {
+        graph.set(index, new Set());
+    });
+    
+    // Connect words that intersect or are adjacent
+    for (let i = 0; i < layout.words.length; i++) {
+        for (let j = i + 1; j < layout.words.length; j++) {
+            if (doWordsIntersect(layout.words[i], layout.words[j], words)) {
+                graph.get(i).add(j);
+                graph.get(j).add(i);
+            }
+        }
+    }
+    
+    // Check if all words are reachable from the first word (BFS)
+    const visited = new Set();
+    const queue = [0];
+    visited.add(0);
+    
+    while (queue.length > 0) {
+        const current = queue.shift();
+        for (let neighbor of graph.get(current)) {
+            if (!visited.has(neighbor)) {
+                visited.add(neighbor);
+                queue.push(neighbor);
+            }
+        }
+    }
+    
+    // All words should be visited (connected)
+    return visited.size === layout.words.length;
+}
+
+// Check if parallel words have proper spacing (at least 1 square gap)
+function hasProperParallelSpacing(layout, words) {
+    for (let i = 0; i < layout.words.length; i++) {
+        for (let j = i + 1; j < layout.words.length; j++) {
+            const word1 = layout.words[i];
+            const word2 = layout.words[j];
+            const word1Text = words[word1.word];
+            const word2Text = words[word2.word];
+            
+            // Only check parallel words (same direction)
+            if (word1.direction === word2.direction) {
+                // Get all positions for both words
+                const positions1 = [];
+                const positions2 = [];
+                
+                for (let k = 0; k < word1Text.length; k++) {
+                    let row = word1.row;
+                    let col = word1.col;
+                    if (word1.direction === 'horizontal') {
+                        col += k;
+                    } else {
+                        row += k;
+                    }
+                    positions1.push({row, col});
+                }
+                
+                for (let k = 0; k < word2Text.length; k++) {
+                    let row = word2.row;
+                    let col = word2.col;
+                    if (word2.direction === 'horizontal') {
+                        col += k;
+                    } else {
+                        row += k;
+                    }
+                    positions2.push({row, col});
+                }
+                
+                // Check if words are too close
+                for (let pos1 of positions1) {
+                    for (let pos2 of positions2) {
+                        if (word1.direction === 'horizontal') {
+                            // Horizontal words: check vertical distance
+                            if (pos1.col === pos2.col && Math.abs(pos1.row - pos2.row) === 1) {
+                                return false; // Words are adjacent vertically
+                            }
+                        } else {
+                            // Vertical words: check horizontal distance
+                            if (pos1.row === pos2.row && Math.abs(pos1.col - pos2.col) === 1) {
+                                return false; // Words are adjacent horizontally
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
+// Check if two words intersect (share a cell with the same letter)
+function doWordsIntersect(word1, word2, words) {
+    const word1Text = words[word1.word];
+    const word2Text = words[word2.word];
+    
+    // Get all positions for both words
+    const positions1 = new Map(); // position -> letter
+    const positions2 = new Map(); // position -> letter
+    
+    for (let i = 0; i < word1Text.length; i++) {
+        let row = word1.row;
+        let col = word1.col;
+        if (word1.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions1.set(`${row},${col}`, word1Text[i]);
+    }
+    
+    for (let i = 0; i < word2Text.length; i++) {
+        let row = word2.row;
+        let col = word2.col;
+        if (word2.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions2.set(`${row},${col}`, word2Text[i]);
+    }
+    
+    // Check for proper intersections (same letter at same position)
+    for (let [pos, letter1] of positions1) {
+        if (positions2.has(pos)) {
+            const letter2 = positions2.get(pos);
+            if (letter1 === letter2) {
+                return true; // Proper intersection with same letter
+            }
+        }
+    }
+    
+    return false;
 }
 
 // Check if a word placement is valid
@@ -550,11 +882,31 @@ function initGame() {
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
     
-    // Select random headline
-    currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+    // Try to generate a valid layout with different captions
+    const maxCaptionAttempts = 10;
+    let captionAttempts = 0;
     
-    // Generate crossword layout
-    crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+    while (captionAttempts < maxCaptionAttempts) {
+        // Select random headline
+        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        
+        // Generate crossword layout
+        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+        
+        // If layout generation succeeded, break out of loop
+        if (crosswordLayout !== null) {
+            break;
+        }
+        
+        captionAttempts++;
+    }
+    
+    // If we still don't have a valid layout, use the last attempt (even if invalid)
+    if (crosswordLayout === null) {
+        // Generate a simple layout as final fallback
+        crosswordLayout = generateSimpleLayout(currentHeadline.words);
+        normalizeLayout(crosswordLayout, currentHeadline.words);
+    }
     
     // Place words in grid
     grid = placeWordsInGrid(currentHeadline.words, crosswordLayout);

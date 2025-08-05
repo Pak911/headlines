@@ -9,7 +9,7 @@
 ## Development Environment
 - **Editor**: VSCode
 - **Browser**: Modern browsers supporting ES6
-- **File Structure**: Single index.html file
+- **File Structure**: Modular structure (index.html, styles.css, script.js, data.js)
 - **Version Control**: Git
 
 ## Browser Requirements
@@ -22,7 +22,7 @@
 1. **No Build Process**: Direct browser execution
 2. **No External Libraries**: Pure vanilla implementation
 3. **Client-Side Only**: No server communication
-4. **Single File**: All code in index.html
+4. **Modular File Structure**: Code separated into HTML, CSS, JavaScript, and Data files
 
 ## Key JavaScript Features Used
 - Array methods (map, forEach, filter)

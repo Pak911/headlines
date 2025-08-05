@@ -9,13 +9,17 @@ Single-page application (SPA) with all logic contained in index.html:
 ## Key Technical Decisions
 
 ### 1. Crossword Generation Algorithm
-- **Pattern**: Two-phase generation with validation
+- **Pattern**: Multi-phase generation with strict validation
   - Phase 1: Attempt intelligent placement using shared letters
-  - Phase 2: Fallback to structured layout if needed
+  - Phase 2: Validate connectivity and parallel spacing
+  - Phase 3: Fallback to structured layout if needed
+  - Phase 4: Caption rejection and retry system
 - **Key Components**:
   - `findCommonLetters()`: Identifies intersection opportunities
   - `isValidPlacement()`: Ensures proper spacing and intersections
-  - `generateCrosswordLayout()`: Main generation logic
+  - `isLayoutConnected()`: Validates all words form single connected component
+  - `hasProperParallelSpacing()`: Ensures parallel words have minimum gaps
+  - `generateCrosswordLayout()`: Main generation logic with validation
   - `generateSimpleLayout()`: Fallback for edge cases
 
 ### 2. Grid Data Structure
