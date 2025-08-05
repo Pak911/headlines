@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crossword Game Color Logic Test Suite</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .test-case {
+            border: 1px solid #ccc;
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .grid {
+            display: inline-grid;
+            grid-template-columns: repeat(10, 35px);
+            gap: 1px;
+            margin: 10px 0;
+        }
+        .cell {
+            width: 35px;
+            height: 35px;
+            border: 1px solid #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 16px;
+        }
+        .correct { background-color: #6aaa64; color: white; }
+        .wrong-position { background-color: #f5a623; color: white; }
+        .wrong-word { background-color: #86888a; color: white; }
+        .connected-word { background-color: #9b59b6; color: white; }
+        .empty { background-color: #ddd; }
+        h2 { color: #333; border-bottom: 2px solid #4a90e2; padding-bottom: 10px; }
+        h3 { margin-top: 20px; color: #555; }
+        .explanation { 
+            background-color: #e8f4fd; 
+            padding: 10px; 
+            border-left: 4px solid #4a90e2; 
+            margin: 10px 0; 
+        }
+        .legend {
+            display: flex;
+            gap: 20px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .legend-color {
+            width: 20px;
+            height: 20px;
+            border: 1px solid #333;
+        }
+    </style>
+</head>
+<body>
+    <h2>Crossword Game Color Logic Test Suite</h2>
+    
+    <div class="legend">
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #6aaa64;"></div>
+            <span>Correct position</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #f5a623;"></div>
+            <span>Right word, wrong position</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #9b59b6;"></div>
+            <span>Belongs to connected word</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color" style="background-color: #86888a;"></div>
+            <span>Belongs to other word</span>
+        </div>
+        <div class="legend-item">
+            <div class="legend-color empty"></div>
+            <span>Empty Cell</span>
+        </div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test Case 1: Duplicate Letter Handling</h3>
+        <div class="explanation">
+            <p><strong>Target Word:</strong> "GRASS"</p>
+            <p><strong>Player Guess:</strong> "GRRSS"</p>
+            <p><strong>Expected Result:</strong> G=green, R=green, R=gray (no more R in target), S=green, S=green</p>
+        </div>
+        <div class="grid" id="test1"></div>
+    </div>
+
+
+    <div class="test-case">
+        <h3>Test Case 3: Three-Way Word Intersection</h3>
+        <div class="explanation">
+            <p><strong>Word 1 (Horizontal):</strong> "CROSS" (positions 4,2 to 4,6)</p>
+            <p><strong>Word 2 (Vertical):</strong> "ROAD" (positions 2,4 to 5,4, crossing CROSS at 'A')</p>
+            <p><strong>Word 3 (Vertical):</strong> "SEA" (positions 4,5 to 6,5, crossing CROSS at 'S')</p>
+            <p><strong>Intersections:</strong> CROSS-A with ROAD-A, CROSS-S with SEA-S</p>
+            <p><strong>Expected Color Coding:</strong></p>
+            <ul>
+                <li>CROSS: C=<span style="color:#6aaa64">green</span>(correct), R=<span style="color:#f5a623">orange</span>(wrong pos), O=<span style="color:#9b59b6">purple</span>(connected), S=<span style="color:#86888a">gray</span>(wrong), S=<span style="color:#6aaa64">green</span>(correct)</li>
+            </ul>
+        </div>
+        <div class="grid" id="test3"></div>
+    </div>
+
+    <div class="test-case">
+        <h3>Test Case 4: Complex Multi-Word Scenario</h3>
+        <div class="explanation">
+            <p><strong>Word 1 (Horizontal):</strong> "PUZZLE" (positions 3,1 to 3,6)</p>
+            <p><strong>Word 2 (Vertical):</strong> "GAZE" (positions 1,3 to 4,3, crossing PUZZLE at 'Z')</p>
+            <p><strong>Word 3 (Vertical):</strong> "ZEST" (positions 3,4 to 6,4, crossing PUZZLE at 'Z')</p>
+            <p><strong>Word 4 (Vertical):</strong> "ELSE" (positions 3,6 to 6,6, crossing PUZZLE at 'E')</p>
+            <p><strong>Intersections:</strong> Proper crossword pattern with matching letters at intersections</p>
+            <p><strong>Expected Color Coding:</strong></p>
+            <ul>
+                <li>PUZZLE: P=<span style="color:#6aaa64">green</span>(correct), L=<span style="color:#f5a623">orange</span>(wrong pos), Z=<span style="color:#6aaa64">green</span>(correct), Z=<span style="color:#6aaa64">green</span>(correct), A=<span style="color:#9b59b6">purple</span>(connected), E=<span style="color:#6aaa64">green</span>(correct)</li>
+                <li>GAZE: G=<span style="color:#6aaa64">green</span>(correct), L=<span style="color:#f5a623">orange</span>(wrong pos), Z=<span style="color:#6aaa64">green</span>(correct), X=<span style="color:#86888a">gray</span>(wrong)</li>
+                <li>ZEST: Z=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), S=<span style="color:#6aaa64">green</span>(correct), P=<span style="color:#9b59b6">purple</span>(connected)</li>
+                <li>ELSE: E=<span style="color:#6aaa64">green</span>(correct), Z=<span style="color:#f5a623">orange</span>(wrong pos), G=<span style="color:#9b59b6">purple</span>(connected), X=<span style="color:#86888a">gray</span>(wrong)</li>
+            </ul>
+        </div>
+        <div class="grid" id="test4"></div>
+    </div>
+
+    <script>
+        // Simulate the crossword grid structure for testing
+        class TestGrid {
+            constructor() {
+                this.grid = [];
+                this.wordConnections = new Map();
+                this.initializeGrid();
+            }
+            
+            initializeGrid() {
+                // Create 10x10 grid
+                for (let r = 0; r < 10; r++) {
+                    this.grid[r] = [];
+                    for (let c = 0; c < 10; c++) {
+                        this.grid[r][c] = {
+                            letter: '',
+                            currentLetter: '',
+                            wordIndex: -1,
+                            letterIndex: -1
+                        };
+                    }
+                }
+            }
+            
+            // Set up a word in the grid
+            setWord(word, row, col, direction, wordIndex) {
+                for (let i = 0; i < word.length; i++) {
+                    let r = row;
+                    let c = col;
+                    if (direction === 'horizontal') {
+                        c += i;
+                    } else {
+                        r += i;
+                    }
+                    if (r < 10 && c < 10) {
+                        this.grid[r][c] = {
+                            letter: word[i],
+                            currentLetter: word[i],
+                            wordIndex: wordIndex,
+                            letterIndex: i
+                        };
+                    }
+                }
+            }
+            
+            // Set up word connections
+            setWordConnections() {
+                // Find which words are connected (share adjacent cells)
+                this.wordConnections = new Map();
+                
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].wordIndex >= 0) {
+                            const wordIdx = this.grid[r][c].wordIndex;
+                            if (!this.wordConnections.has(wordIdx)) {
+                                this.wordConnections.set(wordIdx, new Set());
+                            }
+                            
+                            // Check adjacent cells for other words
+                            const directions = [[-1,0], [1,0], [0,-1], [0,1]];
+                            for (let [dr, dc] of directions) {
+                                const nr = r + dr;
+                                const nc = c + dc;
+                                if (nr >= 0 && nr < 10 && nc >= 0 && nc < 10) {
+                                    if (this.grid[nr][nc].wordIndex >= 0 && this.grid[nr][nc].wordIndex !== wordIdx) {
+                                        this.wordConnections.get(wordIdx).add(this.grid[nr][nc].wordIndex);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Simulate player input by scrambling letters
+            scrambleWord(wordIndex) {
+                const letters = [];
+                const positions = [];
+                
+                // Collect letters and positions for this word
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].wordIndex === wordIndex) {
+                            letters.push(this.grid[r][c].letter);
+                            positions.push({r, c});
+                        }
+                    }
+                }
+                
+                // Shuffle letters
+                for (let i = letters.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [letters[i], letters[j]] = [letters[j], letters[i]];
+                }
+                
+                // Place shuffled letters back
+                positions.forEach((pos, index) => {
+                    this.grid[pos.r][pos.c].currentLetter = letters[index];
+                });
+            }
+            
+            // Get letter color class (exact copy from main game logic)
+            getLetterColorClass(row, col) {
+                const cell = this.grid[row][col];
+                if (!cell.letter) return 'empty';
+                
+                // Check if letter is in correct position
+                if (cell.currentLetter === cell.letter) {
+                    return 'correct';
+                }
+                
+                // Implement Wordle-style duplicate letter handling
+                // First, get the target word for this cell
+                const targetWordIndex = cell.wordIndex;
+                
+                // Count total occurrences of this letter in the target word
+                let totalInTargetWord = 0;
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].wordIndex === targetWordIndex && this.grid[r][c].letter === cell.currentLetter) {
+                            totalInTargetWord++;
+                        }
+                    }
+                }
+                
+                // Count how many of this letter are already correctly placed in the target word
+                let correctCount = 0;
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].wordIndex === targetWordIndex && 
+                            this.grid[r][c].letter === cell.currentLetter && 
+                            this.grid[r][c].currentLetter === this.grid[r][c].letter) {
+                            correctCount++;
+                        }
+                    }
+                }
+                
+                // Count how many of this letter appear before this position in the same word
+                let beforeCount = 0;
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].wordIndex === targetWordIndex && 
+                            this.grid[r][c].currentLetter === cell.currentLetter) {
+                            // Check if this position comes before the current position
+                            if (r < row || (r === row && c < col)) {
+                                beforeCount++;
+                            }
+                        }
+                    }
+                }
+                
+                // If we haven't used all occurrences of this letter yet, it can be wrong position
+                if (beforeCount < totalInTargetWord) {
+                    // Check if this letter exists in the target word (but not in correct position)
+                    let existsInTargetWord = false;
+                    for (let r = 0; r < 10; r++) {
+                        for (let c = 0; c < 10; c++) {
+                            if (this.grid[r][c].wordIndex === targetWordIndex && 
+                                this.grid[r][c].letter === cell.currentLetter &&
+                                (r !== row || c !== col)) {
+                                existsInTargetWord = true;
+                            }
+                        }
+                    }
+                    
+                    if (existsInTargetWord) {
+                        return 'wrong-position';
+                    }
+                }
+                
+                // Check if letter exists in connected words
+                let foundInConnectedWord = false;
+                for (let r = 0; r < 10; r++) {
+                    for (let c = 0; c < 10; c++) {
+                        if (this.grid[r][c].letter === cell.currentLetter && 
+                            this.grid[r][c].wordIndex !== targetWordIndex) {
+                            if (this.wordConnections.has(targetWordIndex) && 
+                                this.wordConnections.get(targetWordIndex).has(this.grid[r][c].wordIndex)) {
+                                foundInConnectedWord = true;
+                            }
+                        }
+                    }
+                }
+                
+                if (foundInConnectedWord) {
+                    return 'connected-word';
+                } else {
+                    return 'wrong-word';
+                }
+            }
+        }
+        
+        // Render a test grid
+        function renderTestGrid(containerId, testGrid, showCurrentLetters = true) {
+            const container = document.getElementById(containerId);
+            const gridElement = document.createElement('div');
+            gridElement.className = 'grid';
+            
+            for (let r = 0; r < 10; r++) {
+                for (let c = 0; c < 10; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    
+                    const gridCell = testGrid.grid[r][c];
+                    if (gridCell.letter) {
+                        cell.textContent = showCurrentLetters ? gridCell.currentLetter : gridCell.letter;
+                        const colorClass = testGrid.getLetterColorClass(r, c);
+                        cell.classList.add(colorClass);
+                    } else {
+                        cell.classList.add('empty');
+                    }
+                    
+                    gridElement.appendChild(cell);
+                }
+            }
+            
+            container.appendChild(gridElement);
+        }
+        
+        // Run tests
+        window.onload = function() {
+            // Test 1: Duplicate letter handling
+            const test1 = new TestGrid();
+            // Set up target word "GRASS" 
+            test1.grid[1][2] = { letter: 'G', currentLetter: 'G', wordIndex: 0, letterIndex: 0 };
+            test1.grid[1][3] = { letter: 'R', currentLetter: 'R', wordIndex: 0, letterIndex: 1 };
+            test1.grid[1][4] = { letter: 'A', currentLetter: 'R', wordIndex: 0, letterIndex: 2 };
+            test1.grid[1][5] = { letter: 'S', currentLetter: 'S', wordIndex: 0, letterIndex: 3 };
+            test1.grid[1][6] = { letter: 'S', currentLetter: 'S', wordIndex: 0, letterIndex: 4 };
+            
+            // Set up word connections (empty for single word test)
+            test1.wordConnections.set(0, new Set());
+            
+            renderTestGrid('test1', test1);
+            
+            // Test 3: Three-way intersection with all color variants
+            const test3 = new TestGrid();
+            
+            // Set up three intersecting words manually for precise control
+            // Word 0: "CROSS" (horizontal at row 4, cols 2-6)
+            test3.grid[4][2] = { letter: 'C', currentLetter: 'C', wordIndex: 0, letterIndex: 0 };
+            test3.grid[4][3] = { letter: 'R', currentLetter: 'O', wordIndex: 0, letterIndex: 1 };
+            test3.grid[4][4] = { letter: 'O', currentLetter: 'R', wordIndex: 0, letterIndex: 2 };
+            test3.grid[4][5] = { letter: 'S', currentLetter: 'Z', wordIndex: 0, letterIndex: 3 };
+            test3.grid[4][6] = { letter: 'S', currentLetter: 'S', wordIndex: 0, letterIndex: 4 };
+            
+            // Word 1: "ROAD" (vertical at col 4, rows 2-5) - intersects CROSS at O
+            test3.grid[2][4] = { letter: 'R', currentLetter: 'R', wordIndex: 1, letterIndex: 0 };
+            test3.grid[3][4] = { letter: 'O', currentLetter: 'O', wordIndex: 1, letterIndex: 1 };
+            test3.grid[4][4] = { letter: 'A', currentLetter: 'R', wordIndex: 1, letterIndex: 2 }; // Intersection
+            test3.grid[5][4] = { letter: 'D', currentLetter: 'D', wordIndex: 1, letterIndex: 3 };
+            
+            // Word 2: "SEA" (vertical at col 5, rows 4-6) - intersects CROSS at S
+            test3.grid[4][5] = { letter: 'S', currentLetter: 'Z', wordIndex: 2, letterIndex: 0 }; // Intersection
+            test3.grid[5][5] = { letter: 'E', currentLetter: 'E', wordIndex: 2, letterIndex: 1 };
+            test3.grid[6][5] = { letter: 'A', currentLetter: 'A', wordIndex: 2, letterIndex: 2 };
+            
+            // Set up word connections
+            test3.wordConnections.set(0, new Set([1, 2])); // CROSS connects to ROAD and SEA
+            test3.wordConnections.set(1, new Set([0]));    // ROAD connects to CROSS
+            test3.wordConnections.set(2, new Set([0]));    // SEA connects to CROSS
+            
+            renderTestGrid('test3', test3);
+            
+            // Test 4: Four-way intersection with all words connected and all color variants
+            const test4 = new TestGrid();
+            
+            // Set up four connected words forming a proper crossword with correct intersections
+            // Word 0: "PUZZLE" (horizontal at row 3, cols 1-6)
+            test4.grid[3][1] = { letter: 'P', currentLetter: 'P', wordIndex: 0, letterIndex: 0 };
+            test4.grid[3][2] = { letter: 'U', currentLetter: 'L', wordIndex: 0, letterIndex: 1 };
+            test4.grid[3][3] = { letter: 'Z', currentLetter: 'Z', wordIndex: 0, letterIndex: 2 };
+            test4.grid[3][4] = { letter: 'Z', currentLetter: 'Z', wordIndex: 0, letterIndex: 3 };
+            test4.grid[3][5] = { letter: 'L', currentLetter: 'M', wordIndex: 0, letterIndex: 4 };
+            test4.grid[3][6] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 5 };
+            
+            // Word 1: "GAZE" (vertical at col 3, rows 1-4) - intersects PUZZLE at Z
+            test4.grid[1][3] = { letter: 'G', currentLetter: 'G', wordIndex: 1, letterIndex: 0 };
+            test4.grid[2][3] = { letter: 'A', currentLetter: 'M', wordIndex: 1, letterIndex: 1 };
+            test4.grid[3][3] = { letter: 'Z', currentLetter: 'Z', wordIndex: 1, letterIndex: 2 }; // Intersection
+            test4.grid[4][3] = { letter: 'E', currentLetter: 'X', wordIndex: 1, letterIndex: 3 };
+            
+            // Word 2: "BUZZ" (vertical at col 4, rows 3-6) - intersects PUZZLE at Z
+            test4.grid[3][4] = { letter: 'B', currentLetter: 'Z', wordIndex: 2, letterIndex: 0 }; // Intersection - but we want Z here
+            test4.grid[4][4] = { letter: 'U', currentLetter: 'E', wordIndex: 2, letterIndex: 1 };
+            test4.grid[5][4] = { letter: 'Z', currentLetter: 'S', wordIndex: 2, letterIndex: 2 };
+            test4.grid[6][4] = { letter: 'Z', currentLetter: 'Y', wordIndex: 2, letterIndex: 3 };
+            
+            // Actually, let me fix this properly - the intersection letter must match
+            // Word 2: "ZEST" (vertical at col 4, rows 3-6) - intersects PUZZLE at Z
+            test4.grid[3][4] = { letter: 'Z', currentLetter: 'Z', wordIndex: 2, letterIndex: 0 }; // Intersection
+            test4.grid[4][4] = { letter: 'E', currentLetter: 'E', wordIndex: 2, letterIndex: 1 };
+            test4.grid[5][4] = { letter: 'S', currentLetter: 'S', wordIndex: 2, letterIndex: 2 };
+            test4.grid[6][4] = { letter: 'T', currentLetter: 'Y', wordIndex: 2, letterIndex: 3 };
+            
+            // Word 3: "ELSE" (vertical at col 6, rows 3-6) - intersects PUZZLE at E
+            test4.grid[3][6] = { letter: 'E', currentLetter: 'E', wordIndex: 3, letterIndex: 0 }; // Intersection
+            test4.grid[4][6] = { letter: 'L', currentLetter: 'R', wordIndex: 3, letterIndex: 1 };
+            test4.grid[5][6] = { letter: 'S', currentLetter: 'O', wordIndex: 3, letterIndex: 2 };
+            test4.grid[6][6] = { letter: 'E', currentLetter: 'W', wordIndex: 3, letterIndex: 3 };
+            
+            // Set up word connections properly
+            test4.wordConnections.set(0, new Set([1, 2, 3])); // PUZZLE connects to GAZE, ZEST, ELSE
+            test4.wordConnections.set(1, new Set([0]));       // GAZE connects to PUZZLE
+            test4.wordConnections.set(2, new Set([0]));       // ZEST connects to PUZZLE
+            test4.wordConnections.set(3, new Set([0]));       // ELSE connects to PUZZLE
+            
+            // Set player guesses to demonstrate all four colors for each word
+            // For PUZZLE word (index 0):
+            test4.grid[3][1].currentLetter = 'P';  // Correct position - green
+            test4.grid[3][2].currentLetter = 'L';  // Wrong position - yellow (L exists in PUZZLE but not at position 1)
+            test4.grid[3][3].currentLetter = 'Z';  // Correct position - green
+            test4.grid[3][4].currentLetter = 'Z';  // Correct position - green
+            test4.grid[3][5].currentLetter = 'A';  // Connected word - blue (A exists in GAZE)
+            test4.grid[3][6].currentLetter = 'E';  // Correct position - green
+            
+            // For GAZE word (index 1):
+            test4.grid[1][3].currentLetter = 'G';  // Correct position - green
+            test4.grid[2][3].currentLetter = 'L';  // Wrong position - yellow (L exists in PUZZLE but not at position 1)
+            test4.grid[3][3].currentLetter = 'Z';  // Correct position - green
+            test4.grid[4][3].currentLetter = 'X';  // Wrong word - gray (X doesn't exist anywhere)
+            
+            // For ZEST word (index 2):
+            test4.grid[3][4].currentLetter = 'Z';  // Correct position - green
+            test4.grid[4][4].currentLetter = 'E';  // Correct position - green
+            test4.grid[5][4].currentLetter = 'S';  // Correct position - green
+            test4.grid[6][4].currentLetter = 'P';  // Connected word - blue (P exists in PUZZLE)
+            
+            // For ELSE word (index 3):
+            test4.grid[3][6].currentLetter = 'E';  // Correct position - green
+            test4.grid[4][6].currentLetter = 'Z';  // Wrong position - yellow (Z exists in PUZZLE but not at this position)
+            test4.grid[5][6].currentLetter = 'G';  // Connected word - blue (G exists in GAZE)
+            test4.grid[6][6].currentLetter = 'X';  // Wrong word - gray (X doesn't exist anywhere)
+            
+            renderTestGrid('test4', test4);
+        };
+    </script>
+</body>
+</html>

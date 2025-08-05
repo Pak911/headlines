@@ -771,33 +771,81 @@ function getLetterColorClass(row, col) {
         return 'correct';
     }
     
-    // Find where the current letter at this position should actually be
-    let targetWordIndex = -1;
-    let foundInSameWord = false;
-    let foundInConnectedWord = false;
+    // Implement Wordle-style duplicate letter handling
+    // First, get the target word for this cell
+    const targetWordIndex = cell.wordIndex;
     
-    // Look through all positions to find where this letter belongs
+    // Count total occurrences of this letter in the target word
+    let totalInTargetWord = 0;
     for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].letter === cell.currentLetter) {
-                targetWordIndex = grid[r][c].wordIndex;
-                
-                // Check if this letter belongs to the same word as the current position
-                if (targetWordIndex === cell.wordIndex) {
-                    foundInSameWord = true;
+            if (grid[r][c].wordIndex === targetWordIndex && grid[r][c].letter === cell.currentLetter) {
+                totalInTargetWord++;
+            }
+        }
+    }
+    
+    // Count how many of this letter are already correctly placed in the target word
+    let correctCount = 0;
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].wordIndex === targetWordIndex && 
+                grid[r][c].letter === cell.currentLetter && 
+                grid[r][c].currentLetter === grid[r][c].letter) {
+                correctCount++;
+            }
+        }
+    }
+    
+    // Count how many of this letter appear before this position in the same word
+    let beforeCount = 0;
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].wordIndex === targetWordIndex && 
+                grid[r][c].letter === cell.currentLetter &&
+                grid[r][c].currentLetter === cell.currentLetter) {
+                // Check if this position comes before the current position
+                if (r < row || (r === row && c < col)) {
+                    beforeCount++;
                 }
-                // Check if this letter belongs to a connected word
-                else if (wordConnections[cell.wordIndex] && wordConnections[cell.wordIndex].has(targetWordIndex)) {
+            }
+        }
+    }
+    
+    // If we haven't used all occurrences of this letter yet, it can be wrong position
+    if (beforeCount < totalInTargetWord) {
+        // Check if this letter exists in the target word (but not in correct position)
+        let existsInTargetWord = false;
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                if (grid[r][c].wordIndex === targetWordIndex && 
+                    grid[r][c].letter === cell.currentLetter &&
+                    (r !== row || c !== col)) {
+                    existsInTargetWord = true;
+                }
+            }
+        }
+        
+        if (existsInTargetWord) {
+            return 'wrong-position';
+        }
+    }
+    
+    // Check if letter exists in connected words
+    let foundInConnectedWord = false;
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter === cell.currentLetter && 
+                grid[r][c].wordIndex !== targetWordIndex) {
+                if (wordConnections[targetWordIndex] && 
+                    wordConnections[targetWordIndex].has(grid[r][c].wordIndex)) {
                     foundInConnectedWord = true;
                 }
             }
         }
     }
     
-    // Return appropriate color based on where the letter belongs
-    if (foundInSameWord) {
-        return 'wrong-position';
-    } else if (foundInConnectedWord) {
+    if (foundInConnectedWord) {
         return 'connected-word';
     } else {
         return 'wrong-word';

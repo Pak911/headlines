@@ -11,6 +11,9 @@
 - **Browser**: Modern browsers supporting ES6
 - **File Structure**: Modular structure (index.html, styles.css, script.js, data.js)
 - **Version Control**: Git
+- **Run Commands**: 
+  - Main game: `start index.html`
+  - Test suite: `start test.html`
 
 ## Browser Requirements
 - ES6 JavaScript support
