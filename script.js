@@ -934,16 +934,23 @@ function swapLetters(pos1, pos2) {
     cell1.classList.add('swapping');
     cell2.classList.add('swapping');
     
-    // Swap the letters
-    const temp = grid[pos1.row][pos1.col].currentLetter;
-    grid[pos1.row][pos1.col].currentLetter = grid[pos2.row][pos2.col].currentLetter;
-    grid[pos2.row][pos2.col].currentLetter = temp;
-    
-    // Update swap counter
+    // Update swap counter immediately
     swapCount++;
     document.getElementById('swapCount').textContent = swapCount;
     
-    // Re-render after animation
+    // Swap the letters in the middle of the animation (after first 180 degrees)
+    setTimeout(() => {
+        // Swap the letters in the grid data
+        const temp = grid[pos1.row][pos1.col].currentLetter;
+        grid[pos1.row][pos1.col].currentLetter = grid[pos2.row][pos2.col].currentLetter;
+        grid[pos2.row][pos2.col].currentLetter = temp;
+        
+        // Update the text content of the cells immediately
+        cell1.textContent = grid[pos1.row][pos1.col].currentLetter;
+        cell2.textContent = grid[pos2.row][pos2.col].currentLetter;
+    }, 250); // Half of the 500ms animation duration
+    
+    // Re-render after full animation completes
     setTimeout(() => {
         renderCrossword();
         
