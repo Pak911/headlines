@@ -105,6 +105,23 @@
 
 
     <div class="test-case">
+        <h3>Test Case 2: Intersection Letter Bug Fix</h3>
+        <div class="explanation">
+            <p><strong>Word 1 (Horizontal):</strong> "LEGEND" (positions 3,1 to 3,6)</p>
+            <p><strong>Word 2 (Vertical):</strong> "ANNOUNCED" (positions 1,4 to 9,4, crossing LEGEND at 'N')</p>
+            <p><strong>Bug Scenario:</strong> The letter 'N' appears twice in LEGEND and is at the intersection with ANNOUNCED</p>
+            <p><strong>Problem:</strong> When the intersection 'N' is correctly placed, other 'N' letters in LEGEND were incorrectly showing as orange (wrong position) instead of gray (wrong word)</p>
+            <p><strong>Fix:</strong> The algorithm now properly counts correctly placed letters across ALL words when determining color coding for duplicate letters</p>
+            <p><strong>Expected Color Coding:</strong></p>
+            <ul>
+                <li>LEGEND: L=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), G=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct intersection), D=<span style="color:#6aaa64">green</span>(correct)</li>
+                <li>ANNOUNCED: A=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct), O=<span style="color:#6aaa64">green</span>(correct), U=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct intersection), C=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), D=<span style="color:#6aaa64">green</span>(correct)</li>
+            </ul>
+        </div>
+        <div class="grid" id="test2"></div>
+    </div>
+
+    <div class="test-case">
         <h3>Test Case 3: Three-Way Word Intersection</h3>
         <div class="explanation">
             <p><strong>Word 1 (Horizontal):</strong> "CROSS" (positions 4,2 to 4,6)</p>
@@ -372,6 +389,65 @@
             test1.wordConnections.set(0, new Set());
             
             renderTestGrid('test1', test1);
+            
+            // Test 2: Intersection Letter Bug Fix
+            const test2 = new TestGrid();
+            
+            // Set up LEGEND (horizontal at row 3, cols 1-6)
+            test2.grid[3][1] = { letter: 'L', currentLetter: 'L', wordIndex: 0, letterIndex: 0 };
+            test2.grid[3][2] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 1 };
+            test2.grid[3][3] = { letter: 'G', currentLetter: 'G', wordIndex: 0, letterIndex: 2 };
+            test2.grid[3][4] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 3 };
+            test2.grid[3][5] = { letter: 'N', currentLetter: 'N', wordIndex: 0, letterIndex: 4 }; // First N
+            test2.grid[3][6] = { letter: 'D', currentLetter: 'D', wordIndex: 0, letterIndex: 5 };
+            
+            // Set up ANNOUNCED (vertical at col 4, rows 1-9) - intersects LEGEND at E
+            test2.grid[1][4] = { letter: 'A', currentLetter: 'A', wordIndex: 1, letterIndex: 0 };
+            test2.grid[2][4] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 1 };
+            test2.grid[3][4] = { letter: 'N', currentLetter: 'E', wordIndex: 1, letterIndex: 2 }; // Intersection with LEGEND's E
+            test2.grid[4][4] = { letter: 'O', currentLetter: 'O', wordIndex: 1, letterIndex: 3 };
+            test2.grid[5][4] = { letter: 'U', currentLetter: 'U', wordIndex: 1, letterIndex: 4 };
+            test2.grid[6][4] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 5 }; // Intersection N
+            test2.grid[7][4] = { letter: 'C', currentLetter: 'C', wordIndex: 1, letterIndex: 6 };
+            test2.grid[8][4] = { letter: 'E', currentLetter: 'E', wordIndex: 1, letterIndex: 7 };
+            test2.grid[9][4] = { letter: 'D', currentLetter: 'D', wordIndex: 1, letterIndex: 8 };
+            
+            // Wait, I need to fix the intersection - LEGEND has 'N' at position 4, ANNOUNCED should intersect there
+            // Let me correct this:
+            test2.grid[3][4] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 3 }; // LEGEND's E
+            test2.grid[6][4] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 5 }; // ANNOUNCED's N at intersection
+            
+            // Actually, let me set this up properly with the N intersection:
+            // LEGEND: L-E-G-E-N-D (positions 3,1 to 3,6)
+            // ANNOUNCED: A-N-N-O-U-N-C-E-D (positions 1,4 to 9,4, intersecting at N)
+            
+            // Clear and reset properly
+            test2.initializeGrid();
+            
+            // LEGEND (horizontal at row 3, cols 1-6)
+            test2.grid[3][1] = { letter: 'L', currentLetter: 'L', wordIndex: 0, letterIndex: 0 };
+            test2.grid[3][2] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 1 };
+            test2.grid[3][3] = { letter: 'G', currentLetter: 'G', wordIndex: 0, letterIndex: 2 };
+            test2.grid[3][4] = { letter: 'E', currentLetter: 'E', wordIndex: 0, letterIndex: 3 };
+            test2.grid[3][5] = { letter: 'N', currentLetter: 'N', wordIndex: 0, letterIndex: 4 }; // This N intersects with ANNOUNCED
+            test2.grid[3][6] = { letter: 'D', currentLetter: 'D', wordIndex: 0, letterIndex: 5 };
+            
+            // ANNOUNCED (vertical at col 5, rows 1-9) - intersects LEGEND at N
+            test2.grid[1][5] = { letter: 'A', currentLetter: 'A', wordIndex: 1, letterIndex: 0 };
+            test2.grid[2][5] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 1 };
+            test2.grid[3][5] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 2 }; // Intersection N (shared with LEGEND)
+            test2.grid[4][5] = { letter: 'O', currentLetter: 'O', wordIndex: 1, letterIndex: 3 };
+            test2.grid[5][5] = { letter: 'U', currentLetter: 'U', wordIndex: 1, letterIndex: 4 };
+            test2.grid[6][5] = { letter: 'N', currentLetter: 'N', wordIndex: 1, letterIndex: 5 };
+            test2.grid[7][5] = { letter: 'C', currentLetter: 'C', wordIndex: 1, letterIndex: 6 };
+            test2.grid[8][5] = { letter: 'E', currentLetter: 'E', wordIndex: 1, letterIndex: 7 };
+            test2.grid[9][5] = { letter: 'D', currentLetter: 'D', wordIndex: 1, letterIndex: 8 };
+            
+            // Set up word connections
+            test2.wordConnections.set(0, new Set([1])); // LEGEND connects to ANNOUNCED
+            test2.wordConnections.set(1, new Set([0])); // ANNOUNCED connects to LEGEND
+            
+            renderTestGrid('test2', test2);
             
             // Test 3: Three-way intersection with all color variants
             const test3 = new TestGrid();

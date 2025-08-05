@@ -43,6 +43,34 @@
                 <span class="legend-text">Belongs to other word</span>
             </li>
         </ul>
+        <div class="debug-toggle-hint">
+            <small>Press 'D' to toggle debug info</small>
+        </div>
+    </div>
+
+    <div id="debugPanel" class="debug-panel" style="display: none;">
+        <div class="debug-header">
+            <h3>🔧 Debug Information</h3>
+            <button class="debug-close" onclick="toggleDebugPanel()">×</button>
+        </div>
+        <div class="debug-content">
+            <div class="debug-section">
+                <h4>Current Headline</h4>
+                <div id="debugCurrentHeadline" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Layout Generation</h4>
+                <div id="debugLayoutInfo" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Alternative Headlines</h4>
+                <div id="debugAlternatives" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Compatibility Analysis</h4>
+                <div id="debugCompatibility" class="debug-info"></div>
+            </div>
+        </div>
     </div>
 
     <div id="victoryModal" class="victory-modal">

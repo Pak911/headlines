@@ -8,6 +8,17 @@ let selectedCell = null;
 let gridSize = { rows: 0, cols: 0 };
 let wordConnections = {};
 
+// Debug state
+let debugInfo = {
+    layoutAttempts: 0,
+    layoutScore: 0,
+    rejectedHeadlines: [],
+    alternativeHeadlines: [],
+    compatibilityScores: {},
+    generationTime: 0
+};
+let debugPanelVisible = false;
+
 // Find common letters between two words
 function findCommonLetters(word1, word2) {
     const common = [];
@@ -631,8 +642,8 @@ function createGrid() {
             newGrid[r][c] = {
                 letter: '',
                 currentLetter: '',
-                wordIndex: -1,
-                letterIndex: -1,
+                wordIndices: [], // Changed to array to track multiple words at intersections
+                letterIndices: {}, // Map of wordIndex -> letterIndex for each word
                 originalRow: r,
                 originalCol: c
             };
@@ -650,14 +661,21 @@ function placeWordsInGrid(words, layout) {
         let col = wordInfo.col;
         
         for (let i = 0; i < word.length; i++) {
-            newGrid[row][col] = {
-                letter: word[i],
-                currentLetter: word[i],
-                wordIndex: wordInfo.word,
-                letterIndex: i,
-                originalRow: row,
-                originalCol: col
-            };
+            // If cell already has a letter (intersection), add to existing word indices
+            if (newGrid[row][col].letter) {
+                newGrid[row][col].wordIndices.push(wordInfo.word);
+                newGrid[row][col].letterIndices[wordInfo.word] = i;
+            } else {
+                // New cell
+                newGrid[row][col] = {
+                    letter: word[i],
+                    currentLetter: word[i],
+                    wordIndices: [wordInfo.word],
+                    letterIndices: { [wordInfo.word]: i },
+                    originalRow: row,
+                    originalCol: col
+                };
+            }
             
             if (wordInfo.direction === 'horizontal') {
                 col++;
@@ -671,25 +689,24 @@ function placeWordsInGrid(words, layout) {
 }
 
 function findWordConnections() {
-    // Find which words are connected (share adjacent cells)
+    // Find which words are connected (only directly intersect - share cells with same letters)
     wordConnections = {};
     
+    // Only find direct intersections (cells that belong to multiple words)
+    // Adjacent words that merely touch should NOT be considered connected for purple coloring
     for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].wordIndex >= 0) {
-                const wordIdx = grid[r][c].wordIndex;
-                if (!wordConnections[wordIdx]) {
-                    wordConnections[wordIdx] = new Set();
-                }
-                
-                // Check all adjacent cells
-                const directions = [[-1,0], [1,0], [0,-1], [0,1], [-1,-1], [-1,1], [1,-1], [1,1]];
-                for (let [dr, dc] of directions) {
-                    const nr = r + dr;
-                    const nc = c + dc;
-                    if (nr >= 0 && nr < grid.length && nc >= 0 && nc < grid[0].length) {
-                        if (grid[nr][nc].wordIndex >= 0 && grid[nr][nc].wordIndex !== wordIdx) {
-                            wordConnections[wordIdx].add(grid[nr][nc].wordIndex);
+            if (grid[r][c].wordIndices.length > 1) {
+                // This cell is an intersection - all words here are directly connected
+                for (let i = 0; i < grid[r][c].wordIndices.length; i++) {
+                    const wordIdx1 = grid[r][c].wordIndices[i];
+                    if (!wordConnections[wordIdx1]) {
+                        wordConnections[wordIdx1] = new Set();
+                    }
+                    for (let j = 0; j < grid[r][c].wordIndices.length; j++) {
+                        if (i !== j) {
+                            const wordIdx2 = grid[r][c].wordIndices[j];
+                            wordConnections[wordIdx1].add(wordIdx2);
                         }
                     }
                 }
@@ -766,90 +783,123 @@ function getLetterColorClass(row, col) {
     const cell = grid[row][col];
     if (!cell.letter) return null;
     
-    // Check if letter is in correct position
-    if (cell.currentLetter === cell.letter) {
+    // For cells at intersections, we need to check ALL words they belong to
+    // and return the highest priority color
+    const colors = [];
+    
+    for (let wordIdx of cell.wordIndices) {
+        const color = getLetterColorForWord(row, col, wordIdx);
+        colors.push(color);
+    }
+    
+    // Priority order: correct > wrong-position > connected-word > wrong-word
+    const priorityOrder = ['correct', 'wrong-position', 'connected-word', 'wrong-word'];
+    
+    for (let priority of priorityOrder) {
+        if (colors.includes(priority)) {
+            return priority;
+        }
+    }
+    
+    return 'wrong-word'; // Default fallback
+}
+
+function getLetterColorForWord(row, col, targetWordIndex) {
+    const cell = grid[row][col];
+    const currentLetter = cell.currentLetter;
+    
+    // STEP 1: Check if letter is in correct position for this word
+    if (cell.wordIndices.includes(targetWordIndex) && cell.letter === currentLetter) {
         return 'correct';
     }
     
-    // Implement Wordle-style duplicate letter handling
-    // First, get the target word for this cell
-    const targetWordIndex = cell.wordIndex;
-    
-    // Count total occurrences of this letter in the target word
+    // STEP 2: Check if this letter exists elsewhere in the target word
+    let existsInTargetWord = false;
     let totalInTargetWord = 0;
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].wordIndex === targetWordIndex && grid[r][c].letter === cell.currentLetter) {
-                totalInTargetWord++;
-            }
-        }
-    }
+    let correctlyPlacedInTargetWord = 0;
     
-    // Count how many of this letter are already correctly placed in the target word
-    let correctCount = 0;
     for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].wordIndex === targetWordIndex && 
-                grid[r][c].letter === cell.currentLetter && 
-                grid[r][c].currentLetter === grid[r][c].letter) {
-                correctCount++;
-            }
-        }
-    }
-    
-    // Count how many of this letter appear before this position in the same word
-    let beforeCount = 0;
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].wordIndex === targetWordIndex && 
-                grid[r][c].letter === cell.currentLetter &&
-                grid[r][c].currentLetter === cell.currentLetter) {
-                // Check if this position comes before the current position
-                if (r < row || (r === row && c < col)) {
-                    beforeCount++;
+            // Check if this cell belongs to the target word
+            if (grid[r][c].wordIndices.includes(targetWordIndex)) {
+                // Count total occurrences of this letter in the target word
+                if (grid[r][c].letter === currentLetter) {
+                    totalInTargetWord++;
+                    // Count correctly placed instances
+                    if (grid[r][c].currentLetter === currentLetter) {
+                        correctlyPlacedInTargetWord++;
+                    }
                 }
-            }
-        }
-    }
-    
-    // If we haven't used all occurrences of this letter yet, it can be wrong position
-    if (beforeCount < totalInTargetWord) {
-        // Check if this letter exists in the target word (but not in correct position)
-        let existsInTargetWord = false;
-        for (let r = 0; r < grid.length; r++) {
-            for (let c = 0; c < grid[r].length; c++) {
-                if (grid[r][c].wordIndex === targetWordIndex && 
-                    grid[r][c].letter === cell.currentLetter &&
-                    (r !== row || c !== col)) {
+                // Check if letter exists elsewhere in this word
+                if (grid[r][c].letter === currentLetter && (r !== row || c !== col)) {
                     existsInTargetWord = true;
                 }
             }
         }
+    }
+    
+    // STEP 3: If letter exists in target word, check if it should be orange
+    if (existsInTargetWord) {
+        // Apply Wordle-style duplicate logic
+        // Count how many of this letter appear in the target word before this position
+        let beforeCount = 0;
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                if (grid[r][c].wordIndices.includes(targetWordIndex) && 
+                    grid[r][c].currentLetter === currentLetter) {
+                    // Check if this position comes before the current position
+                    if (r < row || (r === row && c < col)) {
+                        // Check if this earlier instance is correctly placed
+                        if (grid[r][c].letter === currentLetter) {
+                            // It's correct, so it "uses up" one instance
+                            beforeCount++;
+                        } else {
+                            // It's in wrong position, also uses up one instance
+                            beforeCount++;
+                        }
+                    }
+                }
+            }
+        }
         
-        if (existsInTargetWord) {
+        // If we haven't used up all instances of this letter, it's wrong position
+        if (beforeCount < totalInTargetWord) {
             return 'wrong-position';
         }
     }
     
-    // Check if letter exists in connected words
-    let foundInConnectedWord = false;
+    // STEP 4: Check if letter belongs to a directly connected word
+    // A word is directly connected if it shares an intersection with the target word
+    let belongsToConnectedWord = false;
+    
+    // First check if this letter belongs to any word that directly intersects with target word
     for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].letter === cell.currentLetter && 
-                grid[r][c].wordIndex !== targetWordIndex) {
-                if (wordConnections[targetWordIndex] && 
-                    wordConnections[targetWordIndex].has(grid[r][c].wordIndex)) {
-                    foundInConnectedWord = true;
+            // Check if this cell contains the current letter
+            if (grid[r][c].letter === currentLetter) {
+                // Check each word this cell belongs to
+                for (let otherWordIdx of grid[r][c].wordIndices) {
+                    if (otherWordIdx !== targetWordIndex) {
+                        // Check if this other word is connected to target word
+                        if (wordConnections[targetWordIndex] && 
+                            wordConnections[targetWordIndex].has(otherWordIdx)) {
+                            belongsToConnectedWord = true;
+                            break;
+                        }
+                    }
                 }
             }
+            if (belongsToConnectedWord) break;
         }
+        if (belongsToConnectedWord) break;
     }
     
-    if (foundInConnectedWord) {
+    if (belongsToConnectedWord) {
         return 'connected-word';
-    } else {
-        return 'wrong-word';
     }
+    
+    // STEP 5: Letter doesn't belong to target word or connected words
+    return 'wrong-word';
 }
 
 function selectCell(row, col) {
@@ -970,5 +1020,230 @@ function initGame() {
     renderCrossword();
 }
 
+// Debug Functions
+function toggleDebugPanel() {
+    debugPanelVisible = !debugPanelVisible;
+    const panel = document.getElementById('debugPanel');
+    panel.style.display = debugPanelVisible ? 'block' : 'none';
+    
+    if (debugPanelVisible) {
+        updateDebugInfo();
+    }
+}
+
+function updateDebugInfo() {
+    // Update current headline info
+    document.getElementById('debugCurrentHeadline').innerHTML = `
+        <strong>Text:</strong> ${currentHeadline.text}<br>
+        <strong>Words:</strong> ${currentHeadline.words.join(', ')}<br>
+        <strong>Grid Size:</strong> ${gridSize.rows} × ${gridSize.cols}<br>
+        <strong>Layout Score:</strong> ${debugInfo.layoutScore}
+    `;
+    
+    // Update layout generation info
+    document.getElementById('debugLayoutInfo').innerHTML = `
+        <strong>Generation Time:</strong> ${debugInfo.generationTime}ms<br>
+        <strong>Layout Attempts:</strong> ${debugInfo.layoutAttempts}<br>
+        <strong>Words Placed:</strong> ${crosswordLayout ? crosswordLayout.words.length : 0}/${currentHeadline.words.length}<br>
+        <strong>Connected:</strong> <span class="${crosswordLayout && isLayoutConnected(crosswordLayout, currentHeadline.words) ? 'success' : 'error'}">${crosswordLayout && isLayoutConnected(crosswordLayout, currentHeadline.words) ? 'Yes' : 'No'}</span><br>
+        <strong>Proper Spacing:</strong> <span class="${crosswordLayout && hasProperParallelSpacing(crosswordLayout, currentHeadline.words) ? 'success' : 'error'}">${crosswordLayout && hasProperParallelSpacing(crosswordLayout, currentHeadline.words) ? 'Yes' : 'No'}</span>
+    `;
+    
+    // Generate alternative headlines
+    generateAlternativeHeadlines();
+    
+    // Update alternatives info
+    const alternativesHtml = debugInfo.alternativeHeadlines.length > 0 
+        ? `<ul class="debug-list">${debugInfo.alternativeHeadlines.map(alt => 
+            `<li><strong>${alt.text}</strong><br>
+             <small>Compatibility: ${alt.compatibility}% | Common Letters: ${alt.commonLetters}</small></li>`
+          ).join('')}</ul>`
+        : '<em>No compatible alternatives found</em>';
+    
+    document.getElementById('debugAlternatives').innerHTML = alternativesHtml;
+    
+    // Update compatibility analysis
+    const compatibilityHtml = Object.keys(debugInfo.compatibilityScores).length > 0
+        ? `<ul class="debug-list">${Object.entries(debugInfo.compatibilityScores)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5)
+            .map(([headline, score]) => 
+                `<li><strong>${headline}</strong><br>
+                 <small>Score: ${score}%</small></li>`
+            ).join('')}</ul>`
+        : '<em>Compatibility analysis in progress...</em>';
+    
+    document.getElementById('debugCompatibility').innerHTML = compatibilityHtml;
+}
+
+function generateAlternativeHeadlines() {
+    debugInfo.alternativeHeadlines = [];
+    debugInfo.compatibilityScores = {};
+    
+    // Analyze each headline for compatibility with current layout
+    mockHeadlines.forEach(headline => {
+        if (headline.text === currentHeadline.text) return;
+        
+        const compatibility = calculateHeadlineCompatibility(headline, currentHeadline);
+        debugInfo.compatibilityScores[headline.text] = Math.round(compatibility * 100);
+        
+        if (compatibility > 0.3) { // Only show reasonably compatible headlines
+            const commonLetters = countCommonLetters(headline.words, currentHeadline.words);
+            debugInfo.alternativeHeadlines.push({
+                text: headline.text,
+                words: headline.words,
+                compatibility: Math.round(compatibility * 100),
+                commonLetters: commonLetters
+            });
+        }
+    });
+    
+    // Sort by compatibility
+    debugInfo.alternativeHeadlines.sort((a, b) => b.compatibility - a.compatibility);
+    debugInfo.alternativeHeadlines = debugInfo.alternativeHeadlines.slice(0, 8); // Top 8
+}
+
+function calculateHeadlineCompatibility(headline1, headline2) {
+    let totalCompatibility = 0;
+    let comparisons = 0;
+    
+    // Compare each word in headline1 with each word in headline2
+    for (let word1 of headline1.words) {
+        for (let word2 of headline2.words) {
+            const commonLetters = findCommonLetters(word1, word2);
+            const compatibility = commonLetters.length / Math.max(word1.length, word2.length);
+            totalCompatibility += compatibility;
+            comparisons++;
+        }
+    }
+    
+    // Average compatibility
+    const avgCompatibility = comparisons > 0 ? totalCompatibility / comparisons : 0;
+    
+    // Bonus for similar word count
+    const wordCountBonus = 1 - Math.abs(headline1.words.length - headline2.words.length) * 0.1;
+    
+    // Bonus for similar total letter count
+    const totalLetters1 = headline1.words.join('').length;
+    const totalLetters2 = headline2.words.join('').length;
+    const letterCountBonus = 1 - Math.abs(totalLetters1 - totalLetters2) * 0.01;
+    
+    return avgCompatibility * wordCountBonus * letterCountBonus;
+}
+
+function countCommonLetters(words1, words2) {
+    const letters1 = words1.join('').split('').sort();
+    const letters2 = words2.join('').split('').sort();
+    
+    let common = 0;
+    let i = 0, j = 0;
+    
+    while (i < letters1.length && j < letters2.length) {
+        if (letters1[i] === letters2[j]) {
+            common++;
+            i++;
+            j++;
+        } else if (letters1[i] < letters2[j]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+    
+    return common;
+}
+
+function enhancedInitGame() {
+    const startTime = performance.now();
+    
+    // Reset debug info
+    debugInfo = {
+        layoutAttempts: 0,
+        layoutScore: 0,
+        rejectedHeadlines: [],
+        alternativeHeadlines: [],
+        compatibilityScores: {},
+        generationTime: 0
+    };
+    
+    // Reset game state
+    swapCount = 0;
+    selectedCell = null;
+    document.getElementById('swapCount').textContent = '0';
+    document.getElementById('victoryModal').style.display = 'none';
+    
+    // Try to generate a valid layout with different captions
+    const maxCaptionAttempts = 10;
+    let captionAttempts = 0;
+    
+    while (captionAttempts < maxCaptionAttempts) {
+        // Select random headline
+        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        
+        // Generate crossword layout
+        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+        debugInfo.layoutAttempts = 50; // From generateCrosswordLayout maxAttempts
+        
+        // If layout generation succeeded, break out of loop
+        if (crosswordLayout !== null) {
+            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+            break;
+        } else {
+            debugInfo.rejectedHeadlines.push(currentHeadline.text);
+        }
+        
+        captionAttempts++;
+    }
+    
+    // If we still don't have a valid layout, use the last attempt (even if invalid)
+    if (crosswordLayout === null) {
+        // Generate a simple layout as final fallback
+        crosswordLayout = generateSimpleLayout(currentHeadline.words);
+        normalizeLayout(crosswordLayout, currentHeadline.words);
+        debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+    }
+    
+    // Place words in grid
+    grid = placeWordsInGrid(currentHeadline.words, crosswordLayout);
+    correctGrid = JSON.parse(JSON.stringify(grid));
+    
+    // Find word connections
+    findWordConnections();
+    
+    // Scramble letters
+    scrambleLetters();
+    
+    // Render the crossword
+    renderCrossword();
+    
+    // Calculate generation time
+    debugInfo.generationTime = Math.round(performance.now() - startTime);
+    
+    // Update debug panel if visible
+    if (debugPanelVisible) {
+        updateDebugInfo();
+    }
+}
+
+// Keyboard event handler
+document.addEventListener('keydown', function(event) {
+    // Toggle debug panel with 'D' key
+    if (event.key.toLowerCase() === 'd' && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        // Only if not typing in an input field
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            event.preventDefault();
+            toggleDebugPanel();
+        }
+    }
+    
+    // Close debug panel with Escape key
+    if (event.key === 'Escape' && debugPanelVisible) {
+        toggleDebugPanel();
+    }
+});
+
+// Replace the original initGame with enhanced version
+window.initGame = enhancedInitGame;
+
 // Start the game
-initGame();
+enhancedInitGame();
