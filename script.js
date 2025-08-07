@@ -1469,6 +1469,8 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
     const targetConnections = connectionsData || wordConnections;
     
     const cell = targetGrid[row][col];
+    if (!cell || !cell.letter) return 'wrong-word';
+    
     const currentLetter = cell.currentLetter;
     
     // Handle both array-based wordIndices (main game) and single wordIndex (legacy test format)
@@ -1481,77 +1483,69 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
         return 'correct';
     }
     
-    // STEP 2: Check if this letter exists elsewhere in the target word
-    let existsInTargetWord = false;
-    let totalInTargetWord = 0;
-    let correctlyPlacedInTargetWord = 0;
-    
-    for (let r = 0; r < targetGrid.length; r++) {
-        for (let c = 0; c < targetGrid[r].length; c++) {
-            // Check if this cell belongs to the target word
-            const cellBelongsToTarget = Array.isArray(targetGrid[r][c].wordIndices)
-                ? targetGrid[r][c].wordIndices.includes(targetWordIndex)
-                : targetGrid[r][c].wordIndex === targetWordIndex;
-                
-            if (cellBelongsToTarget) {
-                // Count total occurrences of this letter in the target word
-                if (targetGrid[r][c].letter === currentLetter) {
-                    totalInTargetWord++;
-                    // Count correctly placed instances
-                    if (targetGrid[r][c].currentLetter === currentLetter) {
-                        correctlyPlacedInTargetWord++;
-                    }
-                }
-                // Check if letter exists elsewhere in this word
-                if (targetGrid[r][c].letter === currentLetter && (r !== row || c !== col)) {
-                    existsInTargetWord = true;
-                }
-            }
-        }
-    }
-    
-    // STEP 3: If letter exists in target word, check if it should be orange
-    if (existsInTargetWord) {
-        // Apply Wordle-style duplicate logic
-        // Count how many of this letter appear in the target word before this position
-        let beforeCount = 0;
+    // STEP 2: Check if this letter exists in the target word (Wordle-style duplicate logic)
+    if (cellBelongsToTargetWord) {
+        // Collect all positions where this letter should appear in the target word
+        const letterPositions = [];
         for (let r = 0; r < targetGrid.length; r++) {
             for (let c = 0; c < targetGrid[r].length; c++) {
+                if (!targetGrid[r][c] || !targetGrid[r][c].letter) continue;
+                
                 const cellBelongsToTarget = Array.isArray(targetGrid[r][c].wordIndices)
                     ? targetGrid[r][c].wordIndices.includes(targetWordIndex)
                     : targetGrid[r][c].wordIndex === targetWordIndex;
                     
-                if (cellBelongsToTarget && targetGrid[r][c].currentLetter === currentLetter) {
-                    // Check if this position comes before the current position
-                    if (r < row || (r === row && c < col)) {
-                        // Check if this earlier instance is correctly placed
-                        if (targetGrid[r][c].letter === currentLetter) {
-                            // It's correct, so it "uses up" one instance
-                            beforeCount++;
-                        } else {
-                            // It's in wrong position, also uses up one instance
-                            beforeCount++;
-                        }
-                    }
+                // Look for positions where the target letter (letter field) matches our current letter
+                if (cellBelongsToTarget && targetGrid[r][c].letter === currentLetter) {
+                    letterPositions.push({
+                        row: r,
+                        col: c,
+                        isCorrect: targetGrid[r][c].currentLetter === currentLetter
+                    });
                 }
             }
         }
         
-        // If we haven't used up all instances of this letter, it's wrong position
-        if (beforeCount < totalInTargetWord) {
-            return 'wrong-position';
+        // If we found positions where this letter should be, apply Wordle logic
+        if (letterPositions.length > 0) {
+            // Sort positions by grid order (row first, then column)
+            letterPositions.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
+            
+            // Count how many instances of this letter are correctly placed
+            const correctInstances = letterPositions.filter(pos => pos.isCorrect).length;
+            
+            // Find the current position in the sorted list
+            const currentPosIndex = letterPositions.findIndex(pos => pos.row === row && pos.col === col);
+            
+            // Apply proper Wordle-style logic: only show orange if there are available instances
+            // after accounting for all correctly placed letters
+            const availableInstances = letterPositions.length - correctInstances;
+            
+            // Count wrong-position instances that come before this position
+            let wrongPositionsBefore = 0;
+            for (let i = 0; i < currentPosIndex; i++) {
+                const pos = letterPositions[i];
+                if (!pos.isCorrect) {
+                    wrongPositionsBefore++;
+                }
+            }
+            
+            // This instance gets wrong-position color only if:
+            // 1. It's not correctly placed, AND
+            // 2. There are still available instances after accounting for wrong positions before it
+            if (currentPosIndex >= 0 && !letterPositions[currentPosIndex].isCorrect && wrongPositionsBefore < availableInstances) {
+                return 'wrong-position';
+            } else if (currentPosIndex < 0 && wrongPositionsBefore < availableInstances) {
+                // This position is not in the target word, but the letter exists elsewhere in the word
+                return 'wrong-position';
+            }
         }
     }
     
-    // STEP 4: Check if letter belongs to a directly connected word
+    // STEP 3: Check if letter belongs to a directly connected word
     // A word is directly connected if it shares an intersection with the target word
     // IMPORTANT: Only count letters that are NOT already correctly placed anywhere in the connected word
     let belongsToConnectedWord = false;
-    
-    // Debug logging for specific cases
-    const debugCase = (row === 1 && col === 2 && targetWordIndex === 2) || // Debug 'A' case
-                      (row === 3 && col === 1 && targetWordIndex === 0) || // Debug 'E' in TRAFFIC
-                      (row === 3 && col === 7 && targetWordIndex === 0);   // Debug 'S' in TRAFFIC
     
     // Check if this letter belongs to any word that directly intersects with target word
     for (let r = 0; r < targetGrid.length; r++) {
@@ -1564,7 +1558,6 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
                     ? targetGrid[r][c].wordIndices
                     : [targetGrid[r][c].wordIndex];
                 
-                
                 // Check each word this cell belongs to
                 for (let otherWordIdx of cellWordIndices) {
                     if (otherWordIdx !== targetWordIndex && otherWordIdx >= 0) {
@@ -1574,13 +1567,9 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
                         const isConnected = connections && 
                             (connections.has ? connections.has(otherWordIdx) : connections.includes && connections.includes(otherWordIdx));
                         
-                        
                         if (isConnected) {
-                            // Count total occurrences of this letter in the connected word
-                            let totalInConnectedWord = 0;
-                            let correctlyPlacedInConnectedWord = 0;
-                            
-                            
+                            // Apply same Wordle-style logic for connected word
+                            const connectedLetterPositions = [];
                             for (let rr = 0; rr < targetGrid.length; rr++) {
                                 for (let cc = 0; cc < targetGrid[rr].length; cc++) {
                                     const cellBelongsToOther = Array.isArray(targetGrid[rr][cc].wordIndices)
@@ -1588,19 +1577,24 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
                                         : targetGrid[rr][cc].wordIndex === otherWordIdx;
                                         
                                     if (cellBelongsToOther && targetGrid[rr][cc].letter === currentLetter) {
-                                        totalInConnectedWord++;
-                                        if (targetGrid[rr][cc].currentLetter === currentLetter) {
-                                            correctlyPlacedInConnectedWord++;
-                                        }
+                                        connectedLetterPositions.push({
+                                            row: rr,
+                                            col: cc,
+                                            isCorrect: targetGrid[rr][cc].currentLetter === currentLetter
+                                        });
                                     }
                                 }
                             }
                             
+                            // Sort positions by grid order
+                            connectedLetterPositions.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
+                            
+                            // Count correctly placed instances in connected word
+                            const correctInConnected = connectedLetterPositions.filter(pos => pos.isCorrect).length;
                             
                             // Only count this as "belongs to connected word" if there are still
                             // available instances of this letter in the connected word
-                            // (i.e., not all instances are correctly placed)
-                            if (correctlyPlacedInConnectedWord < totalInConnectedWord) {
+                            if (correctInConnected < connectedLetterPositions.length) {
                                 belongsToConnectedWord = true;
                                 break;
                             }
@@ -1617,7 +1611,7 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
         return 'connected-word';
     }
     
-    // STEP 5: Letter doesn't belong to target word or connected words
+    // STEP 4: Letter doesn't belong to target word or connected words
     return 'wrong-word';
 }
 
@@ -2396,5 +2390,7 @@ document.addEventListener('keydown', function(event) {
 // Replace the original initGame with enhanced version
 window.initGame = enhancedInitGame;
 
-// Start the game
-enhancedInitGame();
+// Start the game only if we're on the main game page (not test page)
+if (document.getElementById('crosswordGrid')) {
+    enhancedInitGame();
+}
