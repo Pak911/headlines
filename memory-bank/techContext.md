@@ -9,11 +9,25 @@
 ## Development Environment
 - **Editor**: VSCode
 - **Browser**: Modern browsers supporting ES6
-- **File Structure**: Modular structure (index.html, styles.css, script.js, data.js)
+- **File Structure**: Modular structure with main game and test framework:
+  - **Main Game Files**: index.html, styles.css, script.js, data.js
+  - **Test Framework**: test.html (comprehensive test suite for color logic validation)
 - **Version Control**: Git
 - **Run Commands**: 
   - Main game: `start index.html`
   - Test suite: `start test.html`
+
+## Test Framework Architecture
+- **Purpose**: Validate color determination logic and intersection cell handling
+- **Implementation**: Standalone HTML file that reuses main game functions
+- **Key Features**:
+  - Multiple test cases for different scenarios
+  - Hover tooltips showing cell coordinates and word indices
+  - Click-to-copy functionality for easy debugging
+  - Text output generation for LLM analysis
+  - Visual grid representation with color coding
+- **Test Cases**: Focus on edge cases like intersections, duplicate letters, and connected words
+- **Usage**: Essential for verifying color logic changes and debugging complex scenarios
 
 ## Browser Requirements
 - ES6 JavaScript support

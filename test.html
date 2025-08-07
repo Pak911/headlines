@@ -114,149 +114,6 @@
         </div>
     </div>
 
-    <div class="test-case">
-        <h3>Test Case 1: Duplicate Letter Handling</h3>
-        <div class="explanation">
-            <p><strong>Target Word:</strong> "GRASS"</p>
-            <p><strong>Player Guess:</strong> "GRRSS"</p>
-            <p><strong>Expected Result:</strong> G=green, R=green, R=gray (no more R in target), S=green, S=green</p>
-        </div>
-        <div class="grid" id="test1"></div>
-        <div style="margin-top: 15px;">
-            <button onclick="generateSingleTestOutput('test1', 'Test Case 1: Duplicate Letter Handling')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
-                Generate Text Output for LLM
-            </button>
-            <div id="textOutput1" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">
-                <h5>Text Output for LLM Analysis:</h5>
-                <textarea id="textContent1" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>
-                <button onclick="copySingleToClipboard('textContent1')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
-                    Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-    <div class="test-case">
-        <h3>Test Case 2: Intersection Letter Bug Fix</h3>
-        <div class="explanation">
-            <p><strong>Word 1 (Horizontal):</strong> "LEGEND" (positions 3,1 to 3,6)</p>
-            <p><strong>Word 2 (Vertical):</strong> "ANNOUNCED" (positions 1,4 to 9,4, crossing LEGEND at 'N')</p>
-            <p><strong>Bug Scenario:</strong> The letter 'N' appears twice in LEGEND and is at the intersection with ANNOUNCED</p>
-            <p><strong>Problem:</strong> When the intersection 'N' is correctly placed, other 'N' letters in LEGEND were incorrectly showing as orange (wrong position) instead of gray (wrong word)</p>
-            <p><strong>Fix:</strong> The algorithm now properly counts correctly placed letters across ALL words when determining color coding for duplicate letters</p>
-            <p><strong>Expected Color Coding:</strong></p>
-            <ul>
-                <li>LEGEND: L=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), G=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct intersection), D=<span style="color:#6aaa64">green</span>(correct)</li>
-                <li>ANNOUNCED: A=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct), O=<span style="color:#6aaa64">green</span>(correct), U=<span style="color:#6aaa64">green</span>(correct), N=<span style="color:#6aaa64">green</span>(correct intersection), C=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), D=<span style="color:#6aaa64">green</span>(correct)</li>
-            </ul>
-        </div>
-        <div class="grid" id="test2"></div>
-        <div style="margin-top: 15px;">
-            <button onclick="generateSingleTestOutput('test2', 'Test Case 2: Intersection Letter Bug Fix')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
-                Generate Text Output for LLM
-            </button>
-            <div id="textOutput2" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">
-                <h5>Text Output for LLM Analysis:</h5>
-                <textarea id="textContent2" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>
-                <button onclick="copySingleToClipboard('textContent2')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
-                    Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="test-case">
-        <h3>Test Case 3: Three-Way Word Intersection</h3>
-        <div class="explanation">
-            <p><strong>Word 1 (Horizontal):</strong> "CROSS" (positions 4,2 to 4,6)</p>
-            <p><strong>Word 2 (Vertical):</strong> "ROAD" (positions 2,4 to 5,4, crossing CROSS at 'A')</p>
-            <p><strong>Word 3 (Vertical):</strong> "SEA" (positions 4,5 to 6,5, crossing CROSS at 'S')</p>
-            <p><strong>Intersections:</strong> CROSS-A with ROAD-A, CROSS-S with SEA-S</p>
-            <p><strong>Expected Color Coding:</strong></p>
-            <ul>
-                <li>CROSS: C=<span style="color:#6aaa64">green</span>(correct), R=<span style="color:#f5a623">orange</span>(wrong pos), O=<span style="color:#9b59b6">purple</span>(connected), S=<span style="color:#86888a">gray</span>(wrong), S=<span style="color:#6aaa64">green</span>(correct)</li>
-            </ul>
-        </div>
-        <div class="grid" id="test3"></div>
-        <div style="margin-top: 15px;">
-            <button onclick="generateSingleTestOutput('test3', 'Test Case 3: Three-Way Word Intersection')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
-                Generate Text Output for LLM
-            </button>
-            <div id="textOutput3" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">
-                <h5>Text Output for LLM Analysis:</h5>
-                <textarea id="textContent3" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>
-                <button onclick="copySingleToClipboard('textContent3')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
-                    Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <div class="test-case">
-        <h3>Test Case 4: Complex Multi-Word Scenario</h3>
-        <div class="explanation">
-            <p><strong>Word 1 (Horizontal):</strong> "PUZZLE" (positions 3,1 to 3,6)</p>
-            <p><strong>Word 2 (Vertical):</strong> "GAZE" (positions 1,3 to 4,3, crossing PUZZLE at 'Z')</p>
-            <p><strong>Word 3 (Vertical):</strong> "ZEST" (positions 3,4 to 6,4, crossing PUZZLE at 'Z')</p>
-            <p><strong>Word 4 (Vertical):</strong> "ELSE" (positions 3,6 to 6,6, crossing PUZZLE at 'E')</p>
-            <p><strong>Intersections:</strong> Proper crossword pattern with matching letters at intersections</p>
-            <p><strong>Expected Color Coding:</strong></p>
-            <ul>
-                <li>PUZZLE: P=<span style="color:#6aaa64">green</span>(correct), L=<span style="color:#f5a623">orange</span>(wrong pos), Z=<span style="color:#6aaa64">green</span>(correct), Z=<span style="color:#6aaa64">green</span>(correct), A=<span style="color:#9b59b6">purple</span>(connected), E=<span style="color:#6aaa64">green</span>(correct)</li>
-                <li>GAZE: G=<span style="color:#6aaa64">green</span>(correct), L=<span style="color:#f5a623">orange</span>(wrong pos), Z=<span style="color:#6aaa64">green</span>(correct), X=<span style="color:#86888a">gray</span>(wrong)</li>
-                <li>ZEST: Z=<span style="color:#6aaa64">green</span>(correct), E=<span style="color:#6aaa64">green</span>(correct), S=<span style="color:#6aaa64">green</span>(correct), P=<span style="color:#9b59b6">purple</span>(connected)</li>
-                <li>ELSE: E=<span style="color:#6aaa64">green</span>(correct), Z=<span style="color:#f5a623">orange</span>(wrong pos), G=<span style="color:#9b59b6">purple</span>(connected), X=<span style="color:#86888a">gray</span>(wrong)</li>
-            </ul>
-        </div>
-        <div class="grid" id="test4"></div>
-        <div style="margin-top: 15px;">
-            <button onclick="generateSingleTestOutput('test4', 'Test Case 4: Complex Multi-Word Scenario')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
-                Generate Text Output for LLM
-            </button>
-            <div id="textOutput4" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">
-                <h5>Text Output for LLM Analysis:</h5>
-                <textarea id="textContent4" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>
-                <button onclick="copySingleToClipboard('textContent4')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
-                    Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-
-    
-    <!-- 
-    TEMPLATE FOR ADDING NEW TEST CASES:
-    Copy this template and modify the IDs and test names as needed.
-    
-    <div class="test-case">
-        <h3>Test Case [NUMBER]: [TEST CASE NAME]</h3>
-        <div class="explanation">
-            <p><strong>Description:</strong> [Test case description]</p>
-            <p><strong>Expected Result:</strong> [Expected behavior]</p>
-        </div>
-        <div class="grid" id="test[NUMBER]"></div>
-        <div style="margin-top: 15px;">
-            <button onclick="generateSingleTestOutput('test[NUMBER]', 'Test Case [NUMBER]: [TEST CASE NAME]')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">
-                Generate Text Output for LLM
-            </button>
-            <div id="textOutput[NUMBER]" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">
-                <h5>Text Output for LLM Analysis:</h5>
-                <textarea id="textContent[NUMBER]" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>
-                <button onclick="copySingleToClipboard('textContent[NUMBER]')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
-                    Copy to Clipboard
-                </button>
-            </div>
-        </div>
-    </div>
-    
-    JAVASCRIPT SETUP REQUIRED:
-    1. Create test grid: const test[NUMBER] = new TestGrid();
-    2. Set up grid data with target and current letters
-    3. Set up word connections
-    4. Render grid: renderTestGrid('test[NUMBER]', test[NUMBER]);
-    5. Store globally: window.test[NUMBER] = test[NUMBER];
-    -->
 
 
     <script>
@@ -403,6 +260,11 @@
         // Render a test grid
         function renderTestGrid(containerId, testGrid, showCurrentLetters = true) {
             const container = document.getElementById(containerId);
+            if (!container) {
+                console.error('Container not found:', containerId);
+                return;
+            }
+            container.innerHTML = ''; // Clear existing content
             const gridElement = document.createElement('div');
             gridElement.className = 'grid';
             
@@ -416,8 +278,31 @@
                         cell.textContent = showCurrentLetters ? gridCell.currentLetter : gridCell.letter;
                         const colorClass = testGrid.getLetterColorClass(r, c);
                         cell.classList.add(colorClass);
+                        
+                        // Add hover tooltip with coordinates and word info
+                        const wordIndicesStr = Array.isArray(gridCell.wordIndices) ? gridCell.wordIndices.join(',') : gridCell.wordIndex || 'none';
+                        const tooltipText = `Position: (${r},${c})\nLetter: '${gridCell.letter}' → '${gridCell.currentLetter}'\nWord indices: [${wordIndicesStr}]\nColor: ${colorClass}`;
+                        cell.title = tooltipText + '\n\n[Click to copy this info to clipboard]';
+                        
+                        // Add click handler to copy cell info to clipboard
+                        cell.addEventListener('click', function() {
+                            copyCellInfoToClipboard(tooltipText, cell);
+                        });
+                        
+                        // Add visual feedback for clickable cells
+                        cell.style.cursor = 'pointer';
                     } else {
                         cell.classList.add('empty');
+                        // Add hover tooltip for empty cells too
+                        const tooltipText = `Position: (${r},${c})\nEmpty cell`;
+                        cell.title = tooltipText + '\n\n[Click to copy this info to clipboard]';
+                        
+                        // Add click handler for empty cells too
+                        cell.addEventListener('click', function() {
+                            copyCellInfoToClipboard(tooltipText, cell);
+                        });
+                        
+                        cell.style.cursor = 'pointer';
                     }
                     
                     gridElement.appendChild(cell);
@@ -429,109 +314,6 @@
         
         // Run tests
         window.onload = function() {
-            // Test 1: Duplicate letter handling
-            const test1 = new TestGrid();
-            // Set up target word "GRASS" using new format
-            test1.setCell(1, 2, 'G', 'G', 0, 0);
-            test1.setCell(1, 3, 'R', 'R', 0, 1);
-            test1.setCell(1, 4, 'A', 'R', 0, 2);
-            test1.setCell(1, 5, 'S', 'S', 0, 3);
-            test1.setCell(1, 6, 'S', 'S', 0, 4);
-            
-            // Set up word connections (empty for single word test)
-            test1.wordConnections.set(0, new Set());
-            
-            renderTestGrid('test1', test1);
-            
-            // Test 2: Intersection Letter Bug Fix
-            const test2 = new TestGrid();
-            
-            // Set up LEGEND (horizontal at row 3, cols 1-6) using new format
-            test2.setCell(3, 1, 'L', 'L', 0, 0);
-            test2.setCell(3, 2, 'E', 'E', 0, 1);
-            test2.setCell(3, 3, 'G', 'G', 0, 2);
-            test2.setCell(3, 4, 'E', 'E', 0, 3);
-            test2.setCell(3, 5, 'N', 'N', 0, 4); // This N will intersect with ANNOUNCED
-            test2.setCell(3, 6, 'D', 'D', 0, 5);
-            
-            // Set up ANNOUNCED (vertical at col 5, rows 1-9) - intersects LEGEND at N
-            test2.setCell(1, 5, 'A', 'A', 1, 0);
-            test2.setCell(2, 5, 'N', 'N', 1, 1);
-            test2.setCell(3, 5, 'N', 'N', 1, 2); // Intersection N (shared with LEGEND)
-            test2.setCell(4, 5, 'O', 'O', 1, 3);
-            test2.setCell(5, 5, 'U', 'U', 1, 4);
-            test2.setCell(6, 5, 'N', 'N', 1, 5);
-            test2.setCell(7, 5, 'C', 'C', 1, 6);
-            test2.setCell(8, 5, 'E', 'E', 1, 7);
-            test2.setCell(9, 5, 'D', 'D', 1, 8);
-            
-            // Set up word connections automatically
-            test2.setWordConnections();
-            
-            renderTestGrid('test2', test2);
-            
-            // Test 3: Three-way intersection with all color variants
-            const test3 = new TestGrid();
-            
-            // Set up three intersecting words using new format
-            // Word 0: "CROSS" (horizontal at row 4, cols 2-6)
-            test3.setCell(4, 2, 'C', 'C', 0, 0);
-            test3.setCell(4, 3, 'R', 'O', 0, 1);
-            test3.setCell(4, 4, 'O', 'R', 0, 2); // Will intersect with ROAD
-            test3.setCell(4, 5, 'S', 'Z', 0, 3); // Will intersect with SEA
-            test3.setCell(4, 6, 'S', 'S', 0, 4);
-            
-            // Word 1: "ROAD" (vertical at col 4, rows 2-5) - intersects CROSS at O
-            test3.setCell(2, 4, 'R', 'R', 1, 0);
-            test3.setCell(3, 4, 'O', 'O', 1, 1);
-            test3.setCell(4, 4, 'A', 'R', 1, 2); // Intersection with CROSS
-            test3.setCell(5, 4, 'D', 'D', 1, 3);
-            
-            // Word 2: "SEA" (vertical at col 5, rows 4-6) - intersects CROSS at S
-            test3.setCell(4, 5, 'S', 'Z', 2, 0); // Intersection with CROSS
-            test3.setCell(5, 5, 'E', 'E', 2, 1);
-            test3.setCell(6, 5, 'A', 'A', 2, 2);
-            
-            // Set up word connections automatically
-            test3.setWordConnections();
-            
-            renderTestGrid('test3', test3);
-            
-            // Test 4: Four-way intersection with all words connected and all color variants
-            const test4 = new TestGrid();
-            
-            // Set up four connected words using new format
-            // Word 0: "PUZZLE" (horizontal at row 3, cols 1-6)
-            test4.setCell(3, 1, 'P', 'P', 0, 0);
-            test4.setCell(3, 2, 'U', 'L', 0, 1);
-            test4.setCell(3, 3, 'Z', 'Z', 0, 2); // Will intersect with GAZE
-            test4.setCell(3, 4, 'Z', 'Z', 0, 3); // Will intersect with ZEST
-            test4.setCell(3, 5, 'L', 'A', 0, 4);
-            test4.setCell(3, 6, 'E', 'E', 0, 5); // Will intersect with ELSE
-            
-            // Word 1: "GAZE" (vertical at col 3, rows 1-4) - intersects PUZZLE at Z
-            test4.setCell(1, 3, 'G', 'G', 1, 0);
-            test4.setCell(2, 3, 'A', 'L', 1, 1);
-            test4.setCell(3, 3, 'Z', 'Z', 1, 2); // Intersection with PUZZLE
-            test4.setCell(4, 3, 'E', 'X', 1, 3);
-            
-            // Word 2: "ZEST" (vertical at col 4, rows 3-6) - intersects PUZZLE at Z
-            test4.setCell(3, 4, 'Z', 'Z', 2, 0); // Intersection with PUZZLE
-            test4.setCell(4, 4, 'E', 'E', 2, 1);
-            test4.setCell(5, 4, 'S', 'S', 2, 2);
-            test4.setCell(6, 4, 'T', 'P', 2, 3);
-            
-            // Word 3: "ELSE" (vertical at col 6, rows 3-6) - intersects PUZZLE at E
-            test4.setCell(3, 6, 'E', 'E', 3, 0); // Intersection with PUZZLE
-            test4.setCell(4, 6, 'L', 'Z', 3, 1);
-            test4.setCell(5, 6, 'S', 'G', 3, 2);
-            test4.setCell(6, 6, 'E', 'X', 3, 3);
-            
-            // Set up word connections automatically
-            test4.setWordConnections();
-            
-            renderTestGrid('test4', test4);
-            
             // Test Case 140219: TRAFFIC DELAYS EXPECTED TODAY using new format
             const test140219 = new TestGrid();
 
@@ -572,57 +354,9 @@
             // Set up word connections automatically
             test140219.setWordConnections();
 
-            // Debug: Log the word connections and grid state
-            console.log('Test 140219 - Word connections:', test140219.wordConnections);
-            console.log('Test 140219 - Grid intersections:');
-            for (let r = 0; r < 10; r++) {
-                for (let c = 0; c < 10; c++) {
-                    if (test140219.grid[r][c].wordIndices.length > 1) {
-                        console.log(`Intersection at (${r},${c}):`, test140219.grid[r][c]);
-                    }
-                }
-            }
-
-            // Debug: Check color determination for each cell
-            console.log('Test 140219 - Color determination:');
-            for (let r = 0; r < 10; r++) {
-                for (let c = 0; c < 10; c++) {
-                    if (test140219.grid[r][c].letter) {
-                        const color = test140219.getLetterColorClass(r, c);
-                        console.log(`Cell (${r},${c}): letter='${test140219.grid[r][c].letter}', current='${test140219.grid[r][c].currentLetter}', wordIndices=[${test140219.grid[r][c].wordIndices}], color='${color}'`);
-                    }
-                }
-            }
-
-            // Debug: Specifically test a case that should be purple
-            // Let's check cell (1,0) - letter 'E', current 'Y', wordIndices=[2] (EXPECTED)
-            // 'Y' should be purple because it belongs to DELAYS (word 1) which is connected to EXPECTED (word 2)
-            console.log('=== DEBUGGING PURPLE COLOR LOGIC ===');
-            console.log('Testing cell (1,0): letter=E, current=Y, wordIndices=[2]');
-            console.log('Expected: Y should be purple because it belongs to DELAYS which is connected to EXPECTED');
-            
-            // Check if word 2 (EXPECTED) is connected to word 1 (DELAYS)
-            const connections2 = test140219.wordConnections.get(2);
-            console.log('Word 2 (EXPECTED) connections:', connections2);
-            console.log('Is word 1 connected to word 2?', connections2 && connections2.has(1));
-            
-            // Check where Y appears in the grid
-            console.log('Looking for letter Y in the grid:');
-            for (let r = 0; r < 10; r++) {
-                for (let c = 0; c < 10; c++) {
-                    if (test140219.grid[r][c].letter === 'Y') {
-                        console.log(`Found Y at (${r},${c}): wordIndices=[${test140219.grid[r][c].wordIndices}], current='${test140219.grid[r][c].currentLetter}'`);
-                    }
-                }
-            }
-
             renderTestGrid('test140219Container', test140219);
             
-            // Store test grids globally for text output function
-            window.test1 = test1;
-            window.test2 = test2;
-            window.test3 = test3;
-            window.test4 = test4;
+            // Store test grid globally for text output function
             window.test140219 = test140219;
         };
 
@@ -671,21 +405,31 @@
                         const colorClass = testGrid.getLetterColorClass(r, c);
                         const colorName = getColorName(colorClass);
                         
-                        const letterInfo = {
-                            letter: cell.currentLetter,
-                            color: colorName,
-                            position: `(${r},${c})`,
-                            wordIndex: cell.wordIndex,
-                            letterIndex: cell.letterIndex,
-                            targetLetter: cell.letter
-                        };
+                        // Handle both array-based wordIndices (new format) and single wordIndex (legacy)
+                        const wordIndices = Array.isArray(cell.wordIndices) ? cell.wordIndices : [cell.wordIndex];
+                        
+                        // For cells with multiple words, create entries for each word
+                        for (let wordIdx of wordIndices) {
+                            if (wordIdx >= 0) { // Valid word index
+                                const letterIdx = cell.letterIndices ? cell.letterIndices[wordIdx] : cell.letterIndex;
+                                
+                                const letterInfo = {
+                                    letter: cell.currentLetter,
+                                    color: colorName,
+                                    position: `(${r},${c})`,
+                                    wordIndex: wordIdx,
+                                    letterIndex: letterIdx,
+                                    targetLetter: cell.letter
+                                };
 
-                        allLetters.push(letterInfo);
+                                allLetters.push(letterInfo);
 
-                        if (!wordGroups.has(cell.wordIndex)) {
-                            wordGroups.set(cell.wordIndex, []);
+                                if (!wordGroups.has(wordIdx)) {
+                                    wordGroups.set(wordIdx, []);
+                                }
+                                wordGroups.get(wordIdx).push(letterInfo);
+                            }
                         }
-                        wordGroups.get(cell.wordIndex).push(letterInfo);
                     }
                 }
             }
@@ -812,6 +556,67 @@
                 console.error('Failed to copy text: ', err);
                 alert('Failed to copy to clipboard. Please select the text manually and copy.');
             }
+        }
+
+        // Function to copy cell information to clipboard when clicked
+        function copyCellInfoToClipboard(tooltipText, cellElement) {
+            // Use the modern clipboard API if available, fallback to older method
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(tooltipText).then(() => {
+                    showCopyFeedback(cellElement, 'Copied!');
+                }).catch(err => {
+                    console.error('Failed to copy with modern API: ', err);
+                    fallbackCopyToClipboard(tooltipText, cellElement);
+                });
+            } else {
+                fallbackCopyToClipboard(tooltipText, cellElement);
+            }
+        }
+
+        // Fallback copy method for older browsers
+        function fallbackCopyToClipboard(text, cellElement) {
+            // Create a temporary textarea element
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            textArea.style.position = 'fixed';
+            textArea.style.left = '-999999px';
+            textArea.style.top = '-999999px';
+            document.body.appendChild(textArea);
+            
+            try {
+                textArea.focus();
+                textArea.select();
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    showCopyFeedback(cellElement, 'Copied!');
+                } else {
+                    showCopyFeedback(cellElement, 'Copy failed');
+                }
+            } catch (err) {
+                console.error('Fallback copy failed: ', err);
+                showCopyFeedback(cellElement, 'Copy failed');
+            } finally {
+                document.body.removeChild(textArea);
+            }
+        }
+
+        // Show visual feedback when cell info is copied
+        function showCopyFeedback(cellElement, message) {
+            const originalText = cellElement.textContent;
+            const originalBackground = cellElement.style.backgroundColor;
+            const originalColor = cellElement.style.color;
+            
+            // Show feedback
+            cellElement.textContent = '✓';
+            cellElement.style.backgroundColor = '#28a745';
+            cellElement.style.color = 'white';
+            
+            // Restore original appearance after 1 second
+            setTimeout(() => {
+                cellElement.textContent = originalText;
+                cellElement.style.backgroundColor = originalBackground;
+                cellElement.style.color = originalColor;
+            }, 1000);
         }
     </script>
 

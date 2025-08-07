@@ -26,9 +26,39 @@ Single-page application (SPA) with all logic contained in index.html:
 - 2D array of cell objects containing:
   - `letter`: The correct letter for this position
   - `currentLetter`: The currently displayed letter
-  - `wordIndex`: Which word this cell belongs to
-  - `letterIndex`: Position within the word
+  - `wordIndices`: Array of word indices this cell belongs to (for intersections)
+  - `letterIndices`: Map of wordIndex → letterIndex for each word
   - `originalRow/Col`: Original position for reference
+
+#### Critical Pattern: Intersection Cell Handling
+**Problem**: Cells at word intersections belong to multiple words simultaneously and require special handling for color determination and letter swapping.
+
+**Solution**: Multi-word cell structure with priority-based color logic:
+
+```javascript
+// Intersection cell structure
+{
+  letter: 'T',           // Target letter
+  currentLetter: 'E',    // Current scrambled letter
+  wordIndices: [0, 3],   // Belongs to words 0 and 3
+  letterIndices: {       // Position in each word
+    0: 0,                // First letter of word 0
+    3: 0                 // First letter of word 3
+  }
+}
+```
+
+**Key Implementation Details**:
+1. **Grid Creation**: `placeWordsInGrid()` detects intersections and adds to existing `wordIndices`
+2. **Color Logic**: `getLetterColorClass()` checks ALL words and returns highest priority color
+3. **Swapping Logic**: Only `currentLetter` changes; word memberships remain intact
+4. **Priority Order**: correct > wrong-position > connected-word > wrong-word
+
+**Why This Works**:
+- Intersection cells maintain structural integrity during letter swaps
+- Color determination considers all word relationships simultaneously
+- Connected word logic properly handles duplicate letters across intersections
+- Test framework and main game use identical intersection handling
 
 ### 3. Color Coding System
 - **Implementation**: Dynamic class assignment based on letter analysis
