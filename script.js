@@ -779,17 +779,26 @@ function renderCrossword() {
     }
 }
 
-function getLetterColorClass(row, col) {
-    const cell = grid[row][col];
+// Universal color determination functions that work with any compatible grid structure
+function getLetterColorClass(row, col, gridData = null, connectionsData = null) {
+    const targetGrid = gridData || grid;
+    const targetConnections = connectionsData || wordConnections;
+    
+    const cell = targetGrid[row][col];
     if (!cell.letter) return null;
+    
+    // Handle both array-based wordIndices (main game) and single wordIndex (legacy test format)
+    const wordIndices = Array.isArray(cell.wordIndices) ? cell.wordIndices : [cell.wordIndex];
     
     // For cells at intersections, we need to check ALL words they belong to
     // and return the highest priority color
     const colors = [];
     
-    for (let wordIdx of cell.wordIndices) {
-        const color = getLetterColorForWord(row, col, wordIdx);
-        colors.push(color);
+    for (let wordIdx of wordIndices) {
+        if (wordIdx >= 0) { // Valid word index
+            const color = getLetterColorForWord(row, col, wordIdx, targetGrid, targetConnections);
+            colors.push(color);
+        }
     }
     
     // Priority order: correct > wrong-position > connected-word > wrong-word
@@ -804,12 +813,20 @@ function getLetterColorClass(row, col) {
     return 'wrong-word'; // Default fallback
 }
 
-function getLetterColorForWord(row, col, targetWordIndex) {
-    const cell = grid[row][col];
+function getLetterColorForWord(row, col, targetWordIndex, gridData = null, connectionsData = null) {
+    const targetGrid = gridData || grid;
+    const targetConnections = connectionsData || wordConnections;
+    
+    const cell = targetGrid[row][col];
     const currentLetter = cell.currentLetter;
     
+    // Handle both array-based wordIndices (main game) and single wordIndex (legacy test format)
+    const cellBelongsToTargetWord = Array.isArray(cell.wordIndices) 
+        ? cell.wordIndices.includes(targetWordIndex)
+        : cell.wordIndex === targetWordIndex;
+    
     // STEP 1: Check if letter is in correct position for this word
-    if (cell.wordIndices.includes(targetWordIndex) && cell.letter === currentLetter) {
+    if (cellBelongsToTargetWord && cell.letter === currentLetter) {
         return 'correct';
     }
     
@@ -818,20 +835,24 @@ function getLetterColorForWord(row, col, targetWordIndex) {
     let totalInTargetWord = 0;
     let correctlyPlacedInTargetWord = 0;
     
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[r].length; c++) {
+    for (let r = 0; r < targetGrid.length; r++) {
+        for (let c = 0; c < targetGrid[r].length; c++) {
             // Check if this cell belongs to the target word
-            if (grid[r][c].wordIndices.includes(targetWordIndex)) {
+            const cellBelongsToTarget = Array.isArray(targetGrid[r][c].wordIndices)
+                ? targetGrid[r][c].wordIndices.includes(targetWordIndex)
+                : targetGrid[r][c].wordIndex === targetWordIndex;
+                
+            if (cellBelongsToTarget) {
                 // Count total occurrences of this letter in the target word
-                if (grid[r][c].letter === currentLetter) {
+                if (targetGrid[r][c].letter === currentLetter) {
                     totalInTargetWord++;
                     // Count correctly placed instances
-                    if (grid[r][c].currentLetter === currentLetter) {
+                    if (targetGrid[r][c].currentLetter === currentLetter) {
                         correctlyPlacedInTargetWord++;
                     }
                 }
                 // Check if letter exists elsewhere in this word
-                if (grid[r][c].letter === currentLetter && (r !== row || c !== col)) {
+                if (targetGrid[r][c].letter === currentLetter && (r !== row || c !== col)) {
                     existsInTargetWord = true;
                 }
             }
@@ -843,14 +864,17 @@ function getLetterColorForWord(row, col, targetWordIndex) {
         // Apply Wordle-style duplicate logic
         // Count how many of this letter appear in the target word before this position
         let beforeCount = 0;
-        for (let r = 0; r < grid.length; r++) {
-            for (let c = 0; c < grid[r].length; c++) {
-                if (grid[r][c].wordIndices.includes(targetWordIndex) && 
-                    grid[r][c].currentLetter === currentLetter) {
+        for (let r = 0; r < targetGrid.length; r++) {
+            for (let c = 0; c < targetGrid[r].length; c++) {
+                const cellBelongsToTarget = Array.isArray(targetGrid[r][c].wordIndices)
+                    ? targetGrid[r][c].wordIndices.includes(targetWordIndex)
+                    : targetGrid[r][c].wordIndex === targetWordIndex;
+                    
+                if (cellBelongsToTarget && targetGrid[r][c].currentLetter === currentLetter) {
                     // Check if this position comes before the current position
                     if (r < row || (r === row && c < col)) {
                         // Check if this earlier instance is correctly placed
-                        if (grid[r][c].letter === currentLetter) {
+                        if (targetGrid[r][c].letter === currentLetter) {
                             // It's correct, so it "uses up" one instance
                             beforeCount++;
                         } else {
@@ -870,21 +894,94 @@ function getLetterColorForWord(row, col, targetWordIndex) {
     
     // STEP 4: Check if letter belongs to a directly connected word
     // A word is directly connected if it shares an intersection with the target word
+    // IMPORTANT: Only count letters that are NOT already correctly placed anywhere in the connected word
     let belongsToConnectedWord = false;
     
-    // First check if this letter belongs to any word that directly intersects with target word
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[r].length; c++) {
-            // Check if this cell contains the current letter
-            if (grid[r][c].letter === currentLetter) {
+    // Debug logging for specific cases
+    const debugCase = (row === 1 && col === 2 && targetWordIndex === 2) || // Debug 'A' case
+                      (row === 3 && col === 1 && targetWordIndex === 0) || // Debug 'E' in TRAFFIC
+                      (row === 3 && col === 7 && targetWordIndex === 0);   // Debug 'S' in TRAFFIC
+    if (debugCase) {
+        console.log(`=== DEBUGGING CONNECTED WORD for cell (${row},${col}), word ${targetWordIndex}, letter '${currentLetter}' ===`);
+    }
+    
+    // Check if this letter belongs to any word that directly intersects with target word
+    for (let r = 0; r < targetGrid.length; r++) {
+        for (let c = 0; c < targetGrid[r].length; c++) {
+            // Check if this cell contains the target letter (correct letter for this position)
+            if (targetGrid[r][c].letter === currentLetter) {
+                if (debugCase) {
+                    console.log(`Found letter '${currentLetter}' at (${r},${c}), current='${targetGrid[r][c].currentLetter}'`);
+                }
+                
+                // Get all word indices for this cell
+                const cellWordIndices = Array.isArray(targetGrid[r][c].wordIndices)
+                    ? targetGrid[r][c].wordIndices
+                    : [targetGrid[r][c].wordIndex];
+                
+                if (debugCase) {
+                    console.log(`  Cell wordIndices: [${cellWordIndices}]`);
+                }
+                
                 // Check each word this cell belongs to
-                for (let otherWordIdx of grid[r][c].wordIndices) {
-                    if (otherWordIdx !== targetWordIndex) {
+                for (let otherWordIdx of cellWordIndices) {
+                    if (otherWordIdx !== targetWordIndex && otherWordIdx >= 0) {
+                        if (debugCase) {
+                            console.log(`  Checking word ${otherWordIdx} (different from target word ${targetWordIndex})`);
+                        }
+                        
                         // Check if this other word is connected to target word
-                        if (wordConnections[targetWordIndex] && 
-                            wordConnections[targetWordIndex].has(otherWordIdx)) {
-                            belongsToConnectedWord = true;
-                            break;
+                        const connections = targetConnections[targetWordIndex] || targetConnections.get?.(targetWordIndex);
+                        const isConnected = connections && 
+                            (connections.has ? connections.has(otherWordIdx) : connections.includes && connections.includes(otherWordIdx));
+                        
+                        if (debugCase) {
+                            console.log(`  Is word ${otherWordIdx} connected to word ${targetWordIndex}? ${isConnected}`);
+                        }
+                        
+                        if (isConnected) {
+                            // Check if this letter is already correctly placed anywhere in the connected word
+                            let letterAlreadyCorrectInConnectedWord = false;
+                            if (debugCase) {
+                                console.log(`  Checking if '${currentLetter}' is already correctly placed in word ${otherWordIdx}:`);
+                            }
+                            
+                            for (let rr = 0; rr < targetGrid.length; rr++) {
+                                for (let cc = 0; cc < targetGrid[rr].length; cc++) {
+                                    const cellBelongsToOther = Array.isArray(targetGrid[rr][cc].wordIndices)
+                                        ? targetGrid[rr][cc].wordIndices.includes(otherWordIdx)
+                                        : targetGrid[rr][cc].wordIndex === otherWordIdx;
+                                        
+                                    if (cellBelongsToOther &&
+                                        targetGrid[rr][cc].letter === currentLetter &&
+                                        targetGrid[rr][cc].currentLetter === currentLetter) {
+                                        if (debugCase) {
+                                            console.log(`    Found '${currentLetter}' correctly placed at (${rr},${cc}) in word ${otherWordIdx}`);
+                                        }
+                                        letterAlreadyCorrectInConnectedWord = true;
+                                        break;
+                                    }
+                                }
+                                if (letterAlreadyCorrectInConnectedWord) break;
+                            }
+                            
+                            if (debugCase) {
+                                console.log(`  Letter '${currentLetter}' already correctly placed in word ${otherWordIdx}? ${letterAlreadyCorrectInConnectedWord}`);
+                            }
+                            
+                            // Only count this as "belongs to connected word" if the letter
+                            // is NOT already correctly placed anywhere in the connected word
+                            if (!letterAlreadyCorrectInConnectedWord) {
+                                if (debugCase) {
+                                    console.log(`  RESULT: Letter '${currentLetter}' should be PURPLE (connected-word)`);
+                                }
+                                belongsToConnectedWord = true;
+                                break;
+                            } else {
+                                if (debugCase) {
+                                    console.log(`  RESULT: Letter '${currentLetter}' should NOT be purple (already correctly placed)`);
+                                }
+                            }
                         }
                     }
                 }
