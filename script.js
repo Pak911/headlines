@@ -1183,19 +1183,20 @@ function updateGridStateCode() {
     const rowOffset = minRow;
     const colOffset = minCol;
     
-    // Step 3: Generate normalized grid data (10x10 max)
+    // Step 3: Generate normalized cell data with proper word mapping
     const normalizedCells = [];
+    const cellWordMappings = new Map(); // Map of "row,col" -> array of {wordIndex, letterIndex}
+    
     for (let cellData of filledCells) {
         const newRow = cellData.row - rowOffset;
         const newCol = cellData.col - colOffset;
         
         // Only include cells that fit in 10x10 grid
         if (newRow < 10 && newCol < 10) {
-            // Find which word this cell belongs to and its position in that word
-            let wordIndex = -1;
-            let letterIndex = -1;
+            const key = `${newRow},${newCol}`;
+            cellWordMappings.set(key, []);
             
-            // Find the word index by checking which word contains this position
+            // Find ALL words that contain this position (for intersections)
             for (let i = 0; i < crosswordLayout.words.length; i++) {
                 const wordInfo = crosswordLayout.words[i];
                 const word = currentHeadline.words[wordInfo.word];
@@ -1211,12 +1212,12 @@ function updateGridStateCode() {
                     }
                     
                     if (wordRow === cellData.row && wordCol === cellData.col) {
-                        wordIndex = wordInfo.word;
-                        letterIndex = j;
-                        break;
+                        cellWordMappings.get(key).push({
+                            wordIndex: wordInfo.word,
+                            letterIndex: j
+                        });
                     }
                 }
-                if (wordIndex !== -1) break;
             }
             
             normalizedCells.push({
@@ -1224,8 +1225,7 @@ function updateGridStateCode() {
                 col: newCol,
                 letter: cellData.cell.letter,
                 currentLetter: cellData.cell.currentLetter,
-                wordIndex: wordIndex,
-                letterIndex: letterIndex
+                wordMappings: cellWordMappings.get(key)
             });
         }
     }
@@ -1234,10 +1234,31 @@ function updateGridStateCode() {
     const nextTestNumber = getNextTestCaseNumber();
     const testName = `test${nextTestNumber}`;
     
-    // Step 5: Generate JavaScript code
+    // Step 5: Generate HTML code for new test case section
+    const htmlLines = [];
+    htmlLines.push(`<div class="test-case">`);
+    htmlLines.push(`    <h3>Test Case ${nextTestNumber}: ${currentHeadline.text}</h3>`);
+    htmlLines.push(`    <p>Words: ${currentHeadline.words.join(', ')}</p>`);
+    htmlLines.push(`    <div id="${testName}Container" class="test-grid"></div>`);
+    htmlLines.push(`    <div style="margin-top: 15px;">`);
+    htmlLines.push(`        <button onclick="generateSingleTestOutput('${testName}', 'Test Case ${nextTestNumber}: ${currentHeadline.text}')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">`);
+    htmlLines.push(`            Generate Text Output for LLM`);
+    htmlLines.push(`        </button>`);
+    htmlLines.push(`        <div id="textOutput${nextTestNumber}" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">`);
+    htmlLines.push(`            <h5>Text Output for LLM Analysis:</h5>`);
+    htmlLines.push(`            <textarea id="textContent${nextTestNumber}" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>`);
+    htmlLines.push(`            <button onclick="copySingleToClipboard('textContent${nextTestNumber}')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">`);
+    htmlLines.push(`                Copy to Clipboard`);
+    htmlLines.push(`            </button>`);
+    htmlLines.push(`        </div>`);
+    htmlLines.push(`    </div>`);
+    htmlLines.push(`</div>`);
+    
+    const htmlCode = htmlLines.join('\n');
+    
+    // Step 6: Generate JavaScript code using new setCell format
     const jsLines = [];
-    jsLines.push('// Current Grid State - Test Case Format');
-    jsLines.push(`// Headline: "${currentHeadline.text}"`);
+    jsLines.push(`// Test Case ${nextTestNumber}: ${currentHeadline.text}`);
     jsLines.push(`// Words: ${currentHeadline.words.join(', ')}`);
     jsLines.push('');
     jsLines.push(`const ${testName} = new TestGrid();`);
@@ -1246,41 +1267,57 @@ function updateGridStateCode() {
     // Sort cells by row, then by column for consistent output
     normalizedCells.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
     
-    // Add each normalized cell
+    // Generate setCell calls for each word in each cell
+    const setCellCalls = [];
     for (let cellData of normalizedCells) {
-        jsLines.push(`${testName}.grid[${cellData.row}][${cellData.col}] = { letter: '${cellData.letter}', currentLetter: '${cellData.currentLetter}', wordIndex: ${cellData.wordIndex}, letterIndex: ${cellData.letterIndex} };`);
+        // For each word that this cell belongs to, generate a setCell call
+        for (let mapping of cellData.wordMappings) {
+            setCellCalls.push({
+                row: cellData.row,
+                col: cellData.col,
+                letter: cellData.letter,
+                currentLetter: cellData.currentLetter,
+                wordIndex: mapping.wordIndex,
+                letterIndex: mapping.letterIndex
+            });
+        }
+    }
+    
+    // Sort setCell calls by word index, then by letter index for logical ordering
+    setCellCalls.sort((a, b) => {
+        if (a.wordIndex !== b.wordIndex) return a.wordIndex - b.wordIndex;
+        return a.letterIndex - b.letterIndex;
+    });
+    
+    // Add comments for each word
+    let currentWordIndex = -1;
+    for (let call of setCellCalls) {
+        if (call.wordIndex !== currentWordIndex) {
+            currentWordIndex = call.wordIndex;
+            const wordText = currentHeadline.words[call.wordIndex];
+            jsLines.push(`// Set up ${wordText.toUpperCase()} (word ${call.wordIndex})`);
+        }
+        
+        jsLines.push(`${testName}.setCell(${call.row}, ${call.col}, '${call.letter}', '${call.currentLetter}', ${call.wordIndex}, ${call.letterIndex});`);
     }
     
     jsLines.push('');
-    jsLines.push('// Set up word connections');
-    for (let [wordIdx, connections] of Object.entries(wordConnections)) {
-        const connectionsArray = Array.from(connections);
-        jsLines.push(`${testName}.wordConnections.set(${wordIdx}, new Set([${connectionsArray.join(', ')}]));`);
-    }
+    jsLines.push('// Set up word connections automatically');
+    jsLines.push(`${testName}.setWordConnections();`);
     
     jsLines.push('');
     jsLines.push(`renderTestGrid('${testName}Container', ${testName});`);
+    jsLines.push('');
+    jsLines.push('// Store test grid globally for text output function');
+    jsLines.push(`window.${testName} = ${testName};`);
     
-    // Step 6: Generate HTML code for new test case section
-    const htmlLines = [];
-    htmlLines.push('<!-- Add this to test.html -->');
-    htmlLines.push(`<div class="test-case">`);
-    htmlLines.push(`    <h3>Test Case ${nextTestNumber}: ${currentHeadline.text}</h3>`);
-    htmlLines.push(`    <p>Words: ${currentHeadline.words.join(', ')}</p>`);
-    htmlLines.push(`    <div id="${testName}Container" class="test-grid"></div>`);
-    htmlLines.push(`</div>`);
-    htmlLines.push('');
+    const jsCode = jsLines.join('\n');
     
-    // Step 7: Combine both codes
-    const combinedCode = [
-        '// ========== JAVASCRIPT CODE ==========',
-        ...jsLines,
-        '',
-        '// ========== HTML CODE ==========',
-        ...htmlLines
-    ].join('\n');
+    // Update the HTML section
+    document.getElementById('gridStateCode').value = htmlCode;
     
-    document.getElementById('gridStateCode').value = combinedCode;
+    // Update the JavaScript section  
+    document.getElementById('gridStateJSCode').value = jsCode;
 }
 
 function updateCompleteTestCaseCode() {
@@ -1304,19 +1341,20 @@ function updateCompleteTestCaseCode() {
     const rowOffset = minRow;
     const colOffset = minCol;
     
-    // Step 3: Generate normalized grid data (10x10 max)
+    // Step 3: Generate normalized cell data with proper word mapping
     const normalizedCells = [];
+    const cellWordMappings = new Map(); // Map of "row,col" -> array of {wordIndex, letterIndex}
+    
     for (let cellData of filledCells) {
         const newRow = cellData.row - rowOffset;
         const newCol = cellData.col - colOffset;
         
         // Only include cells that fit in 10x10 grid
         if (newRow < 10 && newCol < 10) {
-            // Find which word this cell belongs to and its position in that word
-            let wordIndex = -1;
-            let letterIndex = -1;
+            const key = `${newRow},${newCol}`;
+            cellWordMappings.set(key, []);
             
-            // Find the word index by checking which word contains this position
+            // Find ALL words that contain this position (for intersections)
             for (let i = 0; i < crosswordLayout.words.length; i++) {
                 const wordInfo = crosswordLayout.words[i];
                 const word = currentHeadline.words[wordInfo.word];
@@ -1332,12 +1370,12 @@ function updateCompleteTestCaseCode() {
                     }
                     
                     if (wordRow === cellData.row && wordCol === cellData.col) {
-                        wordIndex = wordInfo.word;
-                        letterIndex = j;
-                        break;
+                        cellWordMappings.get(key).push({
+                            wordIndex: wordInfo.word,
+                            letterIndex: j
+                        });
                     }
                 }
-                if (wordIndex !== -1) break;
             }
             
             normalizedCells.push({
@@ -1345,8 +1383,7 @@ function updateCompleteTestCaseCode() {
                 col: newCol,
                 letter: cellData.cell.letter,
                 currentLetter: cellData.cell.currentLetter,
-                wordIndex: wordIndex,
-                letterIndex: letterIndex
+                wordMappings: cellWordMappings.get(key)
             });
         }
     }
@@ -1367,7 +1404,7 @@ function updateCompleteTestCaseCode() {
     htmlLines.push(`        <p><strong>Grid Size:</strong> ${maxRow - minRow + 1} × ${maxCol - minCol + 1}</p>`);
     htmlLines.push(`        <p><strong>Test Scenario:</strong> Letters are scrambled to demonstrate the color-coding system</p>`);
     htmlLines.push(`    </div>`);
-    htmlLines.push(`    <div class="grid" id="${testName}"></div>`);
+    htmlLines.push(`    <div id="${testName}Container" class="test-grid"></div>`);
     htmlLines.push(`    <div style="margin-top: 15px;">`);
     htmlLines.push(`        <button onclick="generateSingleTestOutput('${testName}', 'Test Case ${nextTestNumber}: ${currentHeadline.text}')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">`);
     htmlLines.push(`            Generate Text Output for LLM`);
@@ -1383,7 +1420,7 @@ function updateCompleteTestCaseCode() {
     htmlLines.push(`</div>`);
     htmlLines.push('');
     
-    // JavaScript code
+    // JavaScript code using new setCell format
     htmlLines.push('<!-- JavaScript Setup -->');
     htmlLines.push('<script>');
     htmlLines.push(`// Test Case ${nextTestNumber}: ${currentHeadline.text}`);
@@ -1395,20 +1432,46 @@ function updateCompleteTestCaseCode() {
     // Sort cells by row, then by column for consistent output
     normalizedCells.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
     
-    // Add each normalized cell
+    // Generate setCell calls for each word in each cell
+    const setCellCalls = [];
     for (let cellData of normalizedCells) {
-        htmlLines.push(`${testName}.grid[${cellData.row}][${cellData.col}] = { letter: '${cellData.letter}', currentLetter: '${cellData.currentLetter}', wordIndex: ${cellData.wordIndex}, letterIndex: ${cellData.letterIndex} };`);
+        // For each word that this cell belongs to, generate a setCell call
+        for (let mapping of cellData.wordMappings) {
+            setCellCalls.push({
+                row: cellData.row,
+                col: cellData.col,
+                letter: cellData.letter,
+                currentLetter: cellData.currentLetter,
+                wordIndex: mapping.wordIndex,
+                letterIndex: mapping.letterIndex
+            });
+        }
+    }
+    
+    // Sort setCell calls by word index, then by letter index for logical ordering
+    setCellCalls.sort((a, b) => {
+        if (a.wordIndex !== b.wordIndex) return a.wordIndex - b.wordIndex;
+        return a.letterIndex - b.letterIndex;
+    });
+    
+    // Add comments for each word
+    let currentWordIndex = -1;
+    for (let call of setCellCalls) {
+        if (call.wordIndex !== currentWordIndex) {
+            currentWordIndex = call.wordIndex;
+            const wordText = currentHeadline.words[call.wordIndex];
+            htmlLines.push(`// Set up ${wordText.toUpperCase()} (word ${call.wordIndex})`);
+        }
+        
+        htmlLines.push(`${testName}.setCell(${call.row}, ${call.col}, '${call.letter}', '${call.currentLetter}', ${call.wordIndex}, ${call.letterIndex});`);
     }
     
     htmlLines.push('');
-    htmlLines.push('// Set up word connections');
-    for (let [wordIdx, connections] of Object.entries(wordConnections)) {
-        const connectionsArray = Array.from(connections);
-        htmlLines.push(`${testName}.wordConnections.set(${wordIdx}, new Set([${connectionsArray.join(', ')}]));`);
-    }
+    htmlLines.push('// Set up word connections automatically');
+    htmlLines.push(`${testName}.setWordConnections();`);
     
     htmlLines.push('');
-    htmlLines.push(`renderTestGrid('${testName}', ${testName});`);
+    htmlLines.push(`renderTestGrid('${testName}Container', ${testName});`);
     htmlLines.push('');
     htmlLines.push('// Store test grid globally for text output function');
     htmlLines.push(`window.${testName} = ${testName};`);
@@ -1445,6 +1508,30 @@ function copyGridState() {
         setTimeout(() => {
             button.textContent = originalText;
             button.style.background = '#4CAF50';
+        }, 2000);
+    } catch (err) {
+        console.error('Failed to copy text: ', err);
+        alert('Failed to copy to clipboard. Please select the text manually and copy.');
+    }
+}
+
+function copyGridStateJS() {
+    const textarea = document.getElementById('gridStateJSCode');
+    textarea.select();
+    textarea.setSelectionRange(0, 99999); // For mobile devices
+    
+    try {
+        document.execCommand('copy');
+        
+        // Show feedback
+        const button = event.target;
+        const originalText = button.textContent;
+        button.textContent = 'Copied!';
+        button.style.background = '#4CAF50';
+        
+        setTimeout(() => {
+            button.textContent = originalText;
+            button.style.background = '#2196F3';
         }, 2000);
     } catch (err) {
         console.error('Failed to copy text: ', err);
