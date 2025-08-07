@@ -1,5 +1,5 @@
 // Difficulty system configuration
-let currentDifficulty = 'medium'; // Default difficulty
+let currentDifficulty = 'mediumHard'; // Default difficulty
 
 const difficultySettings = {
     easy: { 
