@@ -67,7 +67,7 @@ function initGame() {
     renderCrossword();
 }
 
-function enhancedInitGame() {
+async function enhancedInitGame() {
     const startTime = performance.now();
     
     // Reset debug info
@@ -86,100 +86,103 @@ function enhancedInitGame() {
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
     
-    // Try to generate a valid layout with headline management system
-    const maxCaptionAttempts = 10;
-    let captionAttempts = 0;
+    console.log('🎮 Starting enhanced game initialization...');
     
-    while (captionAttempts < maxCaptionAttempts) {
-        // Get next available headline using management system
-        currentHeadline = getNextHeadline();
+    try {
+        // Initialize the enhanced headline management system
+        await initializeHeadlineManagement();
         
-        // Generate crossword layout
-        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
-        debugInfo.layoutAttempts = 50; // From generateCrosswordLayout maxAttempts
+        // Try to generate a valid layout with enhanced headline management system
+        const maxCaptionAttempts = 10;
+        let captionAttempts = 0;
         
-        // If layout generation succeeded, mark as used and break
-        if (crosswordLayout !== null) {
-            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
-            markHeadlineAsUsed(currentHeadline);
-            break;
-        } else {
-            // Mark as rejected and try next headline
-            markHeadlineAsRejected(currentHeadline);
-            debugInfo.rejectedHeadlines.push(currentHeadline.text);
-        }
-        
-        captionAttempts++;
-    }
-    
-    // If we still don't have a valid layout after trying multiple headlines, reject this session
-    if (crosswordLayout === null) {
-        console.log(`Failed to generate valid layout after ${captionAttempts} attempts. Trying one more time with relaxed validation...`);
-        
-        // Try one more time with the current headline but with a simple layout
-        crosswordLayout = generateSimpleLayout(currentHeadline.words);
-        
-        // STRICT VALIDATION: Only proceed if the simple layout also passes all rules
-        if (crosswordLayout.words.length === currentHeadline.words.length &&
-            isLayoutConnected(crosswordLayout, currentHeadline.words) && 
-            hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
-            hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words)) {
+        while (captionAttempts < maxCaptionAttempts) {
+            // Get next available headline using enhanced management system
+            currentHeadline = await getNextHeadline();
             
-            normalizeLayout(crosswordLayout, currentHeadline.words);
-            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
-            markHeadlineAsUsed(currentHeadline);
-            console.log(`Simple layout passed validation for: "${currentHeadline.text}"`);
-        } else {
-            // Even simple layout failed - reject this headline and try another
-            console.log(`Simple layout also failed validation for: "${currentHeadline.text}"`);
-            markHeadlineAsRejected(currentHeadline);
-            
-            // Try one more headline as absolute fallback
-            currentHeadline = getNextHeadline();
-            crosswordLayout = generateSimpleLayout(currentHeadline.words);
-            
-            // If this also fails, keep trying more headlines until we find a valid one
-            if (!(crosswordLayout.words.length === currentHeadline.words.length &&
-                  isLayoutConnected(crosswordLayout, currentHeadline.words) && 
-                  hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
-                  hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words))) {
-                console.error(`CRITICAL: Layout validation failed for: "${currentHeadline.text}". Trying another headline...`);
-                markHeadlineAsRejected(currentHeadline);
-                
-                // Keep trying more headlines until we find one that works
-                let additionalAttempts = 0;
-                const maxAdditionalAttempts = 20;
-                
-                while (additionalAttempts < maxAdditionalAttempts) {
-                    currentHeadline = getNextHeadline();
-                    crosswordLayout = generateSimpleLayout(currentHeadline.words);
-                    
-                    if (crosswordLayout.words.length === currentHeadline.words.length &&
-                        isLayoutConnected(crosswordLayout, currentHeadline.words) && 
-                        hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
-                        hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words)) {
-                        console.log(`Found valid layout after ${additionalAttempts + 1} additional attempts: "${currentHeadline.text}"`);
-                        markHeadlineAsUsed(currentHeadline);
-                        break;
-                    } else {
-                        console.log(`Rejecting headline ${additionalAttempts + 1}: "${currentHeadline.text}" - failed validation`);
-                        markHeadlineAsRejected(currentHeadline);
-                        additionalAttempts++;
-                    }
-                }
-                
-                // If we still don't have a valid layout after all attempts, something is seriously wrong
-                if (additionalAttempts >= maxAdditionalAttempts) {
-                    console.error(`CRITICAL ERROR: Unable to find any valid headline after ${maxAdditionalAttempts} additional attempts. This suggests a fundamental issue with the validation logic or headline data.`);
-                    // As absolute last resort, use the last attempted layout but mark it as problematic
-                    markHeadlineAsRejected(currentHeadline);
-                }
-            } else {
-                markHeadlineAsUsed(currentHeadline);
+            if (!currentHeadline) {
+                console.error('❌ No headlines available from enhanced system');
+                break;
             }
             
+            // Use filtered words if available, otherwise fall back to original words
+            const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
+            
+            console.log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${wordsToUse.length} words)`);
+            
+            // Generate crossword layout
+            crosswordLayout = generateCrosswordLayout(wordsToUse);
+            debugInfo.layoutAttempts = 50; // From generateCrosswordLayout maxAttempts
+            
+            // If layout generation succeeded, mark as used and break
+            if (crosswordLayout !== null) {
+                debugInfo.layoutScore = scoreLayout(crosswordLayout, wordsToUse);
+                markHeadlineAsUsed(currentHeadline);
+                console.log(`✅ Successfully generated layout for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                
+                // Update currentHeadline to use filtered words for the game
+                if (currentHeadline.filteredWords) {
+                    currentHeadline.words = currentHeadline.filteredWords;
+                    currentHeadline.text = currentHeadline.filteredText;
+                }
+                
+                break;
+            } else {
+                // Mark as rejected and try next headline
+                markHeadlineAsRejected(currentHeadline);
+                debugInfo.rejectedHeadlines.push(currentHeadline.filteredText || currentHeadline.text);
+                console.log(`❌ Layout generation failed for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+            }
+            
+            captionAttempts++;
+        }
+        
+        // If we still don't have a valid layout after trying multiple headlines
+        if (crosswordLayout === null) {
+            console.log(`⚠️ Failed to generate valid layout after ${captionAttempts} attempts. Trying simple layout...`);
+            
+            if (currentHeadline) {
+                const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
+                crosswordLayout = generateSimpleLayout(wordsToUse);
+                
+                if (crosswordLayout && crosswordLayout.words.length === wordsToUse.length) {
+                    normalizeLayout(crosswordLayout, wordsToUse);
+                    debugInfo.layoutScore = scoreLayout(crosswordLayout, wordsToUse);
+                    markHeadlineAsUsed(currentHeadline);
+                    console.log(`✅ Simple layout succeeded for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                    
+                    // Update currentHeadline to use filtered words
+                    if (currentHeadline.filteredWords) {
+                        currentHeadline.words = currentHeadline.filteredWords;
+                        currentHeadline.text = currentHeadline.filteredText;
+                    }
+                } else {
+                    console.error('❌ Even simple layout failed');
+                    markHeadlineAsRejected(currentHeadline);
+                }
+            }
+        }
+        
+        // Final fallback check
+        if (!crosswordLayout || !currentHeadline) {
+            console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
+            // Use a guaranteed working headline from mock data
+            currentHeadline = mockHeadlines[0];
+            crosswordLayout = generateSimpleLayout(currentHeadline.words);
             normalizeLayout(crosswordLayout, currentHeadline.words);
-            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error in enhanced game initialization:', error);
+        
+        // Emergency fallback to old system
+        console.log('🔄 Falling back to legacy headline system');
+        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+        
+        if (!crosswordLayout) {
+            crosswordLayout = generateSimpleLayout(currentHeadline.words);
+            normalizeLayout(crosswordLayout, currentHeadline.words);
         }
     }
     
@@ -196,11 +199,16 @@ function enhancedInitGame() {
     // Render the crossword
     renderCrossword();
     
+    // Display headline description as hint
+    displayHeadlineDescription();
+    
     // Update difficulty display
     updateDifficultyDisplay();
     
     // Calculate generation time
     debugInfo.generationTime = Math.round(performance.now() - startTime);
+    
+    console.log(`🎮 Game initialization completed in ${debugInfo.generationTime}ms`);
     
     // Update debug panel if visible
     if (debugPanelVisible) {
@@ -224,6 +232,46 @@ document.addEventListener('keydown', function(event) {
         toggleDebugPanel();
     }
 });
+
+// Function to display headline description as hint
+function displayHeadlineDescription() {
+    const descriptionElement = document.getElementById('headlineDescription');
+    if (currentHeadline && currentHeadline.description) {
+        descriptionElement.textContent = currentHeadline.description;
+    } else {
+        descriptionElement.textContent = '';
+    }
+}
+
+// Auto-win function for debug purposes
+function autoWinGame() {
+    if (!currentHeadline || !grid) {
+        console.log('❌ No active game to auto-win');
+        return;
+    }
+    
+    console.log('🏆 Auto-winning game...');
+    
+    // Set all letters to their correct positions
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                grid[r][c].currentLetter = grid[r][c].letter;
+            }
+        }
+    }
+    
+    // Re-render the grid
+    renderCrossword();
+    
+    // Show victory
+    showVictory();
+    
+    console.log('✅ Auto-win completed!');
+}
+
+// Make auto-win function globally available
+window.autoWinGame = autoWinGame;
 
 // Replace the original initGame with enhanced version
 window.initGame = enhancedInitGame;

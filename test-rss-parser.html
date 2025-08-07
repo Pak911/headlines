@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RSS Parser Test Suite</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .test-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .test-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background: #45a049;
+        }
+        
+        button:disabled {
+            background: #cccccc;
+            cursor: not-allowed;
+        }
+        
+        .test-button {
+            background: #2196F3;
+        }
+        
+        .test-button:hover {
+            background: #1976D2;
+        }
+        
+        .clear-button {
+            background: #f44336;
+        }
+        
+        .clear-button:hover {
+            background: #d32f2f;
+        }
+        
+        .status {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .status.loading {
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeaa7;
+        }
+        
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .results {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .headline-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .headline-text {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .headline-meta {
+            font-size: 12px;
+            color: #6c757d;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .word-count {
+            background: #e9ecef;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .source-tag {
+            background: #007bff;
+            color: white;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+        
+        .console-output {
+            background: #1e1e1e;
+            color: #d4d4d4;
+            font-family: 'Courier New', monospace;
+            padding: 15px;
+            border-radius: 5px;
+            max-height: 300px;
+            overflow-y: auto;
+            font-size: 12px;
+            line-height: 1.4;
+        }
+        
+        .console-output .log-info { color: #4fc3f7; }
+        .console-output .log-success { color: #81c784; }
+        .console-output .log-warning { color: #ffb74d; }
+        .console-output .log-error { color: #e57373; }
+        
+        select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗞️ RSS Parser Test Suite</h1>
+        <p>Testing RSS feed parsing for Headlines Crossword Game</p>
+    </div>
+
+    <div class="test-section">
+        <h2>📊 Test Statistics</h2>
+        <div class="stats">
+            <div class="stat-card">
+                <div class="stat-number" id="totalHeadlines">0</div>
+                <div class="stat-label">Total Headlines</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="validHeadlines">0</div>
+                <div class="stat-label">Valid Headlines (4+ words)</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sourcesCount">0</div>
+                <div class="stat-label">Sources Tested</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="successRate">0%</div>
+                <div class="stat-label">Success Rate</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🧪 Test Controls</h2>
+        <div class="test-controls">
+            <button id="testAllBtn" class="test-button">Test All Sources</button>
+            <button id="testBBCBtn" class="test-button">Test BBC News</button>
+            <button id="testCNNBtn" class="test-button">Test CNN</button>
+            <button id="testReutersBtn" class="test-button">Test Reuters</button>
+            <select id="sourceSelect">
+                <option value="">Select a source to test...</option>
+            </select>
+            <button id="testSelectedBtn" class="test-button">Test Selected</button>
+            <button id="clearBtn" class="clear-button">Clear Results</button>
+        </div>
+        
+        <div id="status" class="status" style="display: none;"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>📰 Parsed Headlines</h2>
+        <div id="results" class="results">
+            <p style="text-align: center; color: #6c757d;">No headlines loaded yet. Click a test button to start.</p>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2>🖥️ Console Output</h2>
+        <div id="consoleOutput" class="console-output">
+            <div class="log-info">RSS Parser Test Suite initialized. Ready to test...</div>
+        </div>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="data.js"></script>
+    <script src="scripts/utils/rss-parser.js"></script>
+    
+    <script>
+        // Test suite implementation
+        class RSSParserTestSuite {
+            constructor() {
+                this.totalHeadlines = 0;
+                this.validHeadlines = 0;
+                this.sourcesCount = 0;
+                this.successfulSources = 0;
+                this.allResults = [];
+                
+                this.initializeUI();
+                this.setupEventListeners();
+                this.populateSourceSelect();
+                this.logToConsole('Test suite initialized', 'info');
+            }
+            
+            initializeUI() {
+                this.statusEl = document.getElementById('status');
+                this.resultsEl = document.getElementById('results');
+                this.consoleEl = document.getElementById('consoleOutput');
+                this.sourceSelect = document.getElementById('sourceSelect');
+                
+                // Stats elements
+                this.totalHeadlinesEl = document.getElementById('totalHeadlines');
+                this.validHeadlinesEl = document.getElementById('validHeadlines');
+                this.sourcesCountEl = document.getElementById('sourcesCount');
+                this.successRateEl = document.getElementById('successRate');
+            }
+            
+            setupEventListeners() {
+                document.getElementById('testAllBtn').addEventListener('click', () => this.testAllSources());
+                document.getElementById('testBBCBtn').addEventListener('click', () => this.testSingleSource('BBC News'));
+                document.getElementById('testCNNBtn').addEventListener('click', () => this.testSingleSource('CNN Top Stories'));
+                document.getElementById('testReutersBtn').addEventListener('click', () => this.testSingleSource('Reuters Top News'));
+                document.getElementById('testSelectedBtn').addEventListener('click', () => this.testSelectedSource());
+                document.getElementById('clearBtn').addEventListener('click', () => this.clearResults());
+            }
+            
+            populateSourceSelect() {
+                if (typeof rssNewsSources !== 'undefined') {
+                    rssNewsSources.forEach(source => {
+                        const option = document.createElement('option');
+                        option.value = source.name;
+                        option.textContent = `${source.name} (${source.category})`;
+                        this.sourceSelect.appendChild(option);
+                    });
+                    this.logToConsole(`Loaded ${rssNewsSources.length} RSS sources`, 'success');
+                } else {
+                    this.logToConsole('RSS sources not found - check data.js', 'error');
+                }
+            }
+            
+            async testAllSources() {
+                this.setStatus('loading', 'Testing all RSS sources...');
+                this.logToConsole('Starting test of all RSS sources', 'info');
+                
+                try {
+                    const headlines = await window.RSSParser.testAllSources();
+                    this.processResults(headlines, 'All Sources');
+                    this.setStatus('success', `Successfully tested all sources. Found ${headlines.length} valid headlines.`);
+                } catch (error) {
+                    this.setStatus('error', `Error testing all sources: ${error.message}`);
+                    this.logToConsole(`Error: ${error.message}`, 'error');
+                }
+            }
+            
+            async testSingleSource(sourceName) {
+                this.setStatus('loading', `Testing ${sourceName}...`);
+                this.logToConsole(`Testing single source: ${sourceName}`, 'info');
+                
+                try {
+                    const headlines = await window.RSSParser.testSingleSource(sourceName);
+                    this.processResults(headlines, sourceName);
+                    this.setStatus('success', `Successfully tested ${sourceName}. Found ${headlines.length} valid headlines.`);
+                } catch (error) {
+                    this.setStatus('error', `Error testing ${sourceName}: ${error.message}`);
+                    this.logToConsole(`Error: ${error.message}`, 'error');
+                }
+            }
+            
+            async testSelectedSource() {
+                const selectedSource = this.sourceSelect.value;
+                if (!selectedSource) {
+                    this.setStatus('error', 'Please select a source to test');
+                    return;
+                }
+                
+                await this.testSingleSource(selectedSource);
+            }
+            
+            processResults(headlines, sourceName) {
+                this.allResults = headlines;
+                this.updateStats(headlines, sourceName);
+                this.displayResults(headlines);
+                this.logToConsole(`Processed ${headlines.length} headlines from ${sourceName}`, 'success');
+            }
+            
+            updateStats(headlines, sourceName) {
+                this.totalHeadlines = headlines.length;
+                this.validHeadlines = headlines.filter(h => h.words.length >= 4).length;
+                this.sourcesCount = sourceName === 'All Sources' ? rssNewsSources.length : 1;
+                this.successfulSources = headlines.length > 0 ? this.sourcesCount : 0;
+                
+                const successRate = this.sourcesCount > 0 ? Math.round((this.successfulSources / this.sourcesCount) * 100) : 0;
+                
+                this.totalHeadlinesEl.textContent = this.totalHeadlines;
+                this.validHeadlinesEl.textContent = this.validHeadlines;
+                this.sourcesCountEl.textContent = this.sourcesCount;
+                this.successRateEl.textContent = `${successRate}%`;
+            }
+            
+            displayResults(headlines) {
+                if (headlines.length === 0) {
+                    this.resultsEl.innerHTML = '<p style="text-align: center; color: #e74c3c;">No valid headlines found.</p>';
+                    return;
+                }
+                
+                const headlinesHTML = headlines.map(headline => `
+                    <div class="headline-item">
+                        <div class="headline-text">${headline.text}</div>
+                        <div class="headline-meta">
+                            <span class="word-count">${headline.words.length} words</span>
+                            <span class="source-tag">${headline.sourceName || headline.source}</span>
+                            <span>Category: ${headline.category || 'N/A'}</span>
+                            <span>Original: "${headline.originalTitle}"</span>
+                        </div>
+                    </div>
+                `).join('');
+                
+                this.resultsEl.innerHTML = headlinesHTML;
+            }
+            
+            setStatus(type, message) {
+                this.statusEl.className = `status ${type}`;
+                this.statusEl.textContent = message;
+                this.statusEl.style.display = 'block';
+                
+                // Auto-hide success/error messages after 5 seconds
+                if (type !== 'loading') {
+                    setTimeout(() => {
+                        this.statusEl.style.display = 'none';
+                    }, 5000);
+                }
+            }
+            
+            logToConsole(message, type = 'info') {
+                const timestamp = new Date().toLocaleTimeString();
+                const logClass = `log-${type}`;
+                const logEntry = `<div class="${logClass}">[${timestamp}] ${message}</div>`;
+                
+                this.consoleEl.innerHTML += logEntry;
+                this.consoleEl.scrollTop = this.consoleEl.scrollHeight;
+                
+                // Also log to browser console
+                console.log(`[RSS Parser Test] ${message}`);
+            }
+            
+            clearResults() {
+                this.resultsEl.innerHTML = '<p style="text-align: center; color: #6c757d;">Results cleared. Click a test button to start.</p>';
+                this.consoleEl.innerHTML = '<div class="log-info">Console cleared. Ready for new tests...</div>';
+                this.statusEl.style.display = 'none';
+                
+                // Reset stats
+                this.totalHeadlinesEl.textContent = '0';
+                this.validHeadlinesEl.textContent = '0';
+                this.sourcesCountEl.textContent = '0';
+                this.successRateEl.textContent = '0%';
+                
+                this.allResults = [];
+                this.logToConsole('Results and console cleared', 'info');
+            }
+        }
+        
+        // Override console methods to capture output
+        const originalConsoleLog = console.log;
+        const originalConsoleError = console.error;
+        const originalConsoleWarn = console.warn;
+        
+        // Initialize test suite when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            window.testSuite = new RSSParserTestSuite();
+        });
+        
+        // Capture console output and display in our console
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            if (window.testSuite) {
+                const message = args.join(' ');
+                // Avoid infinite loops by checking if message is from our test suite
+                if (!message.includes('[RSS Parser Test]')) {
+                    if (message.includes('✅')) {
+                        window.testSuite.logToConsole(message, 'success');
+                    } else if (message.includes('⚠️')) {
+                        window.testSuite.logToConsole(message, 'warning');
+                    } else if (message.includes('❌')) {
+                        window.testSuite.logToConsole(message, 'error');
+                    } else {
+                        window.testSuite.logToConsole(message, 'info');
+                    }
+                }
+            }
+        };
+        
+        console.error = function(...args) {
+            originalConsoleError.apply(console, args);
+            if (window.testSuite) {
+                const message = args.join(' ');
+                if (!message.includes('[RSS Parser Test]')) {
+                    window.testSuite.logToConsole(message, 'error');
+                }
+            }
+        };
+        
+        console.warn = function(...args) {
+            originalConsoleWarn.apply(console, args);
+            if (window.testSuite) {
+                const message = args.join(' ');
+                if (!message.includes('[RSS Parser Test]')) {
+                    window.testSuite.logToConsole(message, 'warning');
+                }
+            }
+        };
+    </script>
+</body>
+</html>

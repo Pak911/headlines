@@ -1,64 +1,175 @@
-// Headline Manager - Headline Selection and Management
-// Handles headline lifecycle, usage tracking, and selection logic
+// Enhanced Headline Manager - Advanced headline selection with scoring and pool management
+// Integrates with HeadlineScorer and AsyncRSSFetcher for intelligent headline management
 
-// Headline management system
-let availableHeadlines = [];
+// Headline pool management system
+let headlinePools = null; // Will store grouped headlines by score
 let usedHeadlines = [];
 let rejectedHeadlines = [];
+let isInitialized = false;
 
-// Initialize headline management system
-function initializeHeadlineManagement() {
-    // If availableHeadlines is empty, refill it with all headlines
-    if (availableHeadlines.length === 0) {
-        console.log('Refilling available headlines list');
-        availableHeadlines = [...mockHeadlines];
-        // Clear used and rejected lists when starting fresh
+/**
+ * Initialize the enhanced headline management system
+ * Fetches headlines and sets up scoring pools
+ */
+async function initializeHeadlineManagement() {
+    if (isInitialized && headlinePools && headlinePools.totalValid > 0) {
+        console.log('📋 Headline management already initialized');
+        return;
+    }
+    
+    console.log('🚀 Initializing enhanced headline management system...');
+    
+    try {
+        // Fetch headlines with fallback mechanisms
+        const rawHeadlines = await AsyncRSSFetcher.fetchHeadlinesWithFallback();
+        
+        // Process and score headlines
+        headlinePools = HeadlineScorer.processAndGroupHeadlines(rawHeadlines);
+        
+        // Clear tracking arrays when starting fresh
         usedHeadlines = [];
         rejectedHeadlines = [];
+        isInitialized = true;
+        
+        console.log(`✅ Headline management initialized with ${headlinePools.totalValid} valid headlines`);
+        console.log(`📊 Score pools: ${headlinePools.sortedScores.join(', ')}`);
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize headline management:', error);
+        
+        // Emergency fallback to mock headlines
+        console.log('🔄 Using emergency fallback to mock headlines');
+        const mockHeadlinesWithMetadata = mockHeadlines.map(headline => ({
+            ...headline,
+            source: 'mock',
+            sourceName: 'Mock Data',
+            category: 'fallback',
+            pubDate: new Date().toISOString()
+        }));
+        
+        headlinePools = HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+        isInitialized = true;
     }
 }
 
-// Get next available headline (excluding used and rejected ones)
-function getNextHeadline() {
-    initializeHeadlineManagement();
+/**
+ * Get next available headline using intelligent scoring system
+ * @returns {Object|null} Best available headline or null if none available
+ */
+async function getNextHeadline() {
+    await initializeHeadlineManagement();
     
-    // Filter out used and rejected headlines
-    const validHeadlines = availableHeadlines.filter(headline => 
-        !usedHeadlines.some(used => used.text === headline.text) &&
-        !rejectedHeadlines.some(rejected => rejected.text === headline.text)
-    );
-    
-    if (validHeadlines.length === 0) {
-        console.log('No more valid headlines available, refilling list');
-        // Reset the system - start over with all headlines
-        availableHeadlines = [...mockHeadlines];
-        usedHeadlines = [];
-        rejectedHeadlines = [];
-        return availableHeadlines[Math.floor(Math.random() * availableHeadlines.length)];
+    if (!headlinePools || headlinePools.totalValid === 0) {
+        console.log('❌ No headlines available, reinitializing...');
+        isInitialized = false;
+        await initializeHeadlineManagement();
+        
+        if (!headlinePools || headlinePools.totalValid === 0) {
+            console.error('❌ Failed to get any headlines after reinitialization');
+            return null;
+        }
     }
     
-    // Select random headline from valid ones
-    const selectedHeadline = validHeadlines[Math.floor(Math.random() * validHeadlines.length)];
-    console.log(`Selected headline: "${selectedHeadline.text}"`);
-    console.log(`Remaining available: ${validHeadlines.length - 1}, Used: ${usedHeadlines.length}, Rejected: ${rejectedHeadlines.length}`);
+    // Select best available headline
+    const selectedHeadline = HeadlineScorer.selectBestHeadline(headlinePools);
+    
+    if (!selectedHeadline) {
+        console.log('❌ No more headlines available in pools, reinitializing...');
+        isInitialized = false;
+        return await getNextHeadline(); // Recursive call to reinitialize
+    }
+    
+    console.log(`🎯 Selected headline: "${selectedHeadline.filteredText}" (score: ${selectedHeadline.score})`);
+    console.log(`📊 Remaining pools: ${headlinePools.sortedScores.map(s => `${s}:${headlinePools.scoreGroups[s].length}`).join(', ')}`);
     
     return selectedHeadline;
 }
 
-// Mark headline as used (successfully created a puzzle)
+/**
+ * Mark headline as used and remove from pools
+ * @param {Object} headline - Headline to mark as used
+ */
 function markHeadlineAsUsed(headline) {
     if (!usedHeadlines.some(used => used.text === headline.text)) {
         usedHeadlines.push(headline);
-        console.log(`Marked headline as used: "${headline.text}"`);
+        console.log(`✅ Marked headline as used: "${headline.filteredText || headline.text}"`);
+        
+        // Remove from pools
+        if (headlinePools) {
+            HeadlineScorer.removeHeadlineFromGroups(headlinePools, headline);
+        }
     }
 }
 
-// Mark headline as rejected (failed layout validation)
+/**
+ * Mark headline as rejected and remove from pools
+ * @param {Object} headline - Headline to mark as rejected
+ */
 function markHeadlineAsRejected(headline) {
     if (!rejectedHeadlines.some(rejected => rejected.text === headline.text)) {
         rejectedHeadlines.push(headline);
-        console.log(`Marked headline as rejected: "${headline.text}"`);
+        console.log(`❌ Marked headline as rejected: "${headline.filteredText || headline.text}"`);
+        
+        // Remove from pools
+        if (headlinePools) {
+            HeadlineScorer.removeHeadlineFromGroups(headlinePools, headline);
+        }
     }
+}
+
+/**
+ * Force refresh of headline pools
+ * @returns {Promise<void>}
+ */
+async function refreshHeadlinePools() {
+    console.log('🔄 Forcing headline pools refresh...');
+    isInitialized = false;
+    headlinePools = null;
+    await initializeHeadlineManagement();
+}
+
+/**
+ * Get current pool statistics for debugging
+ * @returns {Object} Pool statistics and debug information
+ */
+function getPoolStatistics() {
+    if (!headlinePools) {
+        return {
+            initialized: false,
+            totalValid: 0,
+            totalProcessed: 0,
+            poolCount: 0,
+            usedCount: usedHeadlines.length,
+            rejectedCount: rejectedHeadlines.length
+        };
+    }
+    
+    return {
+        initialized: isInitialized,
+        totalValid: headlinePools.totalValid,
+        totalProcessed: headlinePools.totalProcessed,
+        poolCount: headlinePools.sortedScores.length,
+        bestScore: headlinePools.bestScore,
+        worstScore: headlinePools.worstScore,
+        usedCount: usedHeadlines.length,
+        rejectedCount: rejectedHeadlines.length,
+        scoreDistribution: headlinePools.sortedScores.map(score => ({
+            score: score,
+            count: headlinePools.scoreGroups[score].length
+        }))
+    };
+}
+
+/**
+ * Get detailed debug information about headline pools
+ * @returns {Object} Detailed debug information
+ */
+function getDetailedPoolInfo() {
+    if (!headlinePools) {
+        return null;
+    }
+    
+    return HeadlineScorer.getHeadlinePoolDebugInfo(headlinePools);
 }
 
 function generateAlternativeHeadlines() {
@@ -136,4 +247,22 @@ function countCommonLetters(words1, words2) {
     }
     
     return common;
+}
+
+// Export functions for use in other modules
+if (typeof window !== 'undefined') {
+    window.HeadlineManager = {
+        initializeHeadlineManagement,
+        getNextHeadline,
+        markHeadlineAsUsed,
+        markHeadlineAsRejected,
+        refreshHeadlinePools,
+        getPoolStatistics,
+        getDetailedPoolInfo
+    };
+    
+    // Also export individual functions to global scope for debug panel
+    window.getPoolStatistics = getPoolStatistics;
+    window.getDetailedPoolInfo = getDetailedPoolInfo;
+    window.refreshHeadlinePools = refreshHeadlinePools;
 }

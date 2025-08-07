@@ -35,6 +35,8 @@ function updateDebugInfo() {
     document.getElementById('debugCurrentHeadline').innerHTML = `
         <strong>Text:</strong> ${currentHeadline.text}<br>
         <strong>Words:</strong> ${currentHeadline.words.join(', ')}<br>
+        <strong>Source:</strong> ${currentHeadline.sourceName || currentHeadline.source || 'Unknown'}<br>
+        <strong>Category:</strong> ${currentHeadline.category || 'N/A'}<br>
         <strong>Grid Size:</strong> ${gridSize.rows} × ${gridSize.cols}<br>
         <strong>Layout Score:</strong> ${debugInfo.layoutScore}
     `;
@@ -58,41 +60,8 @@ function updateDebugInfo() {
         <strong>Difficulty Range:</strong> ${difficultySettings[shuffleInfo.difficulty].minSwaps}-${difficultySettings[shuffleInfo.difficulty].maxSwaps} swaps
     `;
     
-    // Update headline management info
-    const validHeadlines = availableHeadlines.filter(headline => 
-        !usedHeadlines.some(used => used.text === headline.text) &&
-        !rejectedHeadlines.some(rejected => rejected.text === headline.text)
-    );
-    
-    document.getElementById('debugHeadlineManagement').innerHTML = `
-        <strong>Available Headlines:</strong> ${validHeadlines.length}/${mockHeadlines.length}<br>
-        <strong>Used Headlines:</strong> ${usedHeadlines.length}<br>
-        <strong>Rejected Headlines:</strong> ${rejectedHeadlines.length}<br>
-        <br>
-        <strong>Remaining Headlines:</strong><br>
-        <div style="max-height: 150px; overflow-y: auto; font-size: 11px; background: #f8f9fa; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-            ${validHeadlines.length > 0 
-                ? validHeadlines.map(h => `"${h.text}"`).join('<br>')
-                : '<em>No headlines remaining - will refill on next game</em>'
-            }
-        </div>
-        <br>
-        <strong>Used Headlines:</strong><br>
-        <div style="max-height: 100px; overflow-y: auto; font-size: 11px; background: #e8f5e8; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-            ${usedHeadlines.length > 0 
-                ? usedHeadlines.map(h => `"${h.text}"`).join('<br>')
-                : '<em>None used yet</em>'
-            }
-        </div>
-        <br>
-        <strong>Rejected Headlines:</strong><br>
-        <div style="max-height: 100px; overflow-y: auto; font-size: 11px; background: #ffe8e8; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
-            ${rejectedHeadlines.length > 0 
-                ? rejectedHeadlines.map(h => `"${h.text}"`).join('<br>')
-                : '<em>None rejected yet</em>'
-            }
-        </div>
-    `;
+    // Update enhanced headline management info with pools
+    updateHeadlinePoolsDebugInfo();
     
     // Generate alternative headlines
     generateAlternativeHeadlines();
@@ -346,5 +315,179 @@ function copyGridStateJS() {
     } catch (err) {
         console.error('Failed to copy text: ', err);
         alert('Failed to copy to clipboard. Please select the text manually and copy.');
+    }
+}
+
+/**
+ * Updates the headline pools debug information
+ * Shows detailed information about scoring, pools, and filtering
+ */
+function updateHeadlinePoolsDebugInfo() {
+    const debugElement = document.getElementById('debugHeadlineManagement');
+    if (!debugElement) {
+        console.log('Debug headline management element not found');
+        return;
+    }
+    
+    // Check if new headline management system is available
+    if (typeof getPoolStatistics === 'function') {
+        const poolStats = getPoolStatistics();
+        const detailedInfo = getDetailedPoolInfo();
+        const loadingState = typeof AsyncRSSFetcher !== 'undefined' ? AsyncRSSFetcher.getLoadingState() : null;
+        const cacheInfo = typeof AsyncRSSFetcher !== 'undefined' ? AsyncRSSFetcher.getCacheInfo() : null;
+        
+        let html = `
+            <div style="margin-bottom: 15px;">
+                <strong>📊 Enhanced Headline Management System</strong><br>
+                <strong>Initialized:</strong> <span class="${poolStats.initialized ? 'success' : 'error'}">${poolStats.initialized ? 'Yes' : 'No'}</span><br>
+                <strong>Total Processed:</strong> ${poolStats.totalProcessed}<br>
+                <strong>Valid Headlines:</strong> ${poolStats.totalValid}<br>
+                <strong>Score Pools:</strong> ${poolStats.poolCount}<br>
+                <strong>Used:</strong> ${poolStats.usedCount} | <strong>Rejected:</strong> ${poolStats.rejectedCount}
+        `;
+        
+        if (poolStats.bestScore !== null) {
+            html += `<br><strong>Best Score:</strong> ${poolStats.bestScore} | <strong>Worst Score:</strong> ${poolStats.worstScore}`;
+        }
+        
+        html += `</div>`;
+        
+        // Loading and cache information
+        if (loadingState) {
+            html += `
+                <div style="margin-bottom: 15px; padding: 8px; background: #f0f8ff; border: 1px solid #ddd; border-radius: 3px;">
+                    <strong>🔄 Loading State:</strong><br>
+                    <strong>Currently Loading:</strong> ${loadingState.isLoading ? 'Yes' : 'No'}<br>
+                    <strong>Animation Showing:</strong> ${loadingState.showingAnimation ? 'Yes' : 'No'}<br>
+                    <strong>Duration:</strong> ${loadingState.duration}ms
+            `;
+            
+            if (cacheInfo) {
+                html += `<br><strong>Cache Valid:</strong> ${cacheInfo.isValid ? 'Yes' : 'No'}`;
+                if (cacheInfo.age) {
+                    html += `<br><strong>Cache Age:</strong> ${Math.round(cacheInfo.age / 1000)}s`;
+                }
+                if (cacheInfo.expiresIn > 0) {
+                    html += `<br><strong>Expires In:</strong> ${Math.round(cacheInfo.expiresIn / 1000)}s`;
+                }
+            }
+            
+            html += `</div>`;
+        }
+        
+        // Score distribution
+        if (poolStats.scoreDistribution && poolStats.scoreDistribution.length > 0) {
+            html += `
+                <div style="margin-bottom: 15px;">
+                    <strong>📈 Score Distribution:</strong><br>
+                    <div style="font-size: 11px; background: #f8f9fa; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+            `;
+            
+            poolStats.scoreDistribution.forEach(pool => {
+                const barWidth = Math.max(5, (pool.count / poolStats.totalValid) * 100);
+                html += `
+                    <div style="margin: 2px 0; display: flex; align-items: center;">
+                        <span style="width: 40px; display: inline-block;">Score ${pool.score}:</span>
+                        <div style="width: ${barWidth}%; height: 12px; background: ${pool.score === poolStats.bestScore ? '#4CAF50' : '#2196F3'}; margin-right: 5px;"></div>
+                        <span>${pool.count} headlines</span>
+                    </div>
+                `;
+            });
+            
+            html += `</div></div>`;
+        }
+        
+        // Detailed pool contents
+        if (detailedInfo && detailedInfo.pools && detailedInfo.pools.length > 0) {
+            html += `
+                <div style="margin-bottom: 15px;">
+                    <strong>🎯 Pool Contents (Top 3 pools):</strong><br>
+            `;
+            
+            const topPools = detailedInfo.pools.slice(0, 3);
+            topPools.forEach((pool, index) => {
+                const bgColor = index === 0 ? '#e8f5e8' : index === 1 ? '#fff3cd' : '#f8f9fa';
+                html += `
+                    <div style="margin: 8px 0; padding: 8px; background: ${bgColor}; border: 1px solid #ddd; border-radius: 3px;">
+                        <strong>Score ${pool.score} (${pool.count} headlines):</strong><br>
+                        <div style="max-height: 120px; overflow-y: auto; font-size: 10px; margin-top: 5px;">
+                `;
+                
+                pool.headlines.slice(0, 5).forEach(headline => {
+                    html += `
+                        <div style="margin: 2px 0; padding: 2px; background: white; border-radius: 2px;">
+                            <strong>"${headline.text}"</strong><br>
+                            <span style="color: #666;">Words: ${headline.wordCount}</span>
+                    `;
+                    
+                    // Add source information if available
+                    if (headline.sourceName || headline.source) {
+                        html += `<br><span style="color: #2196F3; font-size: 9px;">📡 ${headline.sourceName || headline.source}</span>`;
+                    }
+                    
+                    if (headline.filterReasons && headline.filterReasons.length > 0) {
+                        html += `<br><span style="color: #999; font-size: 9px;">Filtered: ${headline.filterReasons.length} items</span>`;
+                    }
+                    
+                    html += `</div>`;
+                });
+                
+                if (pool.headlines.length > 5) {
+                    html += `<div style="text-align: center; color: #666; font-style: italic;">... and ${pool.headlines.length - 5} more</div>`;
+                }
+                
+                html += `</div></div>`;
+            });
+            
+            html += `</div>`;
+        }
+        
+        // Current headline filtering details
+        if (currentHeadline && typeof HeadlineScorer !== 'undefined') {
+            const scoredHeadline = HeadlineScorer.scoreHeadline(currentHeadline);
+            html += `
+                <div style="margin-bottom: 15px; padding: 8px; background: #e8f5e8; border: 1px solid #ddd; border-radius: 3px;">
+                    <strong>🎯 Current Headline Analysis:</strong><br>
+                    <strong>Original:</strong> ${scoredHeadline.originalWords.join(' ')}<br>
+                    <strong>Filtered:</strong> ${scoredHeadline.filteredWords.join(' ')}<br>
+                    <strong>Score:</strong> ${scoredHeadline.score}<br>
+                    <strong>Word Count:</strong> ${scoredHeadline.wordCount}
+            `;
+            
+            if (scoredHeadline.filterReasons.length > 0) {
+                html += `<br><strong>Filtering Applied:</strong><br>`;
+                scoredHeadline.filterReasons.forEach(reason => {
+                    html += `<span style="font-size: 10px; color: #666;">• ${reason.description}</span><br>`;
+                });
+            } else {
+                html += `<br><span style="color: #4CAF50;">✅ Perfect headline - no filtering needed!</span>`;
+            }
+            
+            html += `</div>`;
+        }
+        
+        // Action buttons
+        html += `
+            <div style="margin-top: 10px;">
+                <button onclick="refreshHeadlinePools()" style="background-color: #2196F3; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px;">
+                    🔄 Refresh Pools
+                </button>
+                <button onclick="console.log('Pool Stats:', getPoolStatistics()); console.log('Detailed Info:', getDetailedPoolInfo());" style="background-color: #FF9800; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">
+                    📋 Log to Console
+                </button>
+            </div>
+        `;
+        
+        debugElement.innerHTML = html;
+        
+    } else {
+        // Fallback to old system if new system not available
+        debugElement.innerHTML = `
+            <div style="color: #ff6b6b; padding: 10px; background: #ffe8e8; border: 1px solid #ffcdd2; border-radius: 3px;">
+                <strong>⚠️ Legacy Headline System</strong><br>
+                Enhanced headline management not yet initialized.<br>
+                <small>The new scoring and pool system will be available after the next game initialization.</small>
+            </div>
+        `;
     }
 }

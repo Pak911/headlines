@@ -23,6 +23,12 @@
         <div id="crosswordGrid" class="crossword-grid"></div>
     </div>
 
+    <div class="headline-description">
+        <div id="headlineDescription" class="description-text">
+            <!-- Description will be displayed here as a hint -->
+        </div>
+    </div>
+
     <div class="color-legend">
         <h3>Letter Color Guide</h3>
         <ul class="legend-list">
@@ -76,6 +82,9 @@
                     </select>
                 </div>
                 <div id="difficultyInfo" style="margin-top: 10px; padding: 8px; background-color: #f0f8ff; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"></div>
+                <div style="margin-top: 10px;">
+                    <button id="autoWinBtn" onclick="autoWinGame()" style="padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">🏆 Auto-Win (Debug)</button>
+                </div>
             </div>
             <div class="debug-section">
                 <h4>Headline Management</h4>
@@ -140,6 +149,9 @@
     <script src="scripts/gameplay/ui-interactions.js"></script>
     
     <!-- Utilities -->
+    <script src="scripts/utils/rss-parser.js"></script>
+    <script src="scripts/utils/headline-scorer.js"></script>
+    <script src="scripts/utils/async-rss-fetcher.js"></script>
     <script src="scripts/utils/headline-manager.js"></script>
     <script src="scripts/utils/debug-utils.js"></script>
     
