@@ -34,6 +34,9 @@ headlines/
 │   │   └── ui-interactions.js          # User interface interactions
 │   └── utils/                          # Supporting utilities
 │       ├── headline-manager.js         # Headline lifecycle management
+│       ├── async-rss-fetcher.js        # Parallel RSS fetching system
+│       ├── headline-scorer.js          # Configurable headline scoring
+│       ├── rss-parser.js               # RSS feed parsing and extraction
 │       └── debug-utils.js              # Debug panel and development tools
 ├── test.html                           # Color logic testing framework
 ├── test-explanation.md                 # Documentation for test framework
@@ -97,6 +100,24 @@ headlines/
   - **Key APIs**: `getNextHeadline()`, `markHeadlineAsUsed()`, `markHeadlineAsRejected()`
   - **Dependencies**: Requires headlines data from data.js
   - **Purpose**: Manages headline pool and prevents duplicates
+
+- **`async-rss-fetcher.js`** (300+ lines)
+  - **Functions**: Parallel RSS fetching with caching and loading management
+  - **Key APIs**: `fetchHeadlinesFromAllSources()`, `getCacheInfo()`, `getLoadingState()`
+  - **Dependencies**: Requires RSS sources from data.js
+  - **Purpose**: High-performance parallel RSS fetching with intelligent caching
+
+- **`headline-scorer.js`** (200+ lines)
+  - **Functions**: Configurable headline scoring and filtering
+  - **Key APIs**: `scoreHeadline()`, `processAndGroupHeadlines()`, `selectBestHeadline()`
+  - **Dependencies**: Requires scoring configuration from data.js
+  - **Purpose**: Intelligent headline quality assessment and pool management
+
+- **`rss-parser.js`** (200+ lines)
+  - **Functions**: RSS feed parsing and headline extraction
+  - **Key APIs**: `fetchLatestHeadlines()`, `fetchFromMultipleSources()`, `testAllSources()`
+  - **Dependencies**: Requires RSS configuration from data.js
+  - **Purpose**: RSS2JSON API integration with source attribution
 
 - **`debug-utils.js`** (400+ lines)
   - **Functions**: Development tools and debugging

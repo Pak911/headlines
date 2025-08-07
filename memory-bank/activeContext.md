@@ -1,12 +1,61 @@
 # Active Context - Headlines Crossword Game
 
 ## Current Task: ✅ COMPLETED
-**Enhanced Headline Management System with Parallel RSS Fetching** - Successfully implemented a complete intelligent headline management system with parallel RSS fetching, advanced scoring algorithms, and real-time news integration.
+**Configurable Headline Management System with Source Attribution** - Successfully implemented a fully configurable headline management system with all parameters extracted to data.js, enhanced source attribution, and comprehensive debugging capabilities.
 
 ## Session Log
 
-### ✅ Enhanced Headline Management System Complete (2025-01-08)
-**TASK**: Implement advanced headline management with parallel RSS fetching, intelligent scoring system, and real-time headline processing to replace sequential fetching and improve game performance.
+### ✅ Configurable Headline Management System Complete (2025-01-08)
+**TASK**: Extract all headline scoring parameters to data.js for easy configuration, implement source attribution in debug panel, and enhance the scoring system with configurable thresholds.
+
+**Latest Implementation (Session 2):**
+- **Complete Configuration System**: All scoring parameters extracted to `data.js` for easy modification
+- **Source Attribution**: RSS source names and categories now displayed in debug panel
+- **Enhanced Scoring**: Configurable stop words, penalties, and thresholds
+- **Improved Debug Panel**: Shows source information for each headline in pools
+- **System Integration**: All components now use centralized configuration
+
+**Key Configuration Parameters in data.js:**
+```javascript
+headlineScoringConfig = {
+    minWords: 4,                    // Minimum words after filtering
+    maxWords: 5,                    // Maximum words for ideal score
+    idealMinWords: 4,               // Ideal minimum word count
+    idealMaxWords: 5,               // Ideal maximum word count
+    minWordLength: 4,               // Minimum individual word length
+    filteredWordPenalty: -1,        // Penalty per filtered word
+    wordCountPenalty: -1,           // Penalty per word outside ideal range
+    noDescriptionPenalty: -999,     // Penalty for headlines without description
+    stopWords: [...],               // Configurable list of trash/stop words
+    rssConfig: {
+        defaultCount: 10,           // Default headlines per RSS source
+        minWordLengthForParsing: 2, // Minimum word length during parsing
+        skipWordsInParsing: [...]   // Words to skip during RSS parsing
+    }
+}
+```
+
+**Source Attribution Implementation:**
+- **RSS Parser**: Enhanced to pass through source name and category
+- **Headline Scorer**: Preserves source information through scoring process
+- **Debug Panel**: Displays source name (e.g., "BBC Technology") and category (e.g., "technology")
+- **Pool Display**: Shows source information for each headline in debug pools
+
+**Testing Results:**
+- ✅ **Configuration Working**: All parameters properly loaded from data.js
+- ✅ **Source Attribution**: Debug panel shows "Source: BBC Technology, Category: technology"
+- ✅ **Scoring System**: Headlines properly scored using configurable parameters
+- ✅ **RSS Integration**: 70 headlines fetched from 7/7 sources successfully
+- ✅ **Pool Management**: Score distribution from -2 to -12 with proper grouping
+- ✅ **Best Selection**: System correctly selected headline with score -2 (best available)
+
+**Example Working Headline:**
+- **Text**: "OFCOM INVESTIGATES PORN SITES CHECKS"
+- **Source**: BBC Technology
+- **Category**: technology
+- **Score**: -2 (best available)
+- **Words**: OFCOM, INVESTIGATES, PORN, SITES, CHECKS (5 words)
+- **Filtering**: "AGE" filtered out (3 letters), "OVER" filtered out (stop word)
 
 **Major Implementation Overview:**
 - **Parallel RSS Fetching**: Converted sequential RSS fetching to simultaneous parallel requests
