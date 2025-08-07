@@ -37,6 +37,7 @@ Create additional files/folders within memory-bank/ when they help organize:
 - API documentation
 - Testing strategies
 - Deployment procedures
+- **designGuidelines.md**: Visual design principles and UI/UX guidelines for the project
 
 ### **Foundational Files (Infrequently Updated)**
 
@@ -46,6 +47,7 @@ These files represent the project's foundation. They should **only** be edited w
 2. productContext.md: The "Why" behind the project. It details the problems being solved, the target users, and the core user experience philosophy.  
 3. systemPatterns.md: The system's architecture. It documents key technical decisions, high-level design patterns, component relationships, and critical implementation paths.  
 4. techContext.md: The technology stack. It lists all technologies, libraries, development environment setup, technical constraints, and dependencies.
+5. designGuidelines.md: The visual design system. It defines the UI/UX principles, Material Design approach, color palette, typography, spacing rules, and component styling guidelines that ensure visual consistency across the project.
 
 ### **Volatile File (Frequently Updated)**
 
@@ -163,6 +165,7 @@ This rule governs how I should begin when starting a new task.
      - `productContext.md` - User problems and experience philosophy  
      - `systemPatterns.md` - Architecture and technical decisions
      - `techContext.md` - Technology stack and dependencies
+     - `designGuidelines.md` - Visual design principles and UI guidelines
      - `activeContext.md` - Current state and recent progress
   2. **THEN**: Proceed with the assigned task using the gathered context.
 * **Why This Matters**: Starting with full context prevents duplicated work, ensures consistency with existing architecture, and maintains project continuity across sessions.
