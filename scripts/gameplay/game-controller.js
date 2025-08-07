@@ -13,15 +13,12 @@ function checkVictory() {
     return true;
 }
 
-function showVictory() {
-    document.getElementById('headlineReveal').textContent = currentHeadline.text;
-    document.getElementById('finalSwaps').textContent = swapCount;
+// Calculate star rating based on swap count and word count
+function calculateStarRating(swapCount, wordCount) {
+    const minPossibleSwaps = Math.floor(wordCount * 2); // Base threshold
     
-    // Calculate performance rating based on swap count
     let rating = '';
     let starCount = 0;
-    const wordCount = currentHeadline.words.length;
-    const minPossibleSwaps = Math.floor(wordCount * 2); // Rough estimate
     
     if (swapCount <= minPossibleSwaps) {
         rating = 'PERFECT';
@@ -40,6 +37,117 @@ function showVictory() {
         starCount = 1;
     }
     
+    return { rating, starCount, minPossibleSwaps };
+}
+
+// Get swap thresholds for each star level
+function getStarThresholds(wordCount) {
+    const minPossibleSwaps = Math.floor(wordCount * 2);
+    
+    return {
+        5: minPossibleSwaps,                    // 5 stars: ≤ wordCount × 2
+        4: Math.floor(minPossibleSwaps * 1.5),  // 4 stars: ≤ wordCount × 3
+        3: minPossibleSwaps * 2,                // 3 stars: ≤ wordCount × 4
+        2: minPossibleSwaps * 3,                // 2 stars: ≤ wordCount × 6
+        1: Infinity                             // 1 star: any number of swaps
+    };
+}
+
+// Generate tooltip content for star hover
+function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
+    const thresholds = getStarThresholds(wordCount);
+    
+    if (starIndex <= currentStars) {
+        // Player achieved this star level
+        if (currentStars === 5) {
+            return "🏆 Perfect! You achieved the maximum 5-star rating!";
+        } else {
+            const nextStarThreshold = thresholds[currentStars + 1];
+            return `🌟 You earned ${currentStars} stars by completing in ${swapCount} swaps!<br>⭐ Get ${currentStars + 1} stars by completing in ${nextStarThreshold} swaps or fewer`;
+        }
+    } else {
+        // Player didn't achieve this star level
+        const requiredSwaps = thresholds[starIndex];
+        if (requiredSwaps === Infinity) {
+            return `⭐ Get ${starIndex} star by completing the puzzle`;
+        } else {
+            return `⭐ Get ${starIndex} stars by completing the puzzle in ${requiredSwaps} swaps or fewer`;
+        }
+    }
+}
+
+// Add hover listeners to stars for tooltips
+function addStarHoverListeners(currentStars, swapCount, wordCount) {
+    const stars = document.querySelectorAll('.victory-star');
+    
+    stars.forEach((star, index) => {
+        const starIndex = index + 1;
+        
+        star.addEventListener('mouseenter', function(e) {
+            showStarTooltip(e.target, starIndex, currentStars, swapCount, wordCount);
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            hideStarTooltip();
+        });
+    });
+}
+
+// Show tooltip for star
+function showStarTooltip(starElement, starIndex, currentStars, swapCount, wordCount) {
+    // Remove existing tooltip
+    hideStarTooltip();
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'star-tooltip';
+    tooltip.innerHTML = generateTooltipContent(starIndex, currentStars, swapCount, wordCount);
+    
+    // Position tooltip
+    const starRect = starElement.getBoundingClientRect();
+    const tooltipWidth = 280; // Approximate width
+    const tooltipHeight = 60; // Approximate height
+    
+    // Calculate position
+    let left = starRect.left + (starRect.width / 2) - (tooltipWidth / 2);
+    let top = starRect.top - tooltipHeight - 10; // 10px gap above star
+    
+    // Adjust if tooltip would go off screen
+    if (left < 10) left = 10;
+    if (left + tooltipWidth > window.innerWidth - 10) {
+        left = window.innerWidth - tooltipWidth - 10;
+    }
+    
+    // If not enough space above, show below
+    if (top < 10) {
+        top = starRect.bottom + 10;
+        tooltip.classList.add('below');
+    }
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    
+    document.body.appendChild(tooltip);
+    
+    // Trigger animation
+    setTimeout(() => tooltip.classList.add('visible'), 10);
+}
+
+// Hide star tooltip
+function hideStarTooltip() {
+    const existingTooltip = document.querySelector('.star-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+}
+
+function showVictory() {
+    document.getElementById('headlineReveal').textContent = currentHeadline.text;
+    document.getElementById('finalSwaps').textContent = swapCount;
+    
+    // Calculate performance rating using new function
+    const wordCount = currentHeadline.words.length;
+    const { rating, starCount } = calculateStarRating(swapCount, wordCount);
+    
     document.getElementById('performanceRating').textContent = rating;
     document.getElementById('articleLink').href = currentHeadline.link || '#';
     
@@ -50,6 +158,7 @@ function showVictory() {
     for (let i = 1; i <= 5; i++) {
         const starDiv = document.createElement('div');
         starDiv.className = 'victory-star' + (i <= starCount ? ' filled' : ' empty');
+        starDiv.setAttribute('data-star-index', i);
         
         const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
         svg.setAttribute('width', '40');
@@ -75,12 +184,17 @@ function showVictory() {
         starsContainer.appendChild(starDiv);
     }
     
+    // Add hover listeners for tooltips
+    addStarHoverListeners(starCount, swapCount, wordCount);
+    
     document.getElementById('victoryModal').style.display = 'flex';
 }
 
 // Function to close the victory modal
 function closeVictoryModal() {
     document.getElementById('victoryModal').style.display = 'none';
+    // Clean up any remaining tooltips
+    hideStarTooltip();
 }
 
 // Function to replay the same game

@@ -276,10 +276,71 @@ h1 {
     animation: starPop 0.4s ease;
 }
 
+.victory-star {
+    cursor: pointer;
+    transition: transform 0.2s ease;
+}
+
+.victory-star:hover {
+    transform: scale(1.1);
+}
+
 @keyframes starPop {
     0% { transform: scale(0); }
     50% { transform: scale(1.2); }
     100% { transform: scale(1); }
+}
+
+/* Star Tooltip Styles */
+.star-tooltip {
+    position: fixed;
+    background: rgba(0, 0, 0, 0.9);
+    color: white;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+    max-width: 280px;
+    text-align: center;
+    z-index: 10000;
+    opacity: 0;
+    transform: translateY(5px);
+    transition: all 0.2s ease;
+    pointer-events: none;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.star-tooltip.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.star-tooltip.below {
+    transform: translateY(-5px);
+}
+
+.star-tooltip.below.visible {
+    transform: translateY(0);
+}
+
+/* Add arrow to tooltip */
+.star-tooltip::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 6px solid transparent;
+    border-top-color: rgba(0, 0, 0, 0.9);
+    bottom: -12px;
+}
+
+.star-tooltip.below::before {
+    top: -12px;
+    bottom: auto;
+    border-top-color: transparent;
+    border-bottom-color: rgba(0, 0, 0, 0.9);
 }
 
 .victory-title {

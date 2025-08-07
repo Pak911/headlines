@@ -152,4 +152,19 @@ This is a powerful but costly operation that must be used sparingly.
   2. Read **all** memory bank files.  
   3. Analyze them for consistency and propose a batch of changes across multiple files if needed. 
 
+## **Rule \#4: New Task Initialization Protocol**
+
+This rule governs how I should begin when starting a new task.
+
+* **Trigger**: When the user creates a new task or when I begin working in a fresh session.
+* **Action**:
+  1. **FIRST**: Read all memory bank files to understand the current project context:
+     - `projectbrief.md` - Project scope and requirements
+     - `productContext.md` - User problems and experience philosophy  
+     - `systemPatterns.md` - Architecture and technical decisions
+     - `techContext.md` - Technology stack and dependencies
+     - `activeContext.md` - Current state and recent progress
+  2. **THEN**: Proceed with the assigned task using the gathered context.
+* **Why This Matters**: Starting with full context prevents duplicated work, ensures consistency with existing architecture, and maintains project continuity across sessions.
+
 **REMEMBER**: After every memory reset, I begin completely fresh. This Memory Bank is my only link to previous work. It must be maintained with precision and clarity, as my effectiveness depends entirely on its accuracy.
