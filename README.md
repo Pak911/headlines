@@ -223,7 +223,7 @@ This attribution helps support the open-source community and gives credit where 
 - Inspired by crossword puzzles and Wordle-style feedback
 - Built with modern web technologies
 - Designed for educational and entertainment purposes
-- Created by **Pak911** with love for puzzle games and clean code
+- Created by **Pak911** with love for game design and code
 
 ---
 
