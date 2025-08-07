@@ -131,9 +131,9 @@ const starRatingConfig = {
     
     // Star threshold multipliers (applied to base threshold)
     starThresholds: {
-        5: 4.0,    // 5 stars: ≤ wordCount × 3 (base)
-        4: 6.0,    // 4 stars: ≤ wordCount × 4.5 (base × 1.5)
-        3: 8.0,    // 3 stars: ≤ wordCount × 6 (base × 2.0)
+        5: 3.0,    // 5 stars: ≤ wordCount × 3 (base)
+        4: 5.0,    // 4 stars: ≤ wordCount × 4.5 (base × 1.5)
+        3: 7.0,    // 3 stars: ≤ wordCount × 6 (base × 2.0)
         2: 12.0,    // 2 stars: ≤ wordCount × 9 (base × 3.0)
         1: Infinity // 1 star: any number of swaps
     },
