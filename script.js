@@ -8,6 +8,11 @@ let selectedCell = null;
 let gridSize = { rows: 0, cols: 0 };
 let wordConnections = {};
 
+// Headline management system
+let availableHeadlines = [];
+let usedHeadlines = [];
+let rejectedHeadlines = [];
+
 // Difficulty system (configuration moved to data.js)
 
 // Debug state
@@ -153,8 +158,10 @@ function generateCrosswordLayout(words) {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const layout = tryGenerateLayout(words, attempt);
         if (layout.words.length === words.length) { // Only consider complete layouts
-            // Validate layout connectivity and parallel spacing
-            if (isLayoutConnected(layout, words) && hasProperParallelSpacing(layout, words)) {
+            // Validate layout connectivity, parallel spacing, and no end-to-end adjacency
+            if (isLayoutConnected(layout, words) && 
+                hasProperParallelSpacing(layout, words) && 
+                hasNoEndToEndAdjacency(layout, words)) {
                 const score = scoreLayout(layout, words);
                 if (score < bestScore) {
                     bestScore = score;
@@ -164,15 +171,19 @@ function generateCrosswordLayout(words) {
         }
     }
     
-    // If we couldn't generate a good layout, fall back to simple layout
+    // If we couldn't generate a good layout, try simple layout
     if (bestLayout === null || bestLayout.words.length < words.length) {
         const simpleLayout = generateSimpleLayout(words);
-        // Validate simple layout too
-        if (isLayoutConnected(simpleLayout, words) && hasProperParallelSpacing(simpleLayout, words)) {
+        // Validate simple layout with all rules
+        if (simpleLayout.words.length === words.length &&
+            isLayoutConnected(simpleLayout, words) && 
+            hasProperParallelSpacing(simpleLayout, words) &&
+            hasNoEndToEndAdjacency(simpleLayout, words)) {
             normalizeLayout(simpleLayout, words);
             return simpleLayout;
         }
-        // If even simple layout fails, we might need to reject this caption
+        // If even simple layout fails, reject this headline
+        console.log(`Rejecting headline: words cannot form valid crossword layout`);
         return null;
     }
     
@@ -440,6 +451,56 @@ function hasProperParallelSpacing(layout, words) {
     return true;
 }
 
+// Check if layout has no end-to-end adjacency (words forming continuous sequences)
+function hasNoEndToEndAdjacency(layout, words) {
+    for (let i = 0; i < layout.words.length; i++) {
+        for (let j = i + 1; j < layout.words.length; j++) {
+            const word1 = layout.words[i];
+            const word2 = layout.words[j];
+            const word1Text = words[word1.word];
+            const word2Text = words[word2.word];
+            
+            // Only check words in the same direction
+            if (word1.direction === word2.direction) {
+                if (word1.direction === 'horizontal') {
+                    // Check if words are on the same row
+                    if (word1.row === word2.row) {
+                        // Check if one word starts where the other ends
+                        const word1End = word1.col + word1Text.length - 1;
+                        const word2End = word2.col + word2Text.length - 1;
+                        
+                        // Word2 starts immediately after word1 ends OR overlaps
+                        if (word2.col <= word1End + 1 && word2.col >= word1End) {
+                            return false;
+                        }
+                        // Word1 starts immediately after word2 ends OR overlaps
+                        if (word1.col <= word2End + 1 && word1.col >= word2End) {
+                            return false;
+                        }
+                    }
+                } else { // vertical
+                    // Check if words are on the same column
+                    if (word1.col === word2.col) {
+                        // Check if one word starts where the other ends
+                        const word1End = word1.row + word1Text.length - 1;
+                        const word2End = word2.row + word2Text.length - 1;
+                        
+                        // Word2 starts immediately after word1 ends OR overlaps
+                        if (word2.row <= word1End + 1 && word2.row >= word1End) {
+                            return false;
+                        }
+                        // Word1 starts immediately after word2 ends OR overlaps
+                        if (word1.row <= word2End + 1 && word1.row >= word2End) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+    }
+    return true;
+}
+
 // Check if two words intersect (share a cell with the same letter)
 function doWordsIntersect(word1, word2, words) {
     const word1Text = words[word1.word];
@@ -491,6 +552,44 @@ function isValidPlacement(layout, newWord, words) {
     
     for (let existing of layout.words) {
         const existingText = words[existing.word];
+        
+        // CRITICAL FIX: Check for end-to-end adjacency in same direction
+        // This prevents words from forming one continuous word (e.g., PRICES + SURGE = PRICESURGE)
+        if (newWord.direction === existing.direction) {
+            if (newWord.direction === 'horizontal') {
+                // Check if words are on the same row
+                if (newWord.row === existing.row) {
+                    // Check if new word starts where existing word ends (or vice versa)
+                    const newWordEnd = newWord.col + newWordText.length - 1;
+                    const existingWordEnd = existing.col + existingText.length - 1;
+                    
+                    // New word starts immediately after existing word ends
+                    if (newWord.col === existingWordEnd + 1) {
+                        return false;
+                    }
+                    // Existing word starts immediately after new word ends
+                    if (existing.col === newWordEnd + 1) {
+                        return false;
+                    }
+                }
+            } else { // vertical
+                // Check if words are on the same column
+                if (newWord.col === existing.col) {
+                    // Check if new word starts where existing word ends (or vice versa)
+                    const newWordEnd = newWord.row + newWordText.length - 1;
+                    const existingWordEnd = existing.row + existingText.length - 1;
+                    
+                    // New word starts immediately after existing word ends
+                    if (newWord.row === existingWordEnd + 1) {
+                        return false;
+                    }
+                    // Existing word starts immediately after new word ends
+                    if (existing.row === newWordEnd + 1) {
+                        return false;
+                    }
+                }
+            }
+        }
         
         // Check for conflicts and proper spacing
         for (let i = 0; i < newWordText.length; i++) {
@@ -560,67 +659,146 @@ function generateSimpleLayout(words) {
         const common01 = findCommonLetters(words[0], words[1]);
         if (common01.length > 0) {
             const c = common01[0];
-            layout.words.push({ 
+            const newPlacement = { 
                 word: 1, 
                 row: 3 - c.word2Index, 
                 col: c.word1Index, 
                 direction: 'vertical' 
-            });
+            };
             
-            // Try to add third word intersecting with one of the first two
-            if (words.length >= 3) {
-                let placed = false;
+            // Validate placement before adding
+            if (isValidPlacement(layout, newPlacement, words)) {
+                layout.words.push(newPlacement);
                 
-                // Try intersecting with first word
-                const common02 = findCommonLetters(words[0], words[2]);
-                if (common02.length > 0 && !placed) {
-                    for (let c of common02) {
-                        if (c.word1Index !== common01[0].word1Index) { // Different intersection point
-                            layout.words.push({
+                // Try to add third word intersecting with one of the first two
+                if (words.length >= 3) {
+                    let placed = false;
+                    
+                    // Try intersecting with first word
+                    const common02 = findCommonLetters(words[0], words[2]);
+                    if (common02.length > 0 && !placed) {
+                        for (let c of common02) {
+                            if (c.word1Index !== common01[0].word1Index) { // Different intersection point
+                                const thirdPlacement = {
+                                    word: 2,
+                                    row: 3 - c.word2Index,
+                                    col: c.word1Index,
+                                    direction: 'vertical'
+                                };
+                                
+                                if (isValidPlacement(layout, thirdPlacement, words)) {
+                                    layout.words.push(thirdPlacement);
+                                    placed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    
+                    // Try intersecting with second word
+                    if (!placed) {
+                        const common12 = findCommonLetters(words[1], words[2]);
+                        if (common12.length > 0) {
+                            const c = common12[0];
+                            const thirdPlacement = {
                                 word: 2,
-                                row: 3 - c.word2Index,
-                                col: c.word1Index,
-                                direction: 'vertical'
-                            });
-                            placed = true;
-                            break;
+                                row: layout.words[1].row + c.word1Index,
+                                col: layout.words[1].col - c.word2Index,
+                                direction: 'horizontal'
+                            };
+                            
+                            if (isValidPlacement(layout, thirdPlacement, words)) {
+                                layout.words.push(thirdPlacement);
+                                placed = true;
+                            }
+                        }
+                    }
+                    
+                    // If still not placed, try placing it with proper spacing
+                    if (!placed) {
+                        // Try different positions with proper validation
+                        const fallbackPlacements = [
+                            { word: 2, row: 6, col: 0, direction: 'horizontal' },
+                            { word: 2, row: 0, col: 6, direction: 'horizontal' },
+                            { word: 2, row: 6, col: 3, direction: 'vertical' }
+                        ];
+                        
+                        for (let placement of fallbackPlacements) {
+                            if (isValidPlacement(layout, placement, words)) {
+                                layout.words.push(placement);
+                                placed = true;
+                                break;
+                            }
                         }
                     }
                 }
                 
-                // Try intersecting with second word
-                if (!placed) {
-                    const common12 = findCommonLetters(words[1], words[2]);
-                    if (common12.length > 0) {
-                        const c = common12[0];
-                        layout.words.push({
-                            word: 2,
-                            row: layout.words[1].row + c.word1Index,
-                            col: layout.words[1].col - c.word2Index,
-                            direction: 'horizontal'
-                        });
-                        placed = true;
+                // Add fourth word with validation
+                if (words.length >= 4) {
+                    const fourthPlacements = [
+                        { word: 3, row: 8, col: 2, direction: 'horizontal' },
+                        { word: 3, row: 0, col: 8, direction: 'vertical' },
+                        { word: 3, row: 6, col: 6, direction: 'horizontal' }
+                    ];
+                    
+                    for (let placement of fourthPlacements) {
+                        if (isValidPlacement(layout, placement, words)) {
+                            layout.words.push(placement);
+                            break;
+                        }
                     }
                 }
-                
-                // If still not placed, put it below with gap
-                if (!placed) {
-                    layout.words.push({ word: 2, row: 6, col: 0, direction: 'horizontal' });
+            } else {
+                // If second word placement is invalid, try alternative layout
+                const altPlacement = { word: 1, row: 0, col: 3, direction: 'vertical' };
+                if (isValidPlacement(layout, altPlacement, words)) {
+                    layout.words.push(altPlacement);
+                }
+            }
+        } else {
+            // No common letters, create a sparse layout with validation
+            const sparsePlacements = [
+                { word: 1, row: 0, col: 3, direction: 'vertical' },
+                { word: 1, row: 6, col: 0, direction: 'horizontal' },
+                { word: 1, row: 3, col: 8, direction: 'vertical' }
+            ];
+            
+            for (let placement of sparsePlacements) {
+                if (isValidPlacement(layout, placement, words)) {
+                    layout.words.push(placement);
+                    break;
                 }
             }
             
-            // Add fourth word
-            if (words.length >= 4) {
-                layout.words.push({ word: 3, row: 8, col: 2, direction: 'horizontal' });
-            }
-        } else {
-            // No common letters, create a sparse layout
-            layout.words.push({ word: 1, row: 0, col: 3, direction: 'vertical' });
+            // Add remaining words with proper spacing
             if (words.length >= 3) {
-                layout.words.push({ word: 2, row: 6, col: 0, direction: 'horizontal' });
+                const thirdPlacements = [
+                    { word: 2, row: 6, col: 0, direction: 'horizontal' },
+                    { word: 2, row: 0, col: 6, direction: 'horizontal' },
+                    { word: 2, row: 8, col: 3, direction: 'vertical' }
+                ];
+                
+                for (let placement of thirdPlacements) {
+                    if (isValidPlacement(layout, placement, words)) {
+                        layout.words.push(placement);
+                        break;
+                    }
+                }
             }
+            
             if (words.length >= 4) {
-                layout.words.push({ word: 3, row: 3, col: 6, direction: 'vertical' });
+                const fourthPlacements = [
+                    { word: 3, row: 3, col: 6, direction: 'vertical' },
+                    { word: 3, row: 9, col: 0, direction: 'horizontal' },
+                    { word: 3, row: 0, col: 9, direction: 'vertical' }
+                ];
+                
+                for (let placement of fourthPlacements) {
+                    if (isValidPlacement(layout, placement, words)) {
+                        layout.words.push(placement);
+                        break;
+                    }
+                }
             }
         }
     }
@@ -799,25 +977,29 @@ function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
     const settings = difficultySettings[difficulty];
     const targetGreenPercentage = settings.maxGreenPercentage;
     
+    // Get initial stats for logging
+    const initialStats = countCorrectCells();
+    console.log(`Starting scramble - Initial: ${initialStats.correctCells}/${initialStats.totalCells} correct (${initialStats.percentage.toFixed(1)}% green)`);
+    console.log(`Target: ${targetGreenPercentage}% green letters for ${settings.name} difficulty`);
+    
     switch (difficulty) {
         case 'easy':
             swapsPerformed = scrambleEasy(swapLog);
             break;
         case 'mediumEasy':
-            swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, targetGreenPercentage, settings);
-            break;
         case 'medium':
-            swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, targetGreenPercentage, settings);
-            break;
         case 'mediumHard':
-            swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, targetGreenPercentage, settings);
-            break;
         case 'hard':
             swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, targetGreenPercentage, settings);
             break;
         default:
             swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, settings.maxGreenPercentage || 30, settings);
     }
+    
+    // Get final stats for logging
+    const finalStats = countCorrectCells();
+    console.log(`Scramble complete - Final: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}% green)`);
+    console.log(`Performed ${swapsPerformed} swaps to achieve target difficulty`);
     
     // Update debug info
     debugInfo.shuffleInfo.swapsPerformed = swapsPerformed;
@@ -839,20 +1021,15 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
     let swapsPerformed = 0;
     const maxSwaps = settings.maxSwaps;
     
-    // Start with 100% green (all correct), need to get down to maxGreenPercentage
-    console.log(`Starting scramble with target: ${maxGreenPercentage}% green letters`);
-    
     // Phase 1: Aggressively reduce green percentage
     let attempts = 0;
     const maxAttempts = 200;
     
     while (attempts < maxAttempts && swapsPerformed < maxSwaps) {
         const stats = countCorrectCells();
-        console.log(`Attempt ${attempts}: ${stats.correctCells}/${stats.totalCells} correct (${stats.percentage.toFixed(1)}%)`);
         
         // If we're at or below target, we're done with aggressive phase
         if (stats.percentage <= maxGreenPercentage) {
-            console.log(`Reached target of ${maxGreenPercentage}% green letters`);
             break;
         }
         
@@ -872,11 +1049,8 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
             }
         }
         
-        console.log(`Found ${correctCells.length} correct cells, ${wrongCells.length} wrong cells`);
-        
         // Must have both correct and wrong cells to swap
         if (correctCells.length === 0) {
-            console.log('No correct cells to swap');
             break;
         }
         
@@ -894,15 +1068,12 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
                 }
                 
                 if (cell1.row !== cell2.row || cell1.col !== cell2.col) {
-                    console.log(`Swapping two correct cells: (${cell1.row},${cell1.col}) <-> (${cell2.row},${cell2.col})`);
                     performStrategicSwap(cell1, cell2, swapLog);
                     swapsPerformed++;
                 } else {
-                    console.log('Could not find two different correct cells to swap');
                     break;
                 }
             } else {
-                console.log('Only one correct cell remaining');
                 break;
             }
         } else {
@@ -910,15 +1081,12 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
             const correctCell = correctCells[Math.floor(Math.random() * correctCells.length)];
             const wrongCell = wrongCells[Math.floor(Math.random() * wrongCells.length)];
             
-            console.log(`Swapping correct cell (${correctCell.row},${correctCell.col}) with wrong cell (${wrongCell.row},${wrongCell.col})`);
             performStrategicSwap(correctCell, wrongCell, swapLog);
             swapsPerformed++;
         }
         
         attempts++;
     }
-    
-    console.log(`Phase 1 complete. Performed ${swapsPerformed} swaps`);
     
     // Phase 2: Additional swaps to reach minimum while maintaining constraint
     while (swapsPerformed < settings.minSwaps && swapsPerformed < maxSwaps) {
@@ -989,9 +1157,6 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
             }
         }
     }
-    
-    const finalStats = countCorrectCells();
-    console.log(`Final result: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}%)`);
     
     return swapsPerformed;
 }
@@ -1784,6 +1949,42 @@ function updateDebugInfo() {
         <strong>Difficulty Range:</strong> ${difficultySettings[shuffleInfo.difficulty].minSwaps}-${difficultySettings[shuffleInfo.difficulty].maxSwaps} swaps
     `;
     
+    // Update headline management info
+    const validHeadlines = availableHeadlines.filter(headline => 
+        !usedHeadlines.some(used => used.text === headline.text) &&
+        !rejectedHeadlines.some(rejected => rejected.text === headline.text)
+    );
+    
+    document.getElementById('debugHeadlineManagement').innerHTML = `
+        <strong>Available Headlines:</strong> ${validHeadlines.length}/${mockHeadlines.length}<br>
+        <strong>Used Headlines:</strong> ${usedHeadlines.length}<br>
+        <strong>Rejected Headlines:</strong> ${rejectedHeadlines.length}<br>
+        <br>
+        <strong>Remaining Headlines:</strong><br>
+        <div style="max-height: 150px; overflow-y: auto; font-size: 11px; background: #f8f9fa; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+            ${validHeadlines.length > 0 
+                ? validHeadlines.map(h => `"${h.text}"`).join('<br>')
+                : '<em>No headlines remaining - will refill on next game</em>'
+            }
+        </div>
+        <br>
+        <strong>Used Headlines:</strong><br>
+        <div style="max-height: 100px; overflow-y: auto; font-size: 11px; background: #e8f5e8; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+            ${usedHeadlines.length > 0 
+                ? usedHeadlines.map(h => `"${h.text}"`).join('<br>')
+                : '<em>None used yet</em>'
+            }
+        </div>
+        <br>
+        <strong>Rejected Headlines:</strong><br>
+        <div style="max-height: 100px; overflow-y: auto; font-size: 11px; background: #ffe8e8; padding: 8px; border: 1px solid #ddd; border-radius: 3px;">
+            ${rejectedHeadlines.length > 0 
+                ? rejectedHeadlines.map(h => `"${h.text}"`).join('<br>')
+                : '<em>None rejected yet</em>'
+            }
+        </div>
+    `;
+    
     // Generate alternative headlines
     generateAlternativeHeadlines();
     
@@ -1813,11 +2014,18 @@ function updateDebugInfo() {
     // Update grid state code
     updateGridStateCode();
     
-    // Update complete test case code
-    updateCompleteTestCaseCode();
 }
 
 function updateGridStateCode() {
+    // Check if elements exist before trying to update them
+    const htmlElement = document.getElementById('gridStateCode');
+    const jsElement = document.getElementById('gridStateJSCode');
+    
+    if (!htmlElement || !jsElement) {
+        console.log('Debug panel elements not found, skipping grid state code update');
+        return;
+    }
+    
     // Step 1: Find the bounds of filled cells
     let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
     const filledCells = [];
@@ -1969,172 +2177,12 @@ function updateGridStateCode() {
     const jsCode = jsLines.join('\n');
     
     // Update the HTML section
-    document.getElementById('gridStateCode').value = htmlCode;
+    htmlElement.value = htmlCode;
     
     // Update the JavaScript section  
-    document.getElementById('gridStateJSCode').value = jsCode;
+    jsElement.value = jsCode;
 }
 
-function updateCompleteTestCaseCode() {
-    // Step 1: Find the bounds of filled cells
-    let minRow = Infinity, maxRow = -Infinity, minCol = Infinity, maxCol = -Infinity;
-    const filledCells = [];
-    
-    for (let r = 0; r < grid.length; r++) {
-        for (let c = 0; c < grid[r].length; c++) {
-            if (grid[r][c].letter) {
-                filledCells.push({row: r, col: c, cell: grid[r][c]});
-                minRow = Math.min(minRow, r);
-                maxRow = Math.max(maxRow, r);
-                minCol = Math.min(minCol, c);
-                maxCol = Math.max(maxCol, c);
-            }
-        }
-    }
-    
-    // Step 2: Calculate offset to move to top-left corner
-    const rowOffset = minRow;
-    const colOffset = minCol;
-    
-    // Step 3: Generate normalized cell data with proper word mapping
-    const normalizedCells = [];
-    const cellWordMappings = new Map(); // Map of "row,col" -> array of {wordIndex, letterIndex}
-    
-    for (let cellData of filledCells) {
-        const newRow = cellData.row - rowOffset;
-        const newCol = cellData.col - colOffset;
-        
-        // Only include cells that fit in 10x10 grid
-        if (newRow < 10 && newCol < 10) {
-            const key = `${newRow},${newCol}`;
-            cellWordMappings.set(key, []);
-            
-            // Find ALL words that contain this position (for intersections)
-            for (let i = 0; i < crosswordLayout.words.length; i++) {
-                const wordInfo = crosswordLayout.words[i];
-                const word = currentHeadline.words[wordInfo.word];
-                
-                for (let j = 0; j < word.length; j++) {
-                    let wordRow = wordInfo.row;
-                    let wordCol = wordInfo.col;
-                    
-                    if (wordInfo.direction === 'horizontal') {
-                        wordCol += j;
-                    } else {
-                        wordRow += j;
-                    }
-                    
-                    if (wordRow === cellData.row && wordCol === cellData.col) {
-                        cellWordMappings.get(key).push({
-                            wordIndex: wordInfo.word,
-                            letterIndex: j
-                        });
-                    }
-                }
-            }
-            
-            normalizedCells.push({
-                row: newRow,
-                col: newCol,
-                letter: cellData.cell.letter,
-                currentLetter: cellData.cell.currentLetter,
-                wordMappings: cellWordMappings.get(key)
-            });
-        }
-    }
-    
-    // Step 4: Generate next test case number
-    const nextTestNumber = getNextTestCaseNumber();
-    const testName = `test${nextTestNumber}`;
-    
-    // Step 5: Generate complete HTML with button and text output functionality
-    const htmlLines = [];
-    
-    // HTML structure
-    htmlLines.push(`<div class="test-case">`);
-    htmlLines.push(`    <h3>Test Case ${nextTestNumber}: ${currentHeadline.text}</h3>`);
-    htmlLines.push(`    <div class="explanation">`);
-    htmlLines.push(`        <p><strong>Headline:</strong> "${currentHeadline.text}"</p>`);
-    htmlLines.push(`        <p><strong>Words:</strong> ${currentHeadline.words.join(', ')}</p>`);
-    htmlLines.push(`        <p><strong>Grid Size:</strong> ${maxRow - minRow + 1} × ${maxCol - minCol + 1}</p>`);
-    htmlLines.push(`        <p><strong>Test Scenario:</strong> Letters are scrambled to demonstrate the color-coding system</p>`);
-    htmlLines.push(`    </div>`);
-    htmlLines.push(`    <div id="${testName}Container" class="test-grid"></div>`);
-    htmlLines.push(`    <div style="margin-top: 15px;">`);
-    htmlLines.push(`        <button onclick="generateSingleTestOutput('${testName}', 'Test Case ${nextTestNumber}: ${currentHeadline.text}')" style="background-color: #4a90e2; color: white; padding: 8px 16px; border: none; border-radius: 3px; cursor: pointer; font-size: 14px;">`);
-    htmlLines.push(`            Generate Text Output for LLM`);
-    htmlLines.push(`        </button>`);
-    htmlLines.push(`        <div id="textOutput${nextTestNumber}" style="display: none; margin-top: 10px; padding: 10px; background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 3px;">`);
-    htmlLines.push(`            <h5>Text Output for LLM Analysis:</h5>`);
-    htmlLines.push(`            <textarea id="textContent${nextTestNumber}" style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; border: 1px solid #ccc; padding: 8px;" readonly></textarea>`);
-    htmlLines.push(`            <button onclick="copySingleToClipboard('textContent${nextTestNumber}')" style="margin-top: 8px; background-color: #28a745; color: white; padding: 6px 12px; border: none; border-radius: 3px; cursor: pointer;">`);
-    htmlLines.push(`                Copy to Clipboard`);
-    htmlLines.push(`            </button>`);
-    htmlLines.push(`        </div>`);
-    htmlLines.push(`    </div>`);
-    htmlLines.push(`</div>`);
-    htmlLines.push('');
-    
-    // JavaScript code using new setCell format
-    htmlLines.push('<!-- JavaScript Setup -->');
-    htmlLines.push('<script>');
-    htmlLines.push(`// Test Case ${nextTestNumber}: ${currentHeadline.text}`);
-    htmlLines.push(`// Words: ${currentHeadline.words.join(', ')}`);
-    htmlLines.push('');
-    htmlLines.push(`const ${testName} = new TestGrid();`);
-    htmlLines.push('');
-    
-    // Sort cells by row, then by column for consistent output
-    normalizedCells.sort((a, b) => a.row === b.row ? a.col - b.col : a.row - b.row);
-    
-    // Generate setCell calls for each word in each cell
-    const setCellCalls = [];
-    for (let cellData of normalizedCells) {
-        // For each word that this cell belongs to, generate a setCell call
-        for (let mapping of cellData.wordMappings) {
-            setCellCalls.push({
-                row: cellData.row,
-                col: cellData.col,
-                letter: cellData.letter,
-                currentLetter: cellData.currentLetter,
-                wordIndex: mapping.wordIndex,
-                letterIndex: mapping.letterIndex
-            });
-        }
-    }
-    
-    // Sort setCell calls by word index, then by letter index for logical ordering
-    setCellCalls.sort((a, b) => {
-        if (a.wordIndex !== b.wordIndex) return a.wordIndex - b.wordIndex;
-        return a.letterIndex - b.letterIndex;
-    });
-    
-    // Add comments for each word
-    let currentWordIndex = -1;
-    for (let call of setCellCalls) {
-        if (call.wordIndex !== currentWordIndex) {
-            currentWordIndex = call.wordIndex;
-            const wordText = currentHeadline.words[call.wordIndex];
-            htmlLines.push(`// Set up ${wordText.toUpperCase()} (word ${call.wordIndex})`);
-        }
-        
-        htmlLines.push(`${testName}.setCell(${call.row}, ${call.col}, '${call.letter}', '${call.currentLetter}', ${call.wordIndex}, ${call.letterIndex});`);
-    }
-    
-    htmlLines.push('');
-    htmlLines.push('// Set up word connections automatically');
-    htmlLines.push(`${testName}.setWordConnections();`);
-    
-    htmlLines.push('');
-    htmlLines.push(`renderTestGrid('${testName}Container', ${testName});`);
-    htmlLines.push('');
-    htmlLines.push('// Store test grid globally for text output function');
-    htmlLines.push(`window.${testName} = ${testName};`);
-    htmlLines.push('</script>');
-    
-    const completeCode = htmlLines.join('\n');
-    document.getElementById('completeTestCaseCode').value = completeCode;
-}
 
 function getNextTestCaseNumber() {
     // This function would ideally read the test.html file to find the highest test number
@@ -2194,29 +2242,6 @@ function copyGridStateJS() {
     }
 }
 
-function copyCompleteTestCase() {
-    const textarea = document.getElementById('completeTestCaseCode');
-    textarea.select();
-    textarea.setSelectionRange(0, 99999); // For mobile devices
-    
-    try {
-        document.execCommand('copy');
-        
-        // Show feedback
-        const button = event.target;
-        const originalText = button.textContent;
-        button.textContent = 'Copied!';
-        button.style.background = '#4CAF50';
-        
-        setTimeout(() => {
-            button.textContent = originalText;
-            button.style.background = '#2196F3';
-        }, 2000);
-    } catch (err) {
-        console.error('Failed to copy text: ', err);
-        alert('Failed to copy to clipboard. Please select the text manually and copy.');
-    }
-}
 
 function generateAlternativeHeadlines() {
     debugInfo.alternativeHeadlines = [];
@@ -2295,6 +2320,61 @@ function countCommonLetters(words1, words2) {
     return common;
 }
 
+// Initialize headline management system
+function initializeHeadlineManagement() {
+    // If availableHeadlines is empty, refill it with all headlines
+    if (availableHeadlines.length === 0) {
+        console.log('Refilling available headlines list');
+        availableHeadlines = [...mockHeadlines];
+        // Clear used and rejected lists when starting fresh
+        usedHeadlines = [];
+        rejectedHeadlines = [];
+    }
+}
+
+// Get next available headline (excluding used and rejected ones)
+function getNextHeadline() {
+    initializeHeadlineManagement();
+    
+    // Filter out used and rejected headlines
+    const validHeadlines = availableHeadlines.filter(headline => 
+        !usedHeadlines.some(used => used.text === headline.text) &&
+        !rejectedHeadlines.some(rejected => rejected.text === headline.text)
+    );
+    
+    if (validHeadlines.length === 0) {
+        console.log('No more valid headlines available, refilling list');
+        // Reset the system - start over with all headlines
+        availableHeadlines = [...mockHeadlines];
+        usedHeadlines = [];
+        rejectedHeadlines = [];
+        return availableHeadlines[Math.floor(Math.random() * availableHeadlines.length)];
+    }
+    
+    // Select random headline from valid ones
+    const selectedHeadline = validHeadlines[Math.floor(Math.random() * validHeadlines.length)];
+    console.log(`Selected headline: "${selectedHeadline.text}"`);
+    console.log(`Remaining available: ${validHeadlines.length - 1}, Used: ${usedHeadlines.length}, Rejected: ${rejectedHeadlines.length}`);
+    
+    return selectedHeadline;
+}
+
+// Mark headline as used (successfully created a puzzle)
+function markHeadlineAsUsed(headline) {
+    if (!usedHeadlines.some(used => used.text === headline.text)) {
+        usedHeadlines.push(headline);
+        console.log(`Marked headline as used: "${headline.text}"`);
+    }
+}
+
+// Mark headline as rejected (failed layout validation)
+function markHeadlineAsRejected(headline) {
+    if (!rejectedHeadlines.some(rejected => rejected.text === headline.text)) {
+        rejectedHeadlines.push(headline);
+        console.log(`Marked headline as rejected: "${headline.text}"`);
+    }
+}
+
 function enhancedInitGame() {
     const startTime = performance.now();
     
@@ -2314,35 +2394,101 @@ function enhancedInitGame() {
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
     
-    // Try to generate a valid layout with different captions
+    // Try to generate a valid layout with headline management system
     const maxCaptionAttempts = 10;
     let captionAttempts = 0;
     
     while (captionAttempts < maxCaptionAttempts) {
-        // Select random headline
-        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        // Get next available headline using management system
+        currentHeadline = getNextHeadline();
         
         // Generate crossword layout
         crosswordLayout = generateCrosswordLayout(currentHeadline.words);
         debugInfo.layoutAttempts = 50; // From generateCrosswordLayout maxAttempts
         
-        // If layout generation succeeded, break out of loop
+        // If layout generation succeeded, mark as used and break
         if (crosswordLayout !== null) {
             debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+            markHeadlineAsUsed(currentHeadline);
             break;
         } else {
+            // Mark as rejected and try next headline
+            markHeadlineAsRejected(currentHeadline);
             debugInfo.rejectedHeadlines.push(currentHeadline.text);
         }
         
         captionAttempts++;
     }
     
-    // If we still don't have a valid layout, use the last attempt (even if invalid)
+    // If we still don't have a valid layout after trying multiple headlines, reject this session
     if (crosswordLayout === null) {
-        // Generate a simple layout as final fallback
+        console.log(`Failed to generate valid layout after ${captionAttempts} attempts. Trying one more time with relaxed validation...`);
+        
+        // Try one more time with the current headline but with a simple layout
         crosswordLayout = generateSimpleLayout(currentHeadline.words);
-        normalizeLayout(crosswordLayout, currentHeadline.words);
-        debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+        
+        // STRICT VALIDATION: Only proceed if the simple layout also passes all rules
+        if (crosswordLayout.words.length === currentHeadline.words.length &&
+            isLayoutConnected(crosswordLayout, currentHeadline.words) && 
+            hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
+            hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words)) {
+            
+            normalizeLayout(crosswordLayout, currentHeadline.words);
+            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+            markHeadlineAsUsed(currentHeadline);
+            console.log(`Simple layout passed validation for: "${currentHeadline.text}"`);
+        } else {
+            // Even simple layout failed - reject this headline and try another
+            console.log(`Simple layout also failed validation for: "${currentHeadline.text}"`);
+            markHeadlineAsRejected(currentHeadline);
+            
+            // Try one more headline as absolute fallback
+            currentHeadline = getNextHeadline();
+            crosswordLayout = generateSimpleLayout(currentHeadline.words);
+            
+            // If this also fails, keep trying more headlines until we find a valid one
+            if (!(crosswordLayout.words.length === currentHeadline.words.length &&
+                  isLayoutConnected(crosswordLayout, currentHeadline.words) && 
+                  hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
+                  hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words))) {
+                console.error(`CRITICAL: Layout validation failed for: "${currentHeadline.text}". Trying another headline...`);
+                markHeadlineAsRejected(currentHeadline);
+                
+                // Keep trying more headlines until we find one that works
+                let additionalAttempts = 0;
+                const maxAdditionalAttempts = 20;
+                
+                while (additionalAttempts < maxAdditionalAttempts) {
+                    currentHeadline = getNextHeadline();
+                    crosswordLayout = generateSimpleLayout(currentHeadline.words);
+                    
+                    if (crosswordLayout.words.length === currentHeadline.words.length &&
+                        isLayoutConnected(crosswordLayout, currentHeadline.words) && 
+                        hasProperParallelSpacing(crosswordLayout, currentHeadline.words) &&
+                        hasNoEndToEndAdjacency(crosswordLayout, currentHeadline.words)) {
+                        console.log(`Found valid layout after ${additionalAttempts + 1} additional attempts: "${currentHeadline.text}"`);
+                        markHeadlineAsUsed(currentHeadline);
+                        break;
+                    } else {
+                        console.log(`Rejecting headline ${additionalAttempts + 1}: "${currentHeadline.text}" - failed validation`);
+                        markHeadlineAsRejected(currentHeadline);
+                        additionalAttempts++;
+                    }
+                }
+                
+                // If we still don't have a valid layout after all attempts, something is seriously wrong
+                if (additionalAttempts >= maxAdditionalAttempts) {
+                    console.error(`CRITICAL ERROR: Unable to find any valid headline after ${maxAdditionalAttempts} additional attempts. This suggests a fundamental issue with the validation logic or headline data.`);
+                    // As absolute last resort, use the last attempted layout but mark it as problematic
+                    markHeadlineAsRejected(currentHeadline);
+                }
+            } else {
+                markHeadlineAsUsed(currentHeadline);
+            }
+            
+            normalizeLayout(crosswordLayout, currentHeadline.words);
+            debugInfo.layoutScore = scoreLayout(crosswordLayout, currentHeadline.words);
+        }
     }
     
     // Place words in grid
