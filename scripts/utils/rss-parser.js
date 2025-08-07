@@ -113,6 +113,7 @@ function processRSSItems(items) {
 
 /**
  * Cleans headline text by removing unwanted characters and formatting
+ * Enhanced with HTML processor integration
  * @param {string} title - Raw headline title
  * @returns {string} Cleaned title
  */
@@ -121,6 +122,12 @@ function cleanHeadlineText(title) {
         return '';
     }
     
+    // Use enhanced HTML processing if available
+    if (typeof window !== 'undefined' && window.HTMLProcessor) {
+        return window.HTMLProcessor.enhancedCleanHeadlineText(title);
+    }
+    
+    // Fallback to original processing
     return title
         // Remove HTML tags
         .replace(/<[^>]*>/g, '')

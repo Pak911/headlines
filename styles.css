@@ -143,6 +143,7 @@ h1 {
     100% { transform: scale(1) rotate(360deg); }
 }
 
+/* Victory Modal - Enhanced Material Design */
 .victory-modal {
     display: none;
     position: fixed;
@@ -150,102 +151,347 @@ h1 {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.7);
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(5px);
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .victory-content {
+    position: relative;
     background: white;
-    padding: 40px;
-    border-radius: 15px;
+    padding: 0;
+    border-radius: 24px;
     text-align: center;
-    max-width: 500px;
-    animation: slideIn 0.3s ease;
+    width: 90%;
+    max-width: 520px;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.2), 0 12px 24px rgba(0, 0, 0, 0.15);
+    animation: slideUp 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    overflow: hidden;
 }
 
-@keyframes slideIn {
+@keyframes slideUp {
     from {
-        transform: translateY(-50px);
+        transform: translateY(60px) scale(0.95);
         opacity: 0;
     }
     to {
-        transform: translateY(0);
+        transform: translateY(0) scale(1);
         opacity: 1;
     }
 }
 
-.victory-content h2 {
-    color: #4CAF50;
+/* Close Button */
+.victory-close {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    width: 36px;
+    height: 36px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    font-size: 24px;
+    color: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.victory-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: rotate(90deg);
+}
+
+/* Victory Header */
+.victory-header {
+    padding: 32px 24px 24px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #6366f1;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.victory-header::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { transform: translate(0, 0); }
+    50% { transform: translate(-30%, -30%); }
+}
+
+/* Victory Stars Rating */
+.victory-stars {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin: 0 auto 20px;
+    animation: starsAppear 0.6s ease 0.2s both;
+}
+
+@keyframes starsAppear {
+    from {
+        opacity: 0;
+        transform: scale(0.8);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+.victory-star {
+    width: 40px;
+    height: 40px;
+    position: relative;
+}
+
+.victory-star svg {
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2));
+}
+
+.victory-star.filled svg {
+    animation: starPop 0.4s ease;
+}
+
+@keyframes starPop {
+    0% { transform: scale(0); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.victory-title {
     font-size: 2rem;
-    margin-bottom: 20px;
+    font-weight: 700;
+    margin: 0 0 8px;
+    letter-spacing: -0.02em;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.victory-subtitle {
+    font-size: 1rem;
+    font-weight: 400;
+    margin: 0;
+    opacity: 0.95;
+}
+
+/* Victory Body */
+.victory-body {
+    padding: 32px 24px;
+    background: #fafbfc;
+}
+
+.headline-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+}
+
+.headline-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+    margin-bottom: 12px;
 }
 
 .headline-reveal {
-    font-size: 1.5rem;
-    color: #1a1a1a;
-    margin: 20px 0;
-    padding: 20px;
-    background: #f0f2f5;
-    border-radius: 10px;
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1f2937;
+    line-height: 1.4;
+    margin: 0;
 }
 
-.stats {
-    font-size: 1.2rem;
-    color: #666;
-    margin: 20px 0;
+/* Stats Container */
+.stats-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
 }
 
-.article-link {
-    display: inline-block;
-    margin-top: 20px;
-    padding: 12px 30px;
-    background: #4a90e2;
-    color: white;
-    text-decoration: none;
-    border-radius: 5px;
-    transition: background 0.2s ease;
+.stat-card {
+    background: white;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s ease;
 }
 
-.article-link:hover {
-    background: #357abd;
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
-.new-game-btn {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 10px 25px;
-    background: #4CAF50;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
+.stat-value {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #6366f1;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    letter-spacing: 0.05em;
+}
+
+/* Victory Actions */
+.victory-actions {
+    padding: 0 24px 32px;
+    background: #fafbfc;
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+}
+
+.btn-primary,
+.btn-secondary {
+    padding: 12px 24px;
+    border-radius: 12px;
     font-size: 1rem;
-    transition: background 0.2s ease;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.new-game-btn:hover {
-    background: #45a049;
+.btn-primary {
+    background: #6366f1;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #5558e3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+}
+
+.btn-secondary {
+    background: #4ade80;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #3dd368;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 222, 128, 0.3);
+}
+
+.btn-replay {
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 1rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    background: #f59e0b;
+    color: white;
+}
+
+.btn-replay:hover {
+    background: #d97706;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.3);
+}
+
+/* Confetti Animation */
+.victory-confetti {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.victory-confetti span {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: #ffd700;
+    top: -10px;
+    animation: confetti-fall 3s ease-in-out infinite;
+}
+
+.victory-confetti span:nth-child(1) { left: 10%; animation-delay: 0s; background: #ff6b6b; }
+.victory-confetti span:nth-child(2) { left: 20%; animation-delay: 0.3s; background: #4ecdc4; }
+.victory-confetti span:nth-child(3) { left: 30%; animation-delay: 0.6s; background: #45b7d1; }
+.victory-confetti span:nth-child(4) { left: 40%; animation-delay: 0.9s; background: #f9ca24; }
+.victory-confetti span:nth-child(5) { left: 50%; animation-delay: 1.2s; background: #f0932b; }
+.victory-confetti span:nth-child(6) { left: 60%; animation-delay: 1.5s; background: #eb4d4b; }
+.victory-confetti span:nth-child(7) { left: 70%; animation-delay: 1.8s; background: #6ab04c; }
+.victory-confetti span:nth-child(8) { left: 80%; animation-delay: 2.1s; background: #c56cf0; }
+.victory-confetti span:nth-child(9) { left: 90%; animation-delay: 2.4s; background: #ffd93d; }
+.victory-confetti span:nth-child(10) { left: 95%; animation-delay: 2.7s; background: #6bcf7f; }
+
+@keyframes confetti-fall {
+    0% {
+        transform: translateY(-100vh) rotate(0deg);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(100vh) rotate(720deg);
+        opacity: 0;
+    }
 }
 
 .new-game-btn-header {
     padding: 12px 20px;
-    background: #4a90e2;
+    background: #4ade80;
     color: white;
     border: none;
-    border-radius: 8px;
+    border-radius: 12px;
     cursor: pointer;
     font-size: 1rem;
     font-weight: 600;
     transition: all 0.2s ease;
-    box-shadow: 0 2px 4px rgba(74, 144, 226, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 2px 4px rgba(74, 222, 128, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 .new-game-btn-header:hover {
-    background: #357abd;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(74, 144, 226, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15);
+    background: #3dd368;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(74, 222, 128, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15);
 }
 
 .instructions {

@@ -123,15 +123,55 @@
 
     <div id="victoryModal" class="victory-modal">
         <div class="victory-content">
-            <h2>🎉 Congratulations!</h2>
-            <p>You've reconstructed the headline!</p>
-            <div id="headlineReveal" class="headline-reveal"></div>
-            <div class="stats">
-                Completed in <span id="finalSwaps"></span> swaps
+            <button class="victory-close" onclick="closeVictoryModal()">×</button>
+            
+            <div class="victory-header">
+                <div class="victory-stars" id="victoryStars">
+                    <!-- Stars will be dynamically inserted here -->
+                </div>
+                <h2 class="victory-title">Congratulations!</h2>
+                <p class="victory-subtitle">You've reconstructed the headline!</p>
             </div>
-            <a id="articleLink" href="#" class="article-link" target="_blank">Read Full Article</a>
-            <br>
-            <button class="new-game-btn" onclick="initGame()">New Game</button>
+            
+            <div class="victory-body">
+                <div class="headline-card">
+                    <div class="headline-label">RECONSTRUCTED HEADLINE</div>
+                    <div id="headlineReveal" class="headline-reveal"></div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="finalSwaps">0</div>
+                        <div class="stat-label">SWAPS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="performanceRating">-</div>
+                        <div class="stat-label">RATING</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="victory-actions">
+                <a id="articleLink" href="#" class="btn-primary" target="_blank">
+                    <span>Read Full Article</span>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M6.5 1h8a.5.5 0 0 1 .5.5v8a.5.5 0 0 1-1 0V2.707L2.354 14.354a.5.5 0 0 1-.708-.708L13.293 2H6.5a.5.5 0 0 1 0-1z"/>
+                    </svg>
+                </a>
+                <button class="btn-replay" onclick="replayGame()">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor">
+                        <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+                        <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+                    </svg>
+                    <span>Replay</span>
+                </button>
+                <button class="btn-secondary" onclick="initGame()">New Game</button>
+            </div>
+        </div>
+        
+        <div class="victory-confetti">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
         </div>
     </div>
 
@@ -149,6 +189,7 @@
     <script src="scripts/gameplay/ui-interactions.js"></script>
     
     <!-- Utilities -->
+    <script src="scripts/utils/html-processor.js"></script>
     <script src="scripts/utils/rss-parser.js"></script>
     <script src="scripts/utils/headline-scorer.js"></script>
     <script src="scripts/utils/async-rss-fetcher.js"></script>

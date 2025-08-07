@@ -2,9 +2,9 @@
 const headlineScoringConfig = {
     // Word count constraints
     minWords: 4,           // Minimum words required after filtering
-    maxWords: 5,           // Maximum words for optimal score
+    maxWords: 8,           // Maximum words for optimal score
     idealMinWords: 4,      // Ideal minimum word count
-    idealMaxWords: 5,      // Ideal maximum word count
+    idealMaxWords: 8,      // Ideal maximum word count
     
     // Word length filtering
     minWordLength: 4,      // Words with 3 letters or less are filtered out

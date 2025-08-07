@@ -37,8 +37,11 @@ headlines/
 │       ├── async-rss-fetcher.js        # Parallel RSS fetching system
 │       ├── headline-scorer.js          # Configurable headline scoring
 │       ├── rss-parser.js               # RSS feed parsing and extraction
+│       ├── html-processor.js           # HTML detection and stripping utilities
 │       └── debug-utils.js              # Debug panel and development tools
 ├── test.html                           # Color logic testing framework
+├── test-rss-parser.html                # RSS parser testing framework
+├── test-html-processor.html            # HTML processing testing framework
 ├── test-explanation.md                 # Documentation for test framework
 └── memory-bank/                        # Project documentation
     ├── projectbrief.md                 # Project scope and requirements
@@ -119,6 +122,12 @@ headlines/
   - **Dependencies**: Requires RSS configuration from data.js
   - **Purpose**: RSS2JSON API integration with source attribution
 
+- **`html-processor.js`** (300+ lines)
+  - **Functions**: HTML detection, stripping, and entity decoding
+  - **Key APIs**: `detectHTML()`, `stripHTML()`, `decodeHTMLEntities()`, `processRSSContent()`
+  - **Dependencies**: None (standalone utility)
+  - **Purpose**: Comprehensive HTML processing for RSS content and game descriptions
+
 - **`debug-utils.js`** (400+ lines)
   - **Functions**: Development tools and debugging
   - **Key APIs**: `toggleDebugPanel()`, `updateDebugInfo()`, `updateGridStateCode()`
@@ -137,7 +146,7 @@ headlines/
 1. **Data Layer**: `data.js` (headlines and configuration)
 2. **Core Engine**: Foundation algorithms (crossword-engine, grid-manager, color-logic)
 3. **Gameplay**: User-facing features (difficulty-system, game-controller, ui-interactions)
-4. **Utilities**: Supporting functions (headline-manager, debug-utils)
+4. **Utilities**: Supporting functions (html-processor, rss-parser, headline-scorer, async-rss-fetcher, headline-manager, debug-utils)
 5. **Main**: Entry point and coordination (main.js)
 
 **Why This Order Works**:

@@ -16,9 +16,96 @@ function checkVictory() {
 function showVictory() {
     document.getElementById('headlineReveal').textContent = currentHeadline.text;
     document.getElementById('finalSwaps').textContent = swapCount;
-    document.getElementById('articleLink').href = currentHeadline.link;
+    
+    // Calculate performance rating based on swap count
+    let rating = '';
+    let starCount = 0;
+    const wordCount = currentHeadline.words.length;
+    const minPossibleSwaps = Math.floor(wordCount * 2); // Rough estimate
+    
+    if (swapCount <= minPossibleSwaps) {
+        rating = 'PERFECT';
+        starCount = 5;
+    } else if (swapCount <= minPossibleSwaps * 1.5) {
+        rating = 'EXCELLENT';
+        starCount = 4;
+    } else if (swapCount <= minPossibleSwaps * 2) {
+        rating = 'GOOD';
+        starCount = 3;
+    } else if (swapCount <= minPossibleSwaps * 3) {
+        rating = 'FAIR';
+        starCount = 2;
+    } else {
+        rating = 'COMPLETE';
+        starCount = 1;
+    }
+    
+    document.getElementById('performanceRating').textContent = rating;
+    document.getElementById('articleLink').href = currentHeadline.link || '#';
+    
+    // Generate star display
+    const starsContainer = document.getElementById('victoryStars');
+    starsContainer.innerHTML = '';
+    
+    for (let i = 1; i <= 5; i++) {
+        const starDiv = document.createElement('div');
+        starDiv.className = 'victory-star' + (i <= starCount ? ' filled' : ' empty');
+        
+        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        svg.setAttribute('width', '40');
+        svg.setAttribute('height', '40');
+        svg.setAttribute('viewBox', '0 0 40 40');
+        svg.setAttribute('fill', 'none');
+        
+        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        path.setAttribute('d', 'M20 3L25 13L36 15L28 23L30 34L20 29L10 34L12 23L4 15L15 13L20 3Z');
+        
+        if (i <= starCount) {
+            path.setAttribute('fill', '#FFD700');
+            path.setAttribute('stroke', '#FFA500');
+            starDiv.style.animationDelay = `${i * 0.1}s`;
+        } else {
+            path.setAttribute('fill', 'transparent');
+            path.setAttribute('stroke', '#D1D5DB');
+        }
+        path.setAttribute('stroke-width', '2');
+        
+        svg.appendChild(path);
+        starDiv.appendChild(svg);
+        starsContainer.appendChild(starDiv);
+    }
+    
     document.getElementById('victoryModal').style.display = 'flex';
 }
+
+// Function to close the victory modal
+function closeVictoryModal() {
+    document.getElementById('victoryModal').style.display = 'none';
+}
+
+// Function to replay the same game
+function replayGame() {
+    // Close the victory modal
+    document.getElementById('victoryModal').style.display = 'none';
+    
+    // Reset swap count
+    swapCount = 0;
+    selectedCell = null;
+    document.getElementById('swapCount').textContent = '0';
+    
+    // Reset grid to the scrambled state (keep the same puzzle)
+    // We need to scramble the letters again
+    scrambleLetters();
+    
+    // Re-render the crossword
+    renderCrossword();
+    
+    console.log('🔄 Replaying the same puzzle');
+}
+
+// Make functions globally available
+window.closeVictoryModal = closeVictoryModal;
+window.replayGame = replayGame;
 
 function initGame() {
     // Reset game state
@@ -237,7 +324,19 @@ document.addEventListener('keydown', function(event) {
 function displayHeadlineDescription() {
     const descriptionElement = document.getElementById('headlineDescription');
     if (currentHeadline && currentHeadline.description) {
-        descriptionElement.textContent = currentHeadline.description;
+        // Use HTML processor to clean the description if available
+        let cleanDescription = currentHeadline.description;
+        
+        if (typeof window !== 'undefined' && window.HTMLProcessor) {
+            // Check if description contains HTML
+            if (window.HTMLProcessor.detectHTML(currentHeadline.description)) {
+                console.log('🔧 Processing HTML in description:', currentHeadline.description.substring(0, 100) + '...');
+                cleanDescription = window.HTMLProcessor.stripHTML(currentHeadline.description);
+                console.log('✅ Clean description:', cleanDescription.substring(0, 100) + '...');
+            }
+        }
+        
+        descriptionElement.textContent = cleanDescription;
     } else {
         descriptionElement.textContent = '';
     }

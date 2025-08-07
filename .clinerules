@@ -123,7 +123,24 @@ This is used for significant, project-altering changes.
 * **Trigger**: A discovery or decision is made that fundamentally changes the project's architecture, scope, or technology.  
 * **Action**:  
   1. I will explicitly state which foundational file needs to be changed and why.  
-  2. I will propose the specific change (e.g., "I need to add 'PostgreSQL' to techContext.md..."). 
+  2. I will propose the specific change (e.g., "I need to add 'PostgreSQL' to techContext.md...").
+
+### **Rule \#2.1: File Creation/Deletion Tracking (MANDATORY)**
+
+This rule is triggered whenever new files are created or existing files are deleted.
+
+* **Trigger**: ANY time I create a new file or delete an existing file during a session.
+* **Action**:  
+  1. I MUST immediately update the file structure in `techContext.md` to reflect the changes.
+  2. I MUST add documentation for new files including their purpose, key functions, and dependencies.
+  3. I MUST update the module loading order if the new files affect dependencies.
+  4. I MUST update `activeContext.md` to log the file creation/deletion in the session log.
+* **Examples of Triggers**:
+  - Creating test files (e.g., `test-html-processor.html`)
+  - Adding new utility modules (e.g., `scripts/utils/html-processor.js`)
+  - Creating documentation files
+  - Deleting obsolete files
+* **Why This Matters**: The file structure documentation is critical for understanding the project architecture and must always be current.
 ### **Rule \#3: The Full System Sync (Explicit Command Only)**
 
 This is a powerful but costly operation that must be used sparingly.

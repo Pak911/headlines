@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML Processor Test - Headlines Crossword Game</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            color: #2563eb;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .test-section {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+        
+        .test-section h2 {
+            color: #374151;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        
+        .input-area {
+            margin-bottom: 20px;
+        }
+        
+        .input-area label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            resize: vertical;
+        }
+        
+        .button-group {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        button {
+            background: #2563eb;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 0 10px;
+            transition: background 0.2s;
+        }
+        
+        button:hover {
+            background: #1d4ed8;
+        }
+        
+        button.secondary {
+            background: #6b7280;
+        }
+        
+        button.secondary:hover {
+            background: #4b5563;
+        }
+        
+        .results {
+            margin-top: 20px;
+        }
+        
+        .result-item {
+            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #2563eb;
+            background: white;
+        }
+        
+        .result-item strong {
+            color: #374151;
+        }
+        
+        .result-value {
+            font-family: monospace;
+            background: #f3f4f6;
+            padding: 8px;
+            border-radius: 4px;
+            margin-top: 5px;
+            word-break: break-all;
+        }
+        
+        .status-true {
+            color: #059669;
+            font-weight: bold;
+        }
+        
+        .status-false {
+            color: #dc2626;
+            font-weight: bold;
+        }
+        
+        .words-list {
+            background: #eff6ff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-top: 5px;
+        }
+        
+        .word-tag {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin: 2px;
+            font-size: 12px;
+        }
+        
+        .example-section {
+            background: #fef3c7;
+            border-color: #f59e0b;
+        }
+        
+        .console-output {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 14px;
+            white-space: pre-wrap;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 HTML Processor Test Suite</h1>
+        <p style="text-align: center; color: #6b7280; margin-bottom: 30px;">
+            Test HTML detection and stripping functionality for the Headlines Crossword Game
+        </p>
+        
+        <!-- Example Test Section -->
+        <div class="test-section example-section">
+            <h2>📰 Your RSS Example Test</h2>
+            <p>This tests the exact RSS content you provided with HTML tags and links.</p>
+            
+            <div class="button-group">
+                <button onclick="testRSSExample()">Test RSS Example</button>
+                <button class="secondary" onclick="clearResults('example-results')">Clear Results</button>
+            </div>
+            
+            <div id="example-results" class="results"></div>
+        </div>
+        
+        <!-- Custom Input Test Section -->
+        <div class="test-section">
+            <h2>🧪 Custom HTML Test</h2>
+            <p>Enter your own HTML content to test the processing functions.</p>
+            
+            <div class="input-area">
+                <label for="custom-input">HTML Content:</label>
+                <textarea id="custom-input" placeholder="Enter HTML content here...">
+&lt;p&gt;Breaking news: &quot;Major discovery&quot; announced by scientists&lt;/p&gt;
+&lt;div&gt;The research team found &amp;amp; documented evidence.&lt;/div&gt;
+                </textarea>
+            </div>
+            
+            <div class="button-group">
+                <button onclick="testCustomInput()">Process HTML</button>
+                <button class="secondary" onclick="clearResults('custom-results')">Clear Results</button>
+                <button class="secondary" onclick="loadSampleHTML()">Load Sample HTML</button>
+            </div>
+            
+            <div id="custom-results" class="results"></div>
+        </div>
+        
+        <!-- Function Testing Section -->
+        <div class="test-section">
+            <h2>⚙️ Individual Function Tests</h2>
+            <p>Test individual HTML processing functions.</p>
+            
+            <div class="button-group">
+                <button onclick="testDetectHTML()">Test HTML Detection</button>
+                <button onclick="testStripHTML()">Test HTML Stripping</button>
+                <button onclick="testDecodeEntities()">Test Entity Decoding</button>
+                <button class="secondary" onclick="clearResults('function-results')">Clear Results</button>
+            </div>
+            
+            <div id="function-results" class="results"></div>
+        </div>
+        
+        <!-- Console Output -->
+        <div class="test-section">
+            <h2>📋 Console Output</h2>
+            <p>Real-time console output from the HTML processor functions.</p>
+            <div id="console-output" class="console-output">Ready to test...\n</div>
+            <div class="button-group">
+                <button class="secondary" onclick="clearConsole()">Clear Console</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Load the HTML Processor -->
+    <script src="scripts/utils/html-processor.js"></script>
+    
+    <script>
+        // Override console.log to capture output
+        const originalConsoleLog = console.log;
+        const consoleOutput = document.getElementById('console-output');
+        
+        console.log = function(...args) {
+            originalConsoleLog.apply(console, args);
+            const message = args.map(arg => 
+                typeof arg === 'object' ? JSON.stringify(arg, null, 2) : String(arg)
+            ).join(' ');
+            consoleOutput.textContent += message + '\n';
+            consoleOutput.scrollTop = consoleOutput.scrollHeight;
+        };
+        
+        function clearConsole() {
+            consoleOutput.textContent = 'Console cleared...\n';
+        }
+        
+        function clearResults(elementId) {
+            document.getElementById(elementId).innerHTML = '';
+        }
+        
+        function displayResults(containerId, result) {
+            const container = document.getElementById(containerId);
+            
+            const html = `
+                <div class="result-item">
+                    <strong>HTML Detected:</strong>
+                    <div class="result-value">
+                        <span class="${result.hasHTML ? 'status-true' : 'status-false'}">
+                            ${result.hasHTML ? 'YES' : 'NO'}
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="result-item">
+                    <strong>Original Content:</strong>
+                    <div class="result-value">${escapeHtml(result.originalContent.substring(0, 200))}${result.originalContent.length > 200 ? '...' : ''}</div>
+                </div>
+                
+                <div class="result-item">
+                    <strong>Clean Text:</strong>
+                    <div class="result-value">${escapeHtml(result.cleanText)}</div>
+                </div>
+                
+                <div class="result-item">
+                    <strong>Headline Text:</strong>
+                    <div class="result-value">${escapeHtml(result.headlineText)}</div>
+                </div>
+                
+                <div class="result-item">
+                    <strong>Words Extracted:</strong>
+                    <div class="words-list">
+                        ${result.words.map(word => `<span class="word-tag">${word}</span>`).join('')}
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <strong>Word Count:</strong> ${result.wordCount} | 
+                        <strong>Suitable for Game:</strong> 
+                        <span class="${result.suitableForGame ? 'status-true' : 'status-false'}">
+                            ${result.suitableForGame ? 'YES' : 'NO'}
+                        </span>
+                    </div>
+                </div>
+            `;
+            
+            container.innerHTML = html;
+        }
+        
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+        
+        function testRSSExample() {
+            console.log('🧪 Testing RSS Example...');
+            const result = testHTMLProcessor();
+            displayResults('example-results', result);
+        }
+        
+        function testCustomInput() {
+            const input = document.getElementById('custom-input').value;
+            if (!input.trim()) {
+                alert('Please enter some HTML content to test.');
+                return;
+            }
+            
+            console.log('🧪 Testing Custom Input...');
+            const result = processRSSContent(input);
+            displayResults('custom-results', result);
+        }
+        
+        function loadSampleHTML() {
+            const samples = [
+                '<p>Scientists discover new species in &quot;remote&quot; location</p><p>The team found &amp; documented over 50 new species.</p>',
+                '<div>Breaking: <strong>Major earthquake</strong> hits coastal region</div><br/>Emergency services respond quickly.',
+                '<h1>Technology News</h1><p>AI breakthrough announced by researchers at leading university.</p>',
+                'Simple text without any HTML tags or entities.',
+                '<p>Mixed content with &lt;code&gt; tags and &amp;amp; entities &quot;quoted text&quot;</p>'
+            ];
+            
+            const randomSample = samples[Math.floor(Math.random() * samples.length)];
+            document.getElementById('custom-input').value = randomSample;
+        }
+        
+        function testDetectHTML() {
+            console.log('🧪 Testing HTML Detection...');
+            
+            const testCases = [
+                '<p>HTML content</p>',
+                'Plain text',
+                'Text with &amp; entities',
+                '<div>Mixed <strong>content</strong></div>',
+                'No HTML here!',
+                '&#39;Numeric entity&#39;'
+            ];
+            
+            const results = testCases.map(test => ({
+                input: test,
+                hasHTML: detectHTML(test)
+            }));
+            
+            const html = results.map(result => `
+                <div class="result-item">
+                    <strong>Input:</strong> <code>${escapeHtml(result.input)}</code><br>
+                    <strong>Has HTML:</strong> 
+                    <span class="${result.hasHTML ? 'status-true' : 'status-false'}">
+                        ${result.hasHTML ? 'YES' : 'NO'}
+                    </span>
+                </div>
+            `).join('');
+            
+            document.getElementById('function-results').innerHTML = html;
+        }
+        
+        function testStripHTML() {
+            console.log('🧪 Testing HTML Stripping...');
+            
+            const testCases = [
+                '<p>Simple paragraph</p>',
+                '<div>Text with <strong>bold</strong> and <em>italic</em></div>',
+                '<p>First paragraph</p><p>Second paragraph</p>',
+                'Plain text without HTML',
+                '<a href="http://example.com">Link text</a>'
+            ];
+            
+            const results = testCases.map(test => ({
+                input: test,
+                output: stripHTML(test)
+            }));
+            
+            const html = results.map(result => `
+                <div class="result-item">
+                    <strong>Input:</strong> <code>${escapeHtml(result.input)}</code><br>
+                    <strong>Output:</strong> <code>${escapeHtml(result.output)}</code>
+                </div>
+            `).join('');
+            
+            document.getElementById('function-results').innerHTML = html;
+        }
+        
+        function testDecodeEntities() {
+            console.log('🧪 Testing Entity Decoding...');
+            
+            const testCases = [
+                '&amp; &lt; &gt; &quot;',
+                '&#39;quoted text&#39;',
+                '&copy; 2024 &trade;',
+                'No entities here',
+                '&nbsp;&ndash;&mdash;'
+            ];
+            
+            const results = testCases.map(test => ({
+                input: test,
+                output: HTMLProcessor.decodeHTMLEntities(test)
+            }));
+            
+            const html = results.map(result => `
+                <div class="result-item">
+                    <strong>Input:</strong> <code>${escapeHtml(result.input)}</code><br>
+                    <strong>Output:</strong> <code>${escapeHtml(result.output)}</code>
+                </div>
+            `).join('');
+            
+            document.getElementById('function-results').innerHTML = html;
+        }
+        
+        // Auto-run the RSS example on page load
+        window.addEventListener('load', function() {
+            console.log('🚀 HTML Processor Test Suite loaded successfully!');
+            console.log('📝 Available functions: detectHTML, stripHTML, processRSSContent, testHTMLProcessor');
+        });
+    </script>
+</body>
+</html>
