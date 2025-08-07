@@ -124,6 +124,30 @@ const rssNewsSources = [
     }
 ];
 
+// Star rating system configuration
+const starRatingConfig = {
+    // Base multiplier for minimum possible swaps
+    baseMultiplier: 1,
+    
+    // Star threshold multipliers (applied to base threshold)
+    starThresholds: {
+        5: 4.0,    // 5 stars: ≤ wordCount × 3 (base)
+        4: 6.0,    // 4 stars: ≤ wordCount × 4.5 (base × 1.5)
+        3: 8.0,    // 3 stars: ≤ wordCount × 6 (base × 2.0)
+        2: 12.0,    // 2 stars: ≤ wordCount × 9 (base × 3.0)
+        1: Infinity // 1 star: any number of swaps
+    },
+    
+    // Performance rating labels
+    ratingLabels: {
+        5: 'PERFECT',
+        4: 'EXCELLENT', 
+        3: 'GOOD',
+        2: 'FAIR',
+        1: 'COMPLETE'
+    }
+};
+
 // Mock headlines data - all with 4+ words and descriptions
 const mockHeadlines = [
     {

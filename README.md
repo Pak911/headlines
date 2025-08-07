@@ -21,20 +21,18 @@ Unlike traditional crosswords that require knowledge, this is a pure logic puzzl
 
 ## 🚀 Quick Start
 
+**Simple Setup - No Installation Required!**
+
+1. **Download**: Clone or download this repository
+2. **Open**: Double-click on `index.html` 
+3. **Play**: The game opens directly in your browser
+
 ```bash
-# Clone the repository
+# Optional: Clone the repository
 git clone https://github.com/Pak911/headlines.git
-
-# Navigate to the project
-cd headlines
-
-# Open the game (no build process needed!)
-open index.html
-# or
-start index.html
 ```
 
-**That's it!** The game runs entirely in your browser with zero dependencies.
+**That's it!** The game runs entirely in your browser with zero dependencies. Just download and open `index.html` in most modern browsers.
 
 ## 🎯 How to Play
 
@@ -51,14 +49,6 @@ start index.html
 | 🟠 **Orange** | Letter belongs to this word but wrong position |
 | 🟣 **Purple** | Letter belongs to a connected/intersecting word |
 | ⚫ **Gray** | Letter belongs to a different, non-connected word |
-
-### 🎚️ Difficulty Levels
-
-- **Easy**: Only words are shuffled, intersections preserved
-- **Medium-Easy**: One intersection disrupted
-- **Medium**: Half of intersections preserved (default)
-- **Medium-Hard**: Intersection chaos
-- **Hard**: Maximum scrambling with 15% green letter limit
 
 ## ✨ Key Features
 
@@ -85,79 +75,61 @@ start index.html
 
 ## 🏗️ Architecture
 
-### Modular Design (9 Focused Modules)
+### Modular Design (12 Focused Modules)
 
 ```
 scripts/
 ├── main.js                    # Entry point & global state
 ├── core/                      # Foundation algorithms
-│   ├── crossword-engine.js    # Layout generation (450+ lines)
-│   ├── grid-manager.js        # Grid & word management (200+ lines)
-│   └── color-logic.js         # Wordle-style feedback (200+ lines)
+│   ├── crossword-engine.js    # Layout generation
+│   ├── grid-manager.js        # Grid & word management
+│   └── color-logic.js         # Wordle-style feedback
 ├── gameplay/                  # User-facing features
-│   ├── difficulty-system.js   # Strategic scrambling (300+ lines)
-│   ├── game-controller.js     # Game flow control (200+ lines)
-│   └── ui-interactions.js     # User interface (100+ lines)
+│   ├── difficulty-system.js   # Strategic scrambling
+│   ├── game-controller.js     # Game flow control
+│   └── ui-interactions.js     # User interface
 └── utils/                     # Supporting functionality
-    ├── headline-manager.js    # Headline lifecycle (150+ lines)
-    └── debug-utils.js         # Development tools (400+ lines)
-```
-
-### Key Algorithms
-
-#### Crossword Generation
-```javascript
-// Multi-phase generation with validation
-generateCrosswordLayout(words) {
-  // Phase 1: Intelligent placement using shared letters
-  // Phase 2: Validate connectivity and spacing
-  // Phase 3: Fallback to structured layout
-  // Phase 4: Rejection and retry system
-}
-```
-
-#### Strategic Scrambling
-```javascript
-// Constraint-based difficulty with state tracking
-scrambleWithGreenConstraint(targetPercentage) {
-  // Track best state during scrambling
-  // Guarantee optimal green percentage targeting
-  // Maintain solvability through swap logging
-}
-```
-
-## 🧪 Testing Framework
-
-The project includes a comprehensive test suite (`test.html`) for validating:
-- Color determination logic
-- Intersection cell handling
-- Edge cases with duplicate letters
-- Connected word relationships
-
-```bash
-# Run the test suite
-open test.html
+    ├── headline-manager.js    # Headline lifecycle
+    ├── headline-scorer.js     # Scoring algorithms
+    ├── async-rss-fetcher.js   # RSS feed processing
+    ├── rss-parser.js          # RSS parsing utilities
+    ├── html-processor.js      # HTML content processing
+    └── debug-utils.js         # Development tools
 ```
 
 ## 📁 Project Structure
 
 ```
 headlines/
-├── index.html              # Main game interface
-├── styles.css              # Game styling and animations
-├── data.js                 # Headlines data and configuration
-├── scripts/                # Modular JavaScript architecture
-├── test.html              # Color logic testing framework
-├── test-explanation.md    # Test framework documentation
-└── memory-bank/           # Project documentation
-    ├── projectbrief.md    # Project scope and requirements
-    ├── productContext.md  # User experience and goals
-    ├── systemPatterns.md  # Architecture and design patterns
-    ├── techContext.md     # Technology stack and setup
-    └── activeContext.md   # Working log and current status
+├── index.html                 # Main game interface
+├── styles.css                 # Game styling and animations
+├── data.js                    # Headlines data and configuration
+├── scripts/                   # Modular JavaScript architecture
+├── test.html                  # Main testing interface
+├── test-html-processor.html   # HTML processor tests
+├── test-rss-parser.html       # RSS parser tests
+├── test-explanation.md        # Test framework documentation
+└── memory-bank/               # Project documentation & guidelines
+    ├── projectbrief.md        # Project scope and requirements
+    ├── productContext.md      # User experience and goals
+    ├── systemPatterns.md      # Architecture and design patterns
+    ├── techContext.md         # Technology stack and setup
+    ├── designGuidelines.md    # Visual design and UI guidelines
+    └── activeContext.md       # Working log and current status
 ```
 
 ## 🔧 Development
+
+### Development Guidelines
+
+This project uses a comprehensive **memory-bank** system for development guidance:
+
+- **`memory-bank/designGuidelines.md`**: Contains visual design principles, Material Design approach, color palette, typography, and component styling guidelines
+- **`memory-bank/systemPatterns.md`**: Documents architecture decisions and technical patterns
+- **`memory-bank/techContext.md`**: Technology stack and development environment setup
+- **`memory-bank/projectbrief.md`**: Project scope and core requirements
+
+**For developers**: Start by reading the memory-bank files to understand the project's design philosophy and technical decisions.
 
 ### Adding New Headlines
 Edit `data.js` to add headlines to the `headlines` array:
@@ -176,6 +148,12 @@ Press **'D'** during gameplay to access:
 - Test case generation tools
 - Grid state export functionality
 
+### Testing
+The project includes multiple test files:
+- `test.html` - Main testing interface
+- `test-html-processor.html` - HTML processing tests
+- `test-rss-parser.html` - RSS parsing tests
+
 ### Browser Requirements
 - ES6 JavaScript support
 - CSS Grid and Flexbox
@@ -190,6 +168,7 @@ Press **'D'** during gameplay to access:
 - **Advanced Algorithms**: Sophisticated crossword generation and scrambling
 - **Comprehensive Testing**: Dedicated test framework for edge cases
 - **Developer-Friendly**: Extensive debug tools and documentation
+- **RSS Integration**: Real-time headline fetching capabilities
 
 ## 🚀 Future Enhancements
 
@@ -218,19 +197,36 @@ Press **'D'** during gameplay to access:
 - Update documentation in the memory-bank
 - Use the debug panel for testing
 - Follow the existing code patterns
+- Consult `memory-bank/designGuidelines.md` for styling consistency
 
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+### Attribution Requirements
+
+**If you use this code or create derivative works, please provide proper attribution:**
+
+- Include a clear acknowledgment that the project was created using this repository
+- Credit **Pak911** as the original author
+- Link back to the original repository: https://github.com/Pak911/headlines
+
+Example attribution:
+```
+Based on "Headlines" by Pak911 (https://github.com/Pak911/headlines)
+```
+
+This attribution helps support the open-source community and gives credit where it's due.
 
 ## 🙏 Acknowledgments
 
 - Inspired by crossword puzzles and Wordle-style feedback
 - Built with modern web technologies
 - Designed for educational and entertainment purposes
+- Created by **Pak911** with love for puzzle games and clean code
 
 ---
 
-**Ready to play?** [Open the game](index.html) and start swapping letters! 🎮
+**Ready to play?** [Download and open index.html](index.html) in your browser! 🎮
 
-*For developers: Press 'D' in-game to explore the debug panel and see the sophisticated algorithms in action.*
+*For developers: Press 'D' in-game to explore the debug panel and check out the memory-bank for comprehensive development guidelines.*

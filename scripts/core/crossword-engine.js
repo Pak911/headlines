@@ -126,10 +126,11 @@ function generateCrosswordLayout(words) {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const layout = tryGenerateLayout(words, attempt);
         if (layout.words.length === words.length) { // Only consider complete layouts
-            // Validate layout connectivity, parallel spacing, and no end-to-end adjacency
+            // Validate layout connectivity, parallel spacing, no end-to-end adjacency, and proper non-intersecting spacing
             if (isLayoutConnected(layout, words) && 
                 hasProperParallelSpacing(layout, words) && 
-                hasNoEndToEndAdjacency(layout, words)) {
+                hasNoEndToEndAdjacency(layout, words) &&
+                hasProperNonIntersectingSpacing(layout, words)) {
                 const score = scoreLayout(layout, words);
                 if (score < bestScore) {
                     bestScore = score;
@@ -146,7 +147,8 @@ function generateCrosswordLayout(words) {
         if (simpleLayout.words.length === words.length &&
             isLayoutConnected(simpleLayout, words) && 
             hasProperParallelSpacing(simpleLayout, words) &&
-            hasNoEndToEndAdjacency(simpleLayout, words)) {
+            hasNoEndToEndAdjacency(simpleLayout, words) &&
+            hasProperNonIntersectingSpacing(simpleLayout, words)) {
             normalizeLayout(simpleLayout, words);
             return simpleLayout;
         }
@@ -466,6 +468,72 @@ function hasNoEndToEndAdjacency(layout, words) {
             }
         }
     }
+    return true;
+}
+
+// Check if non-intersecting words have proper spacing (at least 2 squares apart)
+function hasProperNonIntersectingSpacing(layout, words) {
+    for (let i = 0; i < layout.words.length; i++) {
+        for (let j = i + 1; j < layout.words.length; j++) {
+            const word1 = layout.words[i];
+            const word2 = layout.words[j];
+            
+            // Check if words intersect
+            if (!doWordsIntersect(word1, word2, words)) {
+                // Non-intersecting words must have proper spacing
+                if (!hasMinimumDistance(word1, word2, words, 2)) {
+                    return false;
+                }
+            }
+        }
+    }
+    return true;
+}
+
+// Check if two words have minimum distance between their letters
+function hasMinimumDistance(word1, word2, words, minDistance) {
+    const word1Text = words[word1.word];
+    const word2Text = words[word2.word];
+    
+    // Get all positions for both words
+    const positions1 = [];
+    const positions2 = [];
+    
+    for (let i = 0; i < word1Text.length; i++) {
+        let row = word1.row;
+        let col = word1.col;
+        if (word1.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions1.push({row, col});
+    }
+    
+    for (let i = 0; i < word2Text.length; i++) {
+        let row = word2.row;
+        let col = word2.col;
+        if (word2.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions2.push({row, col});
+    }
+    
+    // Check minimum distance between all letter positions
+    for (let pos1 of positions1) {
+        for (let pos2 of positions2) {
+            const distance = Math.max(
+                Math.abs(pos1.row - pos2.row),
+                Math.abs(pos1.col - pos2.col)
+            );
+            if (distance < minDistance) {
+                return false;
+            }
+        }
+    }
+    
     return true;
 }
 

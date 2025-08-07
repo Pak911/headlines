@@ -15,26 +15,21 @@ function checkVictory() {
 
 // Calculate star rating based on swap count and word count
 function calculateStarRating(swapCount, wordCount) {
-    const minPossibleSwaps = Math.floor(wordCount * 2); // Base threshold
+    const minPossibleSwaps = Math.floor(wordCount * starRatingConfig.baseMultiplier);
     
     let rating = '';
     let starCount = 0;
     
-    if (swapCount <= minPossibleSwaps) {
-        rating = 'PERFECT';
-        starCount = 5;
-    } else if (swapCount <= minPossibleSwaps * 1.5) {
-        rating = 'EXCELLENT';
-        starCount = 4;
-    } else if (swapCount <= minPossibleSwaps * 2) {
-        rating = 'GOOD';
-        starCount = 3;
-    } else if (swapCount <= minPossibleSwaps * 3) {
-        rating = 'FAIR';
-        starCount = 2;
-    } else {
-        rating = 'COMPLETE';
-        starCount = 1;
+    // Check each star level from highest to lowest
+    for (let stars = 5; stars >= 1; stars--) {
+        const threshold = starRatingConfig.starThresholds[stars];
+        const maxSwaps = threshold === Infinity ? Infinity : Math.floor(minPossibleSwaps * threshold);
+        
+        if (swapCount <= maxSwaps) {
+            starCount = stars;
+            rating = starRatingConfig.ratingLabels[stars];
+            break;
+        }
     }
     
     return { rating, starCount, minPossibleSwaps };
@@ -42,15 +37,15 @@ function calculateStarRating(swapCount, wordCount) {
 
 // Get swap thresholds for each star level
 function getStarThresholds(wordCount) {
-    const minPossibleSwaps = Math.floor(wordCount * 2);
+    const minPossibleSwaps = Math.floor(wordCount * starRatingConfig.baseMultiplier);
     
-    return {
-        5: minPossibleSwaps,                    // 5 stars: ≤ wordCount × 2
-        4: Math.floor(minPossibleSwaps * 1.5),  // 4 stars: ≤ wordCount × 3
-        3: minPossibleSwaps * 2,                // 3 stars: ≤ wordCount × 4
-        2: minPossibleSwaps * 3,                // 2 stars: ≤ wordCount × 6
-        1: Infinity                             // 1 star: any number of swaps
-    };
+    const thresholds = {};
+    for (let stars = 5; stars >= 1; stars--) {
+        const threshold = starRatingConfig.starThresholds[stars];
+        thresholds[stars] = threshold === Infinity ? Infinity : Math.floor(minPossibleSwaps * threshold);
+    }
+    
+    return thresholds;
 }
 
 // Generate tooltip content for star hover
