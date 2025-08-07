@@ -70,6 +70,20 @@
                 <h4>Compatibility Analysis</h4>
                 <div id="debugCompatibility" class="debug-info"></div>
             </div>
+            <div class="debug-section">
+                <h4>Current Grid State (Test Case Format)</h4>
+                <div id="debugGridState" class="debug-info">
+                    <textarea id="gridStateCode" readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; background: #f5f5f5; border: 1px solid #ccc; padding: 10px;"></textarea>
+                    <button onclick="copyGridState()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Copy to Clipboard</button>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>Complete Test Case HTML (with LLM Output Functionality)</h4>
+                <div id="debugCompleteTestCase" class="debug-info">
+                    <textarea id="completeTestCaseCode" readonly style="width: 100%; height: 300px; font-family: monospace; font-size: 12px; background: #f5f5f5; border: 1px solid #ccc; padding: 10px;"></textarea>
+                    <button onclick="copyCompleteTestCase()" style="margin-top: 10px; padding: 5px 10px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">Copy Complete HTML to Clipboard</button>
+                </div>
+            </div>
         </div>
     </div>
 
