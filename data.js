@@ -1,3 +1,39 @@
+// Difficulty system configuration
+let currentDifficulty = 'medium'; // Default difficulty
+
+const difficultySettings = {
+    easy: { 
+        name: 'Easy - Word Shuffle Only', 
+        minSwaps: 2, 
+        maxSwaps: 6, 
+        maxGreenPercentage: 100 // No constraint for easy
+    },
+    mediumEasy: { 
+        name: 'Medium-Easy - 40% Green Max', 
+        minSwaps: 3, 
+        maxSwaps: 8, 
+        maxGreenPercentage: 40 
+    },
+    medium: { 
+        name: 'Medium - 30% Green Max', 
+        minSwaps: 6, 
+        maxSwaps: 12, 
+        maxGreenPercentage: 30 
+    },
+    mediumHard: { 
+        name: 'Medium-Hard - 20% Green Max', 
+        minSwaps: 8, 
+        maxSwaps: 16, 
+        maxGreenPercentage: 20 
+    },
+    hard: { 
+        name: 'Hard - 15% Green Max', 
+        minSwaps: 12, 
+        maxSwaps: 24, 
+        maxGreenPercentage: 15 
+    }
+};
+
 // Mock headlines data - all with 4+ words
 const mockHeadlines = [
     {

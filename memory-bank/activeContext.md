@@ -1,68 +1,30 @@
 # Active Context - Headlines Crossword Game
 
-## Current Task: COMPLETED ✅
-**Enhanced test suite with hover tooltips and click-to-copy functionality**
+## Current Status: COMPLETED ✅
+**Advanced Difficulty System with Configurable Green Letter Constraints**
 
-## Session Log
+## Recent Major Achievements (2025-01-08)
 
-### 2025-01-08 16:30 - Test Suite Enhancement Completed
-**Enhancement Request**: User requested hover tooltips showing cell coordinates and click-to-copy functionality for easier reference when discussing test cases.
+**Five-Level Difficulty System Implemented**:
+- Easy (100% green) → Hard (15% green) with configurable constraints
+- Two-phase scrambling algorithm ensures solvability
+- Core innovation: Every puzzle solvable in exactly the number of swaps performed
 
-**Implementation**:
-1. **Hover Tooltips Added**:
-   - Show position coordinates (row, col)
-   - Display letter mapping ('target' → 'current')
-   - Show word indices the cell belongs to
-   - Display applied color class
-   - Works for both filled and empty cells
+**System Organization Enhanced**:
+- All difficulty settings centralized in data.js for easy configuration
+- Color logic unified between main game and test framework
+- Test suite enhanced with hover tooltips and click-to-copy functionality
 
-2. **Click-to-Copy Functionality**:
-   - Click any cell to copy hover information to clipboard
-   - Uses modern `navigator.clipboard.writeText()` API with fallback
-   - Fallback to `document.execCommand('copy')` for older browsers
-   - Visual feedback with green checkmark on successful copy
-   - Pointer cursor indicates clickable cells
+**Key Technical Implementation**:
+- `scrambleWithGreenConstraint()`: Main algorithm with real-time percentage tracking
+- Strategic swap targeting prioritizes correct→wrong cell swaps for maximum impact
+- Universal color functions work seamlessly across both game and test implementations
 
-3. **Enhanced User Experience**:
-   - Clear instruction in tooltip: "[Click to copy this info to clipboard]"
-   - Brief visual feedback (green background + checkmark) on copy
-   - Consistent behavior across all test cases
-
-**Example Output**:
-```
-Position: (3,1)
-Letter: 'T' → 'E'
-Word indices: [0,3]
-Color: connected-word
-```
-
-### 2025-01-08 15:46 - Color Logic Unification Completed
-**Problem Identified**: The main game (index.html) and test framework (test.html) had different implementations of color determination functions, causing inconsistent behavior.
-
-**Solution Implemented**:
-1. **Updated TestGrid class in test.html**:
-   - Changed from `wordIndex` (single value) to `wordIndices` (array format)
-   - Added `letterIndices` mapping for proper intersection handling
-   - Updated `setCell` method to handle intersections correctly
-   - Modified `setWordConnections` to use main game logic
-
-2. **Maintained universal functions in script.js**:
-   - Functions already supported both formats with proper fallbacks
-   - Kept backward compatibility intact
-
-**Results Verified**:
-- ✅ All test cases display correct colors including purple (connected word)
-- ✅ Both main game and test framework use identical color logic
-- ✅ All four color categories working properly
-
-## Known State
-- ✅ Main game (index.html) working correctly with proper color coding
-- ✅ Test framework (test.html) enhanced with tooltips and copy functionality
-- ✅ Universal color functions work seamlessly with both implementations
-- ✅ All intersection and connection logic functioning properly
-- ✅ Enhanced debugging capabilities with easy cell reference copying
-- ✅ Connected word logic fixed to handle duplicate letters correctly
-- ✅ Intersection cell swapping verified to work correctly
+## System Status
+- ✅ Main game and test framework fully functional with unified color logic
+- ✅ Five-level difficulty system with green letter percentage constraints
+- ✅ Enhanced test suite with debugging tooltips and copy functionality
+- ✅ All intersection and connection logic working correctly
 
 ## Critical Technical Insight: Intersection Cell Handling
 **Key Discovery**: Intersection cells (cells that belong to multiple words) are handled correctly in both main game and test framework:
@@ -78,10 +40,7 @@ Color: connected-word
 - Color determination: Checks 'E' against both TRAFFIC and TODAY, returns highest priority result
 
 ## Next Steps
-- System is complete and fully functional
-- Enhanced test suite provides excellent debugging and reference capabilities
-- Intersection cell logic verified and documented
-- No immediate follow-up work required
+System complete and fully functional. No immediate work required.
 
 ## Open Questions
-None - all requested enhancements completed successfully.
+None.

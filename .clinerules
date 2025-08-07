@@ -58,6 +58,42 @@ This is the single file used to track the dynamic state of the project. This is 
    * **Next Steps**: The immediate priorities once the current task is complete.  
    * **Open Questions**: Any unresolved questions for the user.
 
+## **ActiveContext Growth Management**
+
+To prevent activeContext.md from becoming unwieldy, I will follow these strict guidelines:
+
+### **Size Limits & Triggers**
+- **Maximum Target**: 3,000 characters (~1 page)
+- **Warning Threshold**: 2,500 characters
+- **Critical Threshold**: 4,000 characters (mandatory cleanup)
+
+### **Automatic Cleanup Rules**
+When activeContext.md approaches size limits, I will:
+
+1. **Archive Completed Sessions**: Move detailed session logs older than 7 days to a separate `memory-bank/archive/` folder
+2. **Consolidate Redundant Information**: Merge similar entries and remove duplicate technical details
+3. **Promote Stable Knowledge**: Move architectural insights and permanent technical decisions to appropriate foundational files
+4. **Compress Session Logs**: Reduce verbose descriptions to outcome-focused summaries
+
+### **Content Prioritization (Keep vs. Archive)**
+**Always Keep**:
+- Current task status and immediate next steps
+- Critical technical insights unique to the project
+- Recent session outcomes (last 3-5 entries)
+- Known bugs and system state
+
+**Archive When Space Needed**:
+- Detailed implementation steps (keep only outcomes)
+- Verbose session logs older than current work cycle
+- Redundant technical explanations already documented in foundational files
+- Historical debugging information for resolved issues
+
+### **Maintenance Workflow**
+1. **Check size** before each major update
+2. **Propose cleanup** when approaching warning threshold
+3. **Mandatory cleanup** at critical threshold before adding new content
+4. **Archive with date stamps** (e.g., `archive/activeContext-2025-01-08.md`)
+
 ## **Documentation Update Rules & Workflows**
 
 File updates are governed by a strict hierarchy of triggers. I will always announce my intention to update a file, specify which one, and await user confirmation.

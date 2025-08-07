@@ -90,8 +90,76 @@ return layout.words.length === 0 || hasIntersection;
 - Calculate bounds before normalization
 - Adjust all positions relative to minimum values
 
+### 5. Difficulty System & Letter Scrambling Algorithm
+- **Pattern**: Configurable constraint-based scrambling with green letter percentage limits
+- **Key Innovation**: Strategic swap-based approach that guarantees solvability
+
+#### Difficulty Configuration Structure
+**Location**: `data.js` (for easy configuration and adjustment)
+
+```javascript
+// Difficulty system configuration
+let currentDifficulty = 'medium'; // Default difficulty
+
+const difficultySettings = {
+    easy: { 
+        name: 'Easy - Word Shuffle Only', 
+        minSwaps: 2, maxSwaps: 6, 
+        maxGreenPercentage: 100  // No constraint
+    },
+    medium: { 
+        name: 'Medium - 30% Green Max', 
+        minSwaps: 6, maxSwaps: 12, 
+        maxGreenPercentage: 30   // Max 30% correct letters
+    },
+    hard: { 
+        name: 'Hard - 15% Green Max', 
+        minSwaps: 12, maxSwaps: 24, 
+        maxGreenPercentage: 15   // Max 15% correct letters
+    }
+};
+```
+
+**Configuration Guidelines**:
+- Edit `data.js` to modify difficulty settings
+- `maxGreenPercentage`: Controls maximum percentage of correct letters remaining after scrambling
+- `minSwaps`/`maxSwaps`: Define the range of swaps performed during scrambling
+- `name`: Display name shown in UI and debug information
+
+#### Scrambling Algorithm Logic
+**Core Principle**: Every puzzle is solvable in exactly the number of swaps performed during scrambling.
+
+**Two-Phase Approach**:
+1. **Phase 1 - Aggressive Reduction**: Systematically reduce green letter percentage to meet target
+   - Prioritize swapping correct cells with wrong cells
+   - Fall back to correct-with-correct swaps when needed
+   - Continue until green percentage ≤ target
+
+2. **Phase 2 - Minimum Swap Requirement**: Reach minimum swap count while maintaining constraint
+   - Perform neutral swaps (wrong-with-wrong) when at target
+   - Ensure minimum difficulty threshold is met
+
+**Strategic Targeting**:
+- **Easy**: Only shuffle within individual words, preserve all intersections
+- **Medium-Easy/Medium/Medium-Hard/Hard**: Use constraint-based algorithm with different green percentage limits
+- **Intersection Priority**: Intersection cells are prioritized for swapping due to maximum impact
+
+#### Key Functions
+- `scrambleWithGreenConstraint()`: Main constraint-based algorithm
+- `countCorrectCells()`: Tracks green letter percentage in real-time
+- `performStrategicSwap()`: Executes swaps and maintains swap log for solvability
+- `changeDifficulty()`: Resets grid and applies new difficulty settings
+
+**Why This Approach Works**:
+- Guarantees every puzzle has a known minimum solution
+- Provides clear difficulty progression through green letter constraints
+- Maintains crossword structure integrity during scrambling
+- Allows fine-tuning of difficulty through configurable parameters
+
 ## Design Patterns Used
 1. **State Management**: Module-level variables for game state
 2. **Event Delegation**: Click handlers on individual cells
 3. **Factory Pattern**: Grid and layout generation functions
 4. **Observer Pattern**: Implicit through DOM updates
+5. **Strategy Pattern**: Different scrambling algorithms per difficulty level
+6. **Configuration Pattern**: Centralized difficulty settings with runtime modification
