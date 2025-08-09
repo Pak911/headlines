@@ -11,6 +11,7 @@ Create an engaging word puzzle game where players swap individual letters to rec
    - Words intersect at shared letters (not just touch)
    - Parallel words have at least one square gap between them
    - Each word crosses at least one other word
+   - Words share exactly one letter with any intersecting word (no multiple shared letters)
 
 2. **Letter Swapping Mechanics**: 
    - Players swap individual letters (not whole words)

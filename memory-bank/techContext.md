@@ -31,7 +31,8 @@ headlines/
 │   ├── gameplay/                       # User-facing game features
 │   │   ├── difficulty-system.js        # Letter scrambling algorithms
 │   │   ├── game-controller.js          # Game flow and state management
-│   │   └── ui-interactions.js          # User interface interactions
+│   │   ├── ui-interactions.js          # User interface interactions
+│   │   └── victory-animations.js       # Victory celebration animations
 │   └── utils/                          # Supporting utilities
 │       ├── headline-manager.js         # Headline lifecycle management
 │       ├── async-rss-fetcher.js        # Parallel RSS fetching system
@@ -58,7 +59,7 @@ headlines/
 
 - **`crossword-engine.js`** (450+ lines)
   - **Functions**: Layout generation, validation, scoring
-  - **Key APIs**: `generateCrosswordLayout()`, `isLayoutConnected()`, `hasNoEndToEndAdjacency()`
+  - **Key APIs**: `generateCrosswordLayout()`, `isLayoutConnected()`, `hasNoEndToEndAdjacency()`, `doWordsShareMultipleLetters()`, `hasValidLetterSharing()`
   - **Dependencies**: None (pure algorithms)
   - **Purpose**: Creates valid crossword layouts from word lists
 

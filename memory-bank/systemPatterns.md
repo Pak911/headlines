@@ -19,6 +19,8 @@ Single-page application (SPA) with all logic contained in index.html:
   - `isValidPlacement()`: Ensures proper spacing and intersections
   - `isLayoutConnected()`: Validates all words form single connected component
   - `hasProperParallelSpacing()`: Ensures parallel words have minimum gaps
+  - `doWordsShareMultipleLetters()`: Prevents words from sharing more than one letter
+  - `hasValidLetterSharing()`: Validates entire layout for proper letter sharing
   - `generateCrosswordLayout()`: Main generation logic with validation
   - `generateSimpleLayout()`: Fallback for edge cases
 
