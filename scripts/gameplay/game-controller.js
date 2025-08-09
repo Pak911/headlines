@@ -202,6 +202,11 @@ function replayGame() {
     selectedCell = null;
     document.getElementById('swapCount').textContent = '0';
     
+    // Reset completed words tracking
+    if (typeof resetCompletedWords === 'function') {
+        resetCompletedWords();
+    }
+    
     // Reset grid to the scrambled state (keep the same puzzle)
     // We need to scramble the letters again
     scrambleLetters();

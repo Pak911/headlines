@@ -1,6 +1,12 @@
 // UI Interactions - Cell Selection, Swapping, and Rendering
 // Handles user interface interactions and visual feedback
 
+// Store the last swap positions for victory animation
+let lastSwapPositions = null;
+
+// Track completed words to avoid duplicate animations
+let completedWords = new Set();
+
 function renderCrossword() {
     const container = document.getElementById('crosswordGrid');
     container.innerHTML = '';
@@ -63,7 +69,86 @@ function selectCell(row, col) {
     }
 }
 
+// Check if a word is completely correct (all letters in correct positions)
+function isWordComplete(wordIndex) {
+    // Get all cells for this word
+    const wordCells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                wordCells.push({row: r, col: c, cell: grid[r][c]});
+            }
+        }
+    }
+    
+    // Check if all letters are correct
+    for (let cellInfo of wordCells) {
+        if (cellInfo.cell.currentLetter !== cellInfo.cell.letter) {
+            return false;
+        }
+    }
+    
+    return wordCells.length > 0;
+}
+
+// Play subtle color wave animation along a completed word
+function playWordCompletionAnimation(wordIndex) {
+    // Get all cells for this word
+    const wordCells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                wordCells.push({
+                    row: r,
+                    col: c,
+                    element: document.querySelector(`.grid-cell[data-row="${r}"][data-col="${c}"]`)
+                });
+            }
+        }
+    }
+    
+    if (wordCells.length === 0) return;
+    
+    // Get word info to determine direction
+    const wordInfo = crosswordLayout.words.find(w => w.word === wordIndex);
+    const isHorizontal = wordInfo && wordInfo.direction === 'horizontal';
+    
+    // Sort cells based on word direction
+    if (isHorizontal) {
+        // Left to right
+        wordCells.sort((a, b) => a.col - b.col);
+    } else {
+        // Top to bottom
+        wordCells.sort((a, b) => a.row - b.row);
+    }
+    
+    // Apply subtle color wave animation with staggered delays
+    const baseDelay = 80; // Slower, more subtle timing
+    const duration = 400; // Longer duration for smoother transition
+    
+    wordCells.forEach((cell, index) => {
+        if (cell.element) {
+            const delay = index * baseDelay;
+            
+            setTimeout(() => {
+                cell.element.style.transition = `all ${duration}ms ease-out`;
+                cell.element.style.backgroundColor = '#4ade80'; // Brighter green
+                
+                // Return to normal green with smooth transition
+                setTimeout(() => {
+                    if (cell.element) {
+                        cell.element.style.backgroundColor = '#4CAF50'; // Normal green
+                    }
+                }, duration);
+            }, delay);
+        }
+    });
+}
+
 function swapLetters(pos1, pos2) {
+    // Store last swap positions for victory animation
+    lastSwapPositions = [pos1, pos2];
+    
     // Add swapping animation
     const cell1 = document.querySelector(`.grid-cell[data-row="${pos1.row}"][data-col="${pos1.col}"]`);
     const cell2 = document.querySelector(`.grid-cell[data-row="${pos2.row}"][data-col="${pos2.col}"]`);
@@ -91,6 +176,17 @@ function swapLetters(pos1, pos2) {
     setTimeout(() => {
         renderCrossword();
         
+        // Check for word completions (but not if this completes the entire puzzle)
+        if (!checkVictory()) {
+            // Check each word to see if it's now complete
+            for (let wordIndex = 0; wordIndex < currentHeadline.words.length; wordIndex++) {
+                if (!completedWords.has(wordIndex) && isWordComplete(wordIndex)) {
+                    completedWords.add(wordIndex);
+                    playWordCompletionAnimation(wordIndex);
+                }
+            }
+        }
+        
         // Update debug panel if visible
         if (debugPanelVisible) {
             updateGridStateCode();
@@ -98,7 +194,15 @@ function swapLetters(pos1, pos2) {
         
         // Check for victory
         if (checkVictory()) {
-            setTimeout(showVictory, 300);
+            setTimeout(playVictoryAnimation, 300);
         }
     }, 500);
 }
+
+// Reset completed words when starting a new game
+function resetCompletedWords() {
+    completedWords.clear();
+}
+
+// Make function globally available
+window.resetCompletedWords = resetCompletedWords;

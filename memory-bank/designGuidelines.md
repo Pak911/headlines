@@ -52,6 +52,28 @@ Following Material Design elevation levels:
 - Clear focus states for accessibility
 - No jarring animations
 
+### 8. **Victory Animations**
+- **Subtle and Professional**: Animations should enhance satisfaction without being distracting
+- **Performance Optimized**: Use CSS transforms and hardware acceleration for 60fps smoothness
+- **Configurable**: Animation type and parameters controlled via `victoryAnimationConfig` in data.js
+- **Material Design Timing**: Follow established easing functions and duration guidelines
+- **Consistent Styling**: Match existing color palette and visual language
+- **Game Field Focus**: Animations play directly on crossword grid letters when puzzle is solved
+
+**Animation Types Available**:
+1. **Wave**: Letters pulse green in a wave pattern across the grid
+2. **Jump**: Letters bounce up and down in a ripple sequence from grid center  
+3. **Color Wave**: Green color intensity builds in a wave pattern across letters
+4. **Shake**: Gentle horizontal shake that travels across the grid letters
+5. **None**: Direct victory modal (no animation)
+
+**Implementation Guidelines**:
+- Use hardware-accelerated CSS transforms for smooth performance
+- Keep animations under 500ms total duration
+- Apply staggered delays for wave-like effects (30ms default)
+- Follow existing easing functions (`ease-out` for natural feel)
+- Maintain color consistency with established green (#4CAF50) palette
+
 ### 8. **Component Styling**
 
 #### Cards

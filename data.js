@@ -40,7 +40,8 @@ const headlineScoringConfig = {
         skipWordsInParsing: ['THE', 'AND', 'OR', 'BUT', 'FOR', 'NOR', 'SO', 'YET', 'A', 'AN'], // Words to skip during parsing
         defaultCount: 10,            // Default number of headlines to fetch per source
         cacheTimeout: 300000,        // Cache timeout in milliseconds (5 minutes)
-        loadingAnimationDelay: 5000  // Show loading animation after 5 seconds
+        loadingAnimationDelay: 300,  // Show loading animation after 5ms (for debugging)
+        fetchDelay: 0              // Delay before starting RSS fetch (for debugging)
     }
 };
 
@@ -146,6 +147,16 @@ const starRatingConfig = {
         2: 'FAIR',
         1: 'COMPLETE'
     }
+};
+
+// Victory Animation Configuration
+// Choose from: 'wave', 'jump', 'colorWave', 'shake', or 'none'
+const victoryAnimationConfig = {
+    animationType: 'wave',      // Options: 'wave', 'jump', 'colorWave', 'shake', 'none'
+    duration: 500,              // Total animation duration in ms
+    staggerDelay: 30,          // Delay between each cell animation in ms
+    intensity: 'subtle',        // Options: 'subtle', 'moderate', 'strong'
+    easing: 'ease-out'          // CSS easing function
 };
 
 // Mock headlines data - all with 4+ words and descriptions

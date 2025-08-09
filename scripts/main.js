@@ -30,15 +30,26 @@ function countCorrectCells() {
     return { totalCells, correctCells, percentage: totalCells > 0 ? (correctCells / totalCells) * 100 : 0 };
 }
 
+// Enhanced initialization that also resets word completion tracking
+async function enhancedInitGameWithReset() {
+    // Reset completed words tracking
+    if (typeof resetCompletedWords === 'function') {
+        resetCompletedWords();
+    }
+    
+    // Call the original enhanced init game
+    if (typeof enhancedInitGame === 'function') {
+        await enhancedInitGame();
+    } else if (typeof initGame === 'function') {
+        initGame();
+    }
+}
+
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Only initialize if we're on the main game page (not test page)
     if (document.getElementById('crosswordGrid')) {
-        // Use the enhanced initialization from game-controller.js
-        if (typeof enhancedInitGame === 'function') {
-            enhancedInitGame();
-        } else if (typeof initGame === 'function') {
-            initGame();
-        }
+        // Use the enhanced initialization that resets word tracking
+        enhancedInitGameWithReset();
     }
 });

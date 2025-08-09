@@ -95,6 +95,12 @@ headlines/
   - **Dependencies**: Requires grid and color logic
   - **Purpose**: Handles user input and visual updates
 
+- **`victory-animations.js`** (200+ lines)
+  - **Functions**: Victory field animations and configuration
+  - **Key APIs**: `playVictoryAnimation()`, `playWaveAnimation()`, `playJumpAnimation()`
+  - **Dependencies**: Requires grid and victoryAnimationConfig from data.js
+  - **Purpose**: Plays celebratory animations on game field when puzzle is solved
+
 ### Utility Modules (`scripts/utils/`)
 **Purpose**: Supporting functionality
 

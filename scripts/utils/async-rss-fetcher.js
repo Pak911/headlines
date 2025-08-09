@@ -55,8 +55,11 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     if (!forceRefresh) {
         const cachedHeadlines = headlineCache.get();
         if (cachedHeadlines) {
+            console.log(`🎯 Returning ${cachedHeadlines.length} cached headlines`);
             return cachedHeadlines;
         }
+    } else {
+        console.log('🔄 Force refresh requested, bypassing cache');
     }
     
     // Start loading process
@@ -64,6 +67,7 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     
     try {
         // Try to fetch from RSS sources
+        console.log('📡 Attempting to fetch headlines from RSS sources...');
         const rssHeadlines = await fetchFromRSSWithTimeout();
         
         if (rssHeadlines && rssHeadlines.length > 0) {
@@ -123,6 +127,13 @@ async function fetchFromRSSWithTimeout() {
  * @returns {Promise<Array>} Combined headlines from working sources
  */
 async function fetchFromRSSSourcesSequentially() {
+    // Apply fetch delay if configured (for debugging)
+    const fetchDelay = headlineScoringConfig?.rssConfig?.fetchDelay || 0;
+    if (fetchDelay > 0) {
+        console.log(`⏳ Waiting ${fetchDelay}ms before starting RSS fetch (debug delay)`);
+        await new Promise(resolve => setTimeout(resolve, fetchDelay));
+    }
+    
     console.log(`🚀 Fetching from ${rssNewsSources.length} RSS sources simultaneously...`);
     
     const workingSources = [];
@@ -192,14 +203,18 @@ function startLoadingProcess() {
     loadingState.startTime = Date.now();
     loadingState.showingAnimation = false;
     
+    // Use configurable delay from data.js or fallback to FETCH_TIMEOUT
+    const loadingDelay = headlineScoringConfig?.rssConfig?.loadingAnimationDelay || FETCH_TIMEOUT;
+    
     // Show loading animation after a delay if still loading
     loadingState.timeoutId = setTimeout(() => {
         if (loadingState.isLoading) {
             showLoadingAnimation();
+            console.log(`🎭 Loading animation triggered after ${loadingDelay}ms delay`);
         }
-    }, FETCH_TIMEOUT);
+    }, loadingDelay);
     
-    console.log('⏳ Loading process started...');
+    console.log(`⏳ Loading process started with ${loadingDelay}ms delay...`);
 }
 
 /**
