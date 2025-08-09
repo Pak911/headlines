@@ -11,8 +11,34 @@ function renderCrossword() {
     const container = document.getElementById('crosswordGrid');
     container.innerHTML = '';
     
-    // Create grid cells
+    // Find the first and last rows that contain letters
+    let firstFilledRow = -1;
+    let lastFilledRow = -1;
+    
     for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                if (firstFilledRow === -1) {
+                    firstFilledRow = r;
+                }
+                lastFilledRow = r;
+                break;
+            }
+        }
+    }
+    
+    // If no filled rows found, render normally
+    if (firstFilledRow === -1) {
+        firstFilledRow = 0;
+        lastFilledRow = grid.length - 1;
+    }
+    
+    // Add a small buffer (1 row before and after)
+    const startRow = Math.max(0, firstFilledRow - 1);
+    const endRow = Math.min(grid.length - 1, lastFilledRow + 1);
+    
+    // Create grid cells only for the relevant rows
+    for (let r = startRow; r <= endRow; r++) {
         const rowDiv = document.createElement('div');
         rowDiv.className = 'grid-row';
         
