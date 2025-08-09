@@ -65,9 +65,9 @@ This is the single file used to track the dynamic state of the project. This is 
 To prevent activeContext.md from becoming unwieldy, I will follow these strict guidelines:
 
 ### **Size Limits & Triggers**
-- **Maximum Target**: 3,000 characters (~1 page)
-- **Warning Threshold**: 2,500 characters
-- **Critical Threshold**: 4,000 characters (mandatory cleanup)
+- **Maximum Target**: 150 lines maximum
+- **Warning Threshold**: 125 lines
+- **Critical Threshold**: 150 lines (mandatory cleanup)
 
 ### **Automatic Cleanup Rules**
 When activeContext.md approaches size limits, I will:

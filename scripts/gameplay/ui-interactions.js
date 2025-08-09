@@ -149,10 +149,11 @@ function swapLetters(pos1, pos2) {
     // Store last swap positions for victory animation
     lastSwapPositions = [pos1, pos2];
     
-    // Add swapping animation
+    // Get cell elements
     const cell1 = document.querySelector(`.grid-cell[data-row="${pos1.row}"][data-col="${pos1.col}"]`);
     const cell2 = document.querySelector(`.grid-cell[data-row="${pos2.row}"][data-col="${pos2.col}"]`);
     
+    // Add swapping animation (first 180 degrees)
     cell1.classList.add('swapping');
     cell2.classList.add('swapping');
     
@@ -160,7 +161,7 @@ function swapLetters(pos1, pos2) {
     swapCount++;
     document.getElementById('swapCount').textContent = swapCount;
     
-    // Swap the letters in the middle of the animation (after first 180 degrees)
+    // After first 180 degrees, swap letters and update colors immediately
     setTimeout(() => {
         // Swap the letters in the grid data
         const temp = grid[pos1.row][pos1.col].currentLetter;
@@ -170,11 +171,39 @@ function swapLetters(pos1, pos2) {
         // Update the text content of the cells immediately
         cell1.textContent = grid[pos1.row][pos1.col].currentLetter;
         cell2.textContent = grid[pos2.row][pos2.col].currentLetter;
-    }, 250); // Half of the 500ms animation duration
+        
+        // Remove first animation and add second animation
+        cell1.classList.remove('swapping');
+        cell2.classList.remove('swapping');
+        cell1.style.animation = 'swapSpinSecond 0.25s ease forwards';
+        cell2.style.animation = 'swapSpinSecond 0.25s ease forwards';
+        
+        // Force reflow to restart animation
+        cell1.offsetHeight;
+        cell2.offsetHeight;
+        
+        // Apply color classes immediately after swapping
+        const colorClass1 = getLetterColorClass(pos1.row, pos1.col);
+        const colorClass2 = getLetterColorClass(pos2.row, pos2.col);
+        
+        // Remove old color classes
+        cell1.classList.remove('correct', 'wrong-position', 'connected-word', 'wrong-word');
+        cell2.classList.remove('correct', 'wrong-position', 'connected-word', 'wrong-word');
+        
+        // Add new color classes
+        if (colorClass1) {
+            cell1.classList.add(colorClass1);
+        }
+        if (colorClass2) {
+            cell2.classList.add(colorClass2);
+        }
+    }, 250); // Half of the 500ms animation duration (first 180 degrees)
     
-    // Re-render after full animation completes
+    // Clean up and check for completions after full animation
     setTimeout(() => {
-        renderCrossword();
+        // Remove animation styles
+        cell1.style.animation = '';
+        cell2.style.animation = '';
         
         // Check for word completions (but not if this completes the entire puzzle)
         if (!checkVictory()) {
@@ -196,7 +225,7 @@ function swapLetters(pos1, pos2) {
         if (checkVictory()) {
             setTimeout(playVictoryAnimation, 300);
         }
-    }, 500);
+    }, 500); // Full animation duration
 }
 
 // Reset completed words when starting a new game
