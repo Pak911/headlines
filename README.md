@@ -76,7 +76,7 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 ### 📰 Enhanced RSS Integration
 - **Parallel fetching** from multiple news sources for instant loading
 - **Real-time headline processing** with HTML content cleaning
-- **Russian RSS support** with special headline formatting
+- **Multilingual RSS support** with special headline formatting
 
 ### 🛠️ Developer Tools
 - **Debug panel** (press 'D') with comprehensive game state analysis
@@ -89,49 +89,51 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 
 ```
 scripts/
-├── main.js                    # Entry point & global state
-├── core/                      # Foundation algorithms
-│   ├── crossword-engine.js    # Layout generation
-│   ├── grid-manager.js        # Grid & word management
-│   └── color-logic.js         # Wordle-style feedback
-├── gameplay/                  # User-facing features
-│   ├── difficulty-system.js   # Strategic scrambling
-│   ├── game-controller.js    # Game flow control
-│   ├── ui-interactions.js     # User interface
-│   └── victory-animations.js   # Victory celebration animations
-└── utils/                     # Supporting functionality
-    ├── headline-manager.js    # Headline lifecycle
-    ├── headline-scorer.js     # Scoring algorithms
-    ├── async-rss-fetcher.js   # RSS feed processing
-    ├── rss-parser.js          # RSS parsing utilities
-    ├── html-processor.js      # HTML content processing
-    └── debug-utils.js         # Development tools
+                    # Modular JavaScript architecture
+├── main.js                      # Entry point & global state
+├── core/                        # Foundation algorithms
+│   ├── crossword-engine.js      # Layout generation
+│   ├── grid-manager.js          # Grid & word management
+│   └── color-logic.js           # Wordle-style feedback
+├── gameplay/                    # User-facing features
+│   ├── difficulty-system.js     # Strategic scrambling
+│   ├── game-controller.js       # Game flow control
+│   ├── ui-interactions.js       # User interface
+│   └── victory-animations.js    # Victory celebration animations
+└── utils/                       # Supporting functionality
+    ├── headline-manager.js      # Headline lifecycle
+    ├── headline-scorer.js       # Scoring algorithms
+    ├── async-rss-fetcher.js     # RSS feed processing
+    ├── rss-parser.js            # RSS parsing utilities
+    ├── html-processor.js        # HTML content processing
+    └── debug-utils.js           # Development tools
+localization/                    # Localization system
+    ├── en.js                    # English translations
+    ├── ru.js                    # Russian translations
+    └── i18n.js                  # Localization manager
 ```
 
 ## 📁 Project Structure
 
 ```
 headlines/
-├── index.html                 # Main game interface
-├── styles.css                 # Game styling and animations
-├── data.js                    # Headlines data and configuration
-├── scripts/                   # Modular JavaScript architecture
-├── localization/              # Localization system
-│   ├── en.js                  # English translations
-│   ├── ru.js                  # Russian translations
-│   └── i18n.js                # Localization manager
-├── test.html                  # Main testing interface
-├── test-html-processor.html   # HTML processor tests
-├── test-rss-parser.html       # RSS parser tests
-├── test-russian-rss.html      # Russian RSS testing interface
-├── test-explanation.md        # Test framework documentation
-└── memory-bank/               # Project documentation & guidelines
-    ├── projectbrief.md        # Project scope and requirements
-    ├── productContext.md      # User experience and goals
-    ├── systemPatterns.md      # Architecture and design patterns
-    ├── techContext.md         # Technology stack and setup
-    ├── designGuidelines.md    # Visual design and UI guidelines
-    └── activeContext.md       # Working log and current status
+├── index.html                   # Main game interface
+├── styles.css                   # Game styling and animations
+├── data.js                      # Headlines data and configuration
+├── scripts/                     # See Modular Design section above
+├── localization/                # See Modular Design section above
+├── test/                        # Test files directory
+│   ├── test.html                # Main testing interface
+│   ├── test-html-processor.html # HTML processor tests
+│   ├── test-rss-parser.html     # RSS parser tests
+│   └── test-russian-rss.html    # Russian RSS testing interface
+└── memory-bank/                 # Project documentation & guidelines
+    ├── projectbrief.md          # Project scope and requirements
+    ├── productContext.md        # User experience and goals
+    ├── systemPatterns.md        # Architecture and design patterns
+    ├── techContext.md           # Technology stack and setup
+    ├── designGuidelines.md      # Visual design and UI guidelines
+    └── activeContext.md         # Working log and current status
 ```
 
 ## 🔧 Development
