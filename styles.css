@@ -829,10 +829,49 @@ h1 {
     display: none;
 }
 
-.description-text::before {
-    content: "💡 " attr(data-tip-prefix) ":";
-    font-size: 1rem;
+/* Tip header section with icon and label - horizontal layout */
+.tip-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
     flex-shrink: 0;
+}
+
+/* Lightbulb icon - on the left */
+.tip-icon {
+    font-size: 1.5rem;
+    line-height: 1;
+}
+
+/* Tip label section - "Tip:" and "[Source]" stacked vertically */
+.tip-label-section {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 2px;
+    line-height: 1;
+}
+
+/* "Tip:" text */
+.tip-label {
+    font-size: 1rem;
     font-weight: 600;
-    margin-right: 4px;
+    line-height: 1;
+}
+
+/* Source name in brackets */
+.tip-source {
+    font-size: 0.85rem;
+    font-weight: 500;
+    opacity: 0.8;
+    line-height: 1;
+}
+
+/* Tip content text */
+.tip-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    font-weight: 500;
+    text-align: center;
+    flex: 1;
 }

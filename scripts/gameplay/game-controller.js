@@ -540,6 +540,7 @@ document.addEventListener('keydown', function(event) {
 // Function to display headline description as hint
 function displayHeadlineDescription() {
     const descriptionElement = document.getElementById('headlineDescription');
+    
     if (currentHeadline && currentHeadline.description) {
         // Use HTML processor to clean the description if available
         let cleanDescription = currentHeadline.description;
@@ -553,17 +554,39 @@ function displayHeadlineDescription() {
             }
         }
         
-        descriptionElement.textContent = cleanDescription;
-        
-        // Set the tip prefix for localization
+        // Get localized tip text
+        let tipText = 'Tip:';
         if (typeof t !== 'undefined') {
-            descriptionElement.setAttribute('data-tip-prefix', t('hints.tipPrefix').replace('💡 ', '').replace(':', ''));
-        } else {
-            descriptionElement.setAttribute('data-tip-prefix', 'Tip');
+            tipText = t('hints.tipPrefix').replace('💡 ', '').replace(':', '') + ':';
         }
+        
+        // Get source name (fallback to empty if not available)
+        let sourceName = '';
+        if (currentHeadline.sourceName) {
+            sourceName = currentHeadline.sourceName;
+        } else if (currentHeadline.source) {
+            sourceName = currentHeadline.source;
+        }
+        
+        // Build the new HTML structure
+        const tipHeaderHTML = `
+            <div class="tip-header">
+                <div class="tip-icon">💡</div>
+                <div class="tip-label-section">
+                    <div class="tip-label">${tipText}</div>
+                    ${sourceName ? `<div class="tip-source">[${sourceName}]</div>` : ''}
+                </div>
+            </div>
+        `;
+        
+        const tipContentHTML = `<div class="tip-content">${cleanDescription}</div>`;
+        
+        // Set the complete HTML structure
+        descriptionElement.innerHTML = tipHeaderHTML + tipContentHTML;
+        
     } else {
-        descriptionElement.textContent = '';
-        descriptionElement.setAttribute('data-tip-prefix', 'Tip');
+        // Clear the content if no description
+        descriptionElement.innerHTML = '';
     }
 }
 
