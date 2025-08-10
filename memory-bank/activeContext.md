@@ -1,9 +1,25 @@
 # Active Context - Headlines Crossword Game
 
 ## Current Task: ✅ COMPLETED
-**Russian RSS Support Implementation** - Added comprehensive Russian language RSS feed support with automatic language detection and source selection, maintaining full backward compatibility with existing English functionality.
+**RSS Language Configuration Implementation** - Added comprehensive RSS language configuration system with independent control over UI language and RSS source language, enabling flexible combinations like English interface with Russian RSS feeds.
 
 ## Session Log
+
+### 2025-08-10 - RSS Language Configuration Implementation
+**Added comprehensive RSS language configuration system:**
+- Implemented `rssLanguageConfig` in `data.js` with three modes: 'auto', 'ru', 'en'
+- Added 16 Russian fallback mock headlines with proper structure and descriptions
+- Enhanced `getRSSSourcesForCurrentLanguage()` to respect RSS language configuration
+- Modified `setLanguage()` in `localization/i18n.js` to refresh headlines when RSS language is 'auto'
+- Implemented automatic cache clearing and headline pool refresh for auto mode
+- Maintains full backward compatibility with existing functionality
+
+**Key Features Implemented:**
+- **Independent Language Control**: UI language and RSS source language can be controlled separately
+- **Configurable Modes**: 'auto' (detect from UI), 'ru' (Russian RSS only), 'en' (English RSS only)
+- **Automatic Refresh**: When RSS language is 'auto', headlines refresh when UI language changes
+- **Smart Caching**: Respects caching for performance while ensuring fresh content for auto mode
+- **Comprehensive Fallback**: Russian mock headlines when RSS language is 'ru' and no valid RSS available
 
 ### 2025-08-10 - Russian RSS Support Implementation
 **Added comprehensive Russian language RSS feed support:**

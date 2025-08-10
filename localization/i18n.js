@@ -87,6 +87,26 @@ class LocalizationManager {
             localStorage.setItem('preferredLanguage', lang);
             document.documentElement.lang = lang;
             this.updateUI();
+            
+            // Refresh headline management system if RSS language is set to auto
+            if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'auto') {
+                if (typeof window !== 'undefined' && window.HeadlineManager) {
+                    console.log(`🔄 Refreshing headlines for language change to: ${lang}`);
+                    // Clear headline cache and reinitialize
+                    if (typeof headlineCache !== 'undefined') {
+                        headlineCache.clear();
+                    }
+                    // Reset headline management system
+                    if (typeof window.HeadlineManager.refreshHeadlinePools === 'function') {
+                        window.HeadlineManager.refreshHeadlinePools();
+                    }
+                    // Reinitialize game to fetch new headlines
+                    if (typeof initGame === 'function') {
+                        initGame();
+                    }
+                }
+            }
+            
             return true;
         }
         return false;

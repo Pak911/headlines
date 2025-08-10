@@ -123,20 +123,32 @@ async function fetchFromRSSWithTimeout() {
 }
 
 /**
- * Gets the appropriate RSS sources based on current language
+ * Gets the appropriate RSS sources based on RSS language configuration
  * @returns {Array} Array of RSS source objects
  */
 function getRSSSourcesForCurrentLanguage() {
-    // Check if i18n is available and get current language
-    if (typeof window !== 'undefined' && window.i18n) {
-        const currentLanguage = window.i18n.currentLanguage;
-        console.log(`🌐 Current language detected: ${currentLanguage}`);
+    // Check RSS language configuration first
+    let rssLanguage = 'en'; // default fallback
+    
+    if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage) {
+        rssLanguage = rssLanguageConfig.rssLanguage;
+        console.log(`📡 RSS language configuration: ${rssLanguage}`);
         
-        // Return Russian sources if language is Russian
-        if (currentLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
-            console.log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
-            return russianRssNewsSources;
+        // If set to 'auto', detect from UI language
+        if (rssLanguage === 'auto' && typeof window !== 'undefined' && window.i18n) {
+            rssLanguage = window.i18n.currentLanguage;
+            console.log(`🌐 Auto-detected RSS language from UI: ${rssLanguage}`);
         }
+    } else if (typeof window !== 'undefined' && window.i18n) {
+        // Fallback to UI language if no RSS config
+        rssLanguage = window.i18n.currentLanguage;
+        console.log(`🌐 Using UI language as RSS language: ${rssLanguage}`);
+    }
+    
+    // Return Russian sources if language is Russian
+    if (rssLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+        console.log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
+        return russianRssNewsSources;
     }
     
     // Default to English sources

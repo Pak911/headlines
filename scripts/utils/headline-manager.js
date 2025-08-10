@@ -66,7 +66,20 @@ async function getNextHeadline() {
         
         if (!headlinePools || headlinePools.totalValid === 0) {
             console.error('❌ Failed to get any headlines after reinitialization');
-            return null;
+            // Use Russian fallback headlines if RSS language is Russian
+            if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'ru') {
+                console.log('🇷🇺 Using Russian fallback headlines...');
+                const mockHeadlinesWithMetadata = mockRussianHeadlines.map(headline => ({
+                    ...headline,
+                    source: 'mock',
+                    sourceName: 'Russian Mock Data',
+                    category: 'fallback',
+                    pubDate: new Date().toISOString()
+                }));
+                headlinePools = HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+            } else {
+                return null;
+            }
         }
     }
     

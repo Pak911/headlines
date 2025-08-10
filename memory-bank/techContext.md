@@ -33,10 +33,10 @@ headlines/
 │   │   ├── grid-manager.js             # Grid and word management
 │   │   └── color-logic.js              # Wordle-style color feedback
 │   ├── gameplay/                       # User-facing game features
-│   │   ├── difficulty-system.js        # Letter scrambling algorithms
+│   │   ├── difficulty-system.js         # Letter scrambling algorithms
 │   │   ├── game-controller.js          # Game flow and state management
 │   │   ├── ui-interactions.js          # User interface interactions
-│   │   └── victory-animations.js       # Victory celebration animations
+│   │   └── victory-animations.js        # Victory celebration animations
 │   └── utils/                          # Supporting utilities
 │       ├── headline-manager.js         # Headline lifecycle management
 │       ├── async-rss-fetcher.js        # Parallel RSS fetching system

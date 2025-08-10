@@ -4,6 +4,12 @@ const defaultLanguageConfig = {
     defaultLanguage: 'auto'
 };
 
+// RSS language configuration - controls which RSS sources to use
+// Options: 'auto' (detect from UI language), 'ru' (Russian RSS), 'en' (English RSS)
+const rssLanguageConfig = {
+    rssLanguage: 'auto'  // Set to Russian by default as requested
+};
+
 // Headline Scoring Configuration
 const headlineScoringConfig = {
     // Word count constraints
@@ -291,5 +297,105 @@ const mockHeadlines = [
         words: ["POWER", "OUTAGE", "REPORTED", "WIDELY"],
         link: "https://example.com/power-outage",
         description: "Electrical grid failures affect thousands of households as utility companies work to restore service."
+    }
+];
+
+// Russian mock headlines data - all with 4+ words and descriptions
+const mockRussianHeadlines = [
+    {
+        text: "ЭКОНОМИКА СТРАНЫ РАСТЁТ БЫСТРО",
+        words: ["ЭКОНОМИКА", "СТРАНЫ", "РАСТЁТ", "БЫСТРО"],
+        link: "https://example.com/russian-economy",
+        description: "Национальная экономика показывает значительный рост благодаря успешной промышленной политике правительства."
+    },
+    {
+        text: "НОВЫЕ ТЕХНОЛОГИИ ВНЕДРЯЮТСЯ АКТИВНО",
+        words: ["НОВЫЕ", "ТЕХНОЛОГИИ", "ВНЕДРЯЮТСЯ", "АКТИВНО"],
+        link: "https://example.com/russian-tech",
+        description: "Российские компании активно внедряют передовые технологии в производственные процессы для повышения эффективности."
+    },
+    {
+        text: "КЛИМАТ ПЛАНЕТЫ МЕНЯЕТСЯ СИЛЬНО",
+        words: ["КЛИМАТ", "ПЛАНЕТЫ", "МЕНЯЕТСЯ", "СИЛЬНО"],
+        link: "https://example.com/russian-climate",
+        description: "Глобальные климатические изменения оказывают значительное влияние на экосистемы и погодные условия по всему миру."
+    },
+    {
+        text: "МЕДИЦИНА РАЗВИВАЕТСЯ УСПЕШНО",
+        words: ["МЕДИЦИНА", "РАЗВИВАЕТСЯ", "УСПЕШНО"],
+        link: "https://example.com/russian-medicine",
+        description: "Современные медицинские технологии и препараты позволяют эффективно бороться с ранее неизлечимыми заболеваниями."
+    },
+    {
+        text: "ОБРАЗОВАНИЕ СТАНОВИТСЯ ЛУЧШЕ",
+        words: ["ОБРАЗОВАНИЕ", "СТАНОВИТСЯ", "ЛУЧШЕ"],
+        link: "https://example.com/russian-education",
+        description: "Новые образовательные программы и методики обучения обеспечивают высокое качество подготовки специалистов."
+    },
+    {
+        text: "ТРАНСПОРТНАЯ СИСТЕМА МОДЕРНИЗИРУЕТСЯ",
+        words: ["ТРАНСПОРТНАЯ", "СИСТЕМА", "МОДЕРНИЗИРУЕТСЯ"],
+        link: "https://example.com/russian-transport",
+        description: "Масштабные инвестиции в развитие транспортной инфраструктуры улучшают доступность и качество перевозок."
+    },
+    {
+        text: "ЭНЕРГЕТИКА ПЕРЕХОДИТ НА ЗЕЛЁНУЮ",
+        words: ["ЭНЕРГЕТИКА", "ПЕРЕХОДИТ", "НА", "ЗЕЛЁНУЮ"],
+        link: "https://example.com/russian-energy",
+        description: "Переход на возобновляемые источники энергии снижает углеродный след и обеспечивает энергетическую независимость."
+    },
+    {
+        text: "КУЛЬТУРА РАСЦВЕТАЕТ ПОВСЕМЕСТНО",
+        words: ["КУЛЬТУРА", "РАСЦВЕТАЕТ", "ПОВСЕМЕСТНО"],
+        link: "https://example.com/russian-culture",
+        description: "Государственная поддержка культурных инициатив способствует сохранению наследия и развитию творческих индустрий."
+    },
+    {
+        text: "СПОРТ ДОСТИГАЕТ НОВЫХ ВЫСОТ",
+        words: ["СПОРТ", "ДОСТИГАЕТ", "НОВЫХ", "ВЫСОТ"],
+        link: "https://example.com/russian-sport",
+        description: "Российские спортсмены показывают выдающиеся результаты на международных соревнованиях и чемпионатах мира."
+    },
+    {
+        text: "НАУКА ОТКРЫВАЕТ НОВЫЕ ГОРИЗОНТЫ",
+        words: ["НАУКА", "ОТКРЫВАЕТ", "НОВЫЕ", "ГОРИЗОНТЫ"],
+        link: "https://example.com/russian-science",
+        description: "Фундаментальные научные исследования открывают новые возможности для технологического прогресса и развития."
+    },
+    {
+        text: "ЭКОЛОГИЯ ТРЕБУЕТ ВНИМАНИЯ СРОЧНО",
+        words: ["ЭКОЛОГИЯ", "ТРЕБУЕТ", "ВНИМАНИЯ", "СРОЧНО"],
+        link: "https://example.com/russian-ecology",
+        description: "Экологическая ситуация требует немедленных мер по защите окружающей среды и сохранению природных ресурсов."
+    },
+    {
+        text: "ПОЛИТИКА СТРЕМИТСЯ К СТАБИЛЬНОСТИ",
+        words: ["ПОЛИТИКА", "СТРЕМИТСЯ", "К", "СТАБИЛЬНОСТИ"],
+        link: "https://example.com/russian-politics",
+        description: "Государственная политика направлена на обеспечение стабильности и благополучия граждан страны."
+    },
+    {
+        text: "БИЗНЕС РАЗВИВАЕТСЯ ДИНАМИЧНО",
+        words: ["БИЗНЕС", "РАЗВИВАЕТСЯ", "ДИНАМИЧНО"],
+        link: "https://example.com/russian-business",
+        description: "Предпринимательская деятельность получает поддержку государства и показывает высокие темпы роста."
+    },
+    {
+        text: "ТЕХНИКА СОВЕРШЕНСТВУЕТСЯ ПОСТОЯННО",
+        words: ["ТЕХНИКА", "СОВЕРШЕНСТВУЕТСЯ", "ПОСТОЯННО"],
+        link: "https://example.com/russian-engineering",
+        description: "Инженерные разработки и технические новшества обеспечивают прогресс во всех отраслях промышленности."
+    },
+    {
+        text: "ОБЩЕСТВО СТАНОВИТСЯ СПЛОЧЕННЕЕ",
+        words: ["ОБЩЕСТВО", "СТАНОВИТСЯ", "СПЛОЧЕННЕЕ"],
+        link: "https://example.com/russian-society",
+        description: "Социальная сплоченность и взаимопомощь становятся основой стабильного развития гражданского общества."
+    },
+    {
+        text: "ИННОВАЦИИ МЕНЯЮТ МИР БЫСТРО",
+        words: ["ИННОВАЦИИ", "МЕНЯЮТ", "МИР", "БЫСТРО"],
+        link: "https://example.com/russian-innovation",
+        description: "Инновационные разработки и передовые технологии кардинально изменяют привычные способы жизни."
     }
 ];

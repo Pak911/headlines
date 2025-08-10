@@ -672,3 +672,137 @@ function processRSSItems(items) {
 5. **Backward Compatible**: Existing English sources work unchanged
 6. **Extensible**: Easy to add more languages and sources
 7. **Maintainable**: Clean separation of language-specific logic
+
+## RSS Language Configuration System (2025-08-10)
+
+### Configurable Language-Aware Architecture Pattern
+**Achievement**: Implemented comprehensive RSS language configuration system with independent control over UI language and RSS source language, enabling flexible combinations like English interface with Russian RSS feeds.
+
+### Configuration-Driven Design
+**Location**: `data.js` - Centralized RSS language configuration
+
+```javascript
+// RSS language configuration - controls which RSS sources to use
+// Options: 'auto' (detect from UI language), 'ru' (Russian RSS), 'en' (English RSS)
+const rssLanguageConfig = {
+    rssLanguage: 'ru'  // Set to Russian by default as requested
+};
+```
+
+### Independent Language Control Pattern
+**Location**: `scripts/utils/async-rss-fetcher.js` - Enhanced language-aware RSS source selection
+
+#### Core Architecture
+- **Separate UI and RSS Languages**: UI language selection independent of RSS source language
+- **Configurable Modes**: Three modes - 'auto', 'ru', 'en' for flexible control
+- **Automatic Detection**: When set to 'auto', detects UI language changes and switches RSS sources accordingly
+- **Fixed Modes**: When set to 'ru' or 'en', RSS sources remain fixed regardless of UI language
+
+#### Key Functions
+- `getRSSSourcesForCurrentLanguage()`: Enhanced source selection with RSS language configuration
+- `setLanguage()`: Modified in `localization/i18n.js` to refresh headlines when RSS language is 'auto'
+
+```javascript
+// Enhanced RSS language configuration handling
+function getRSSSourcesForCurrentLanguage() {
+    // Check RSS language configuration first
+    let rssLanguage = 'en'; // default fallback
+    
+    if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage) {
+        rssLanguage = rssLanguageConfig.rssLanguage;
+        console.log(`📡 RSS language configuration: ${rssLanguage}`);
+        
+        // If set to 'auto', detect from UI language
+        if (rssLanguage === 'auto' && typeof window !== 'undefined' && window.i18n) {
+            rssLanguage = window.i18n.currentLanguage;
+            console.log(`🌐 Auto-detected RSS language from UI: ${rssLanguage}`);
+        }
+    } else if (typeof window !== 'undefined' && window.i18n) {
+        // Fallback to UI language if no RSS config
+        rssLanguage = window.i18n.currentLanguage;
+        console.log(`🌐 Using UI language as RSS language: ${rssLanguage}`);
+    }
+    
+    // Return Russian sources if language is Russian
+    if (rssLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+        console.log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
+        return russianRssNewsSources;
+    }
+    
+    // Default to English sources
+    console.log(`🇺🇸 Using English RSS sources (${rssNewsSources.length} sources)`);
+    return rssNewsSources;
+}
+```
+
+### Russian Fallback Articles Pattern
+**Location**: `data.js` - Centralized Russian mock headlines
+
+#### Core Architecture
+- **Comprehensive Fallback**: 16 Russian mock headlines with proper structure and descriptions
+- **Automatic Fallback**: When RSS language is 'ru' and no valid RSS headlines available, uses Russian fallbacks
+- **Consistent Structure**: Same format as English mock headlines for seamless integration
+
+```javascript
+// Russian mock headlines data - all with 4+ words and descriptions
+const mockRussianHeadlines = [
+    {
+        text: "ЭКОНОМИКА СТРАНЫ РАСТЁТ БЫСТРО",
+        words: ["ЭКОНОМИКА", "СТРАНЫ", "РАСТЁТ", "БЫСТРО"],
+        link: "https://example.com/russian-economy",
+        description: "Национальная экономика показывает значительный рост благодаря успешной промышленной политике правительства."
+    },
+    // ... 15 more Russian headlines
+];
+```
+
+### Language Switch Integration Pattern
+**Location**: `localization/i18n.js` - Enhanced language switching with RSS refresh
+
+#### Core Architecture
+- **Automatic Refresh**: When RSS language is 'auto' and UI language changes, automatically refreshes headlines
+- **Cache Management**: Clears headline cache and reinitializes headline management system
+- **Performance Optimized**: Respects caching for fixed language modes while ensuring fresh content for auto mode
+
+```javascript
+// Enhanced language switching with RSS refresh
+setLanguage(lang) {
+    if (this.languages[lang]) {
+        this.currentLanguage = lang;
+        localStorage.setItem('preferredLanguage', lang);
+        document.documentElement.lang = lang;
+        this.updateUI();
+        
+        // Refresh headline management system if RSS language is set to auto
+        if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'auto') {
+            if (typeof window !== 'undefined' && window.HeadlineManager) {
+                console.log(`🔄 Refreshing headlines for language change to: ${lang}`);
+                // Clear headline cache and reinitialize
+                if (typeof headlineCache !== 'undefined') {
+                    headlineCache.clear();
+                }
+                // Reset headline management system
+                if (typeof window.HeadlineManager.refreshHeadlinePools === 'function') {
+                    window.HeadlineManager.refreshHeadlinePools();
+                }
+                // Reinitialize game to fetch new headlines
+                if (typeof initGame === 'function') {
+                    initGame();
+                }
+            }
+        }
+        
+        return true;
+    }
+    return false;
+}
+```
+
+### Benefits Achieved
+1. **Flexible Configuration**: Independent control of UI and RSS languages
+2. **Automatic Detection**: Seamless language switching when RSS language set to 'auto'
+3. **Fixed Modes**: Consistent RSS sources when set to specific language
+4. **Comprehensive Fallback**: Russian mock headlines for when RSS fails
+5. **Performance Optimized**: Smart caching with automatic refresh for auto mode
+6. **Backward Compatible**: Existing functionality unchanged
+7. **Extensible**: Easy to add more languages and configuration options
