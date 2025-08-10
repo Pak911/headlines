@@ -8,14 +8,15 @@ Transform scrambled letters into news headlines using crossword-style logic! No 
 [![HTML5](https://img.shields.io/badge/HTML5-E34F26?logo=html5&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/HTML)
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://github.com/Pak911/headlines)
-[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
 ## 🎮 What Makes This Game Unique?
 
-Headlines combines three engaging elements:
+Headlines combines engaging elements:
 - **Crossword Structure**: Words intersect at shared letters in a proper crossword layout
 - **Letter Manipulation**: Swap individual letters instead of solving clues
 - **News Awareness**: Learn real headlines as you solve puzzles
+- **Multi-language Support**: Play in English or Russian with automatic language detection
+- **Real-time RSS Integration**: Current news headlines from multiple sources
 
 Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where the challenge is spatial and strategic.
 
@@ -68,6 +69,16 @@ git clone https://github.com/Pak911/headlines.git
 - **Solvability guarantee** - every puzzle has a known minimum solution
 - **State tracking** to ensure optimal difficulty targeting
 
+### 🌐 Multi-language Support
+- **English and Russian** with automatic language detection
+- **Language selector dropdown** for manual switching
+- **Independent RSS language configuration**
+
+### 📰 Enhanced RSS Integration
+- **Parallel fetching** from multiple news sources for instant loading
+- **Real-time headline processing** with HTML content cleaning
+- **Russian RSS support** with special headline formatting
+
 ### 🛠️ Developer Tools
 - **Debug panel** (press 'D') with comprehensive game state analysis
 - **Test framework** for validating color logic and edge cases
@@ -86,8 +97,9 @@ scripts/
 │   └── color-logic.js         # Wordle-style feedback
 ├── gameplay/                  # User-facing features
 │   ├── difficulty-system.js   # Strategic scrambling
-│   ├── game-controller.js     # Game flow control
-│   └── ui-interactions.js     # User interface
+│   ├── game-controller.js    # Game flow control
+│   ├── ui-interactions.js     # User interface
+│   └── victory-animations.js   # Victory celebration animations
 └── utils/                     # Supporting functionality
     ├── headline-manager.js    # Headline lifecycle
     ├── headline-scorer.js     # Scoring algorithms
@@ -105,9 +117,14 @@ headlines/
 ├── styles.css                 # Game styling and animations
 ├── data.js                    # Headlines data and configuration
 ├── scripts/                   # Modular JavaScript architecture
+├── localization/              # Localization system
+│   ├── en.js                  # English translations
+│   ├── ru.js                  # Russian translations
+│   └── i18n.js                # Localization manager
 ├── test.html                  # Main testing interface
 ├── test-html-processor.html   # HTML processor tests
 ├── test-rss-parser.html       # RSS parser tests
+├── test-russian-rss.html      # Russian RSS testing interface
 ├── test-explanation.md        # Test framework documentation
 └── memory-bank/               # Project documentation & guidelines
     ├── projectbrief.md        # Project scope and requirements
@@ -168,7 +185,9 @@ The project includes multiple test files:
 - **Advanced Algorithms**: Sophisticated crossword generation and scrambling
 - **Comprehensive Testing**: Dedicated test framework for edge cases
 - **Developer-Friendly**: Extensive debug tools and documentation
-- **RSS Integration**: Real-time headline fetching capabilities
+- **RSS Integration**: Real-time headline fetching with parallel processing
+- **Multi-language Support**: Zero-dependency localization system with automatic detection
+- **Configurable Systems**: Runtime configuration for difficulty, animations, and scoring
 
 ## 🚀 Future Enhancements
 
@@ -198,10 +217,6 @@ The project includes multiple test files:
 - Use the debug panel for testing
 - Follow the existing code patterns
 - Consult `memory-bank/designGuidelines.md` for styling consistency
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ### Attribution Requirements
 
