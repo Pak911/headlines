@@ -568,18 +568,22 @@ function displayHeadlineDescription() {
             sourceName = currentHeadline.source;
         }
         
-        // Build the new HTML structure
+        // Build the new HTML structure with source moved to tip content area
         const tipHeaderHTML = `
             <div class="tip-header">
                 <div class="tip-icon">💡</div>
                 <div class="tip-label-section">
                     <div class="tip-label">${tipText}</div>
-                    ${sourceName ? `<div class="tip-source">[${sourceName}]</div>` : ''}
                 </div>
             </div>
         `;
         
-        const tipContentHTML = `<div class="tip-content">${cleanDescription}</div>`;
+        const tipContentHTML = `
+            <div class="tip-content">
+                ${cleanDescription}
+                ${sourceName ? `<div class="tip-source-right">[${sourceName}]</div>` : ''}
+            </div>
+        `;
         
         // Set the complete HTML structure
         descriptionElement.innerHTML = tipHeaderHTML + tipContentHTML;
