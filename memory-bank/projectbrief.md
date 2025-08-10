@@ -27,6 +27,12 @@ Create an engaging word puzzle game where players swap individual letters to rec
 4. **Headlines**: 
    - All headlines must contain at least 4 words
    - Headlines should be realistic news-style phrases
+   - Headlines must include descriptions that provide semantic clues for solving
+
+5. **Hint System**:
+   - Contextual hints from news descriptions guide players toward solutions
+   - Descriptions provide semantic similarity to headlines for meaningful clues
+   - Hint system is essential for player engagement and puzzle solvability
 
 ## Success Criteria
 - Proper crossword generation with valid intersections

@@ -48,6 +48,14 @@ headlines/
 └── memory-bank/                        # Project documentation
 ```
 
+## Hint System Implementation
+
+The hint system is implemented through several key components:
+- **RSS Parser**: Extracts descriptions alongside headlines from news sources
+- **HTML Processor**: Cleans and formats description text for display
+- **Game Controller**: Integrates description display as contextual hints
+- **Styles**: Provides visual styling for hint presentation in the UI
+
 ## Modular Architecture
 
 ### Module Organization

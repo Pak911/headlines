@@ -191,6 +191,12 @@ const rssLanguageConfig = {
 2. **Processing**: `fetchLatestHeadlines()` → `processAndGroupHeadlines()` → Scoring and filtering
 3. **Selection**: `getNextHeadline()` → Pool-based selection with quality prioritization
 
+### Hint System Flow
+1. **Description Extraction**: RSS parser extracts descriptions alongside headlines
+2. **Description Processing**: HTML processor cleans and formats description text
+3. **Display Integration**: Game controller displays description as contextual hint
+4. **Player Guidance**: Players use semantic clues to guide their solving strategy
+
 ### RSS Integration Flow
 1. **Source Selection**: `getRSSSourcesForCurrentLanguage()` → Language-aware source selection
 2. **Fetching**: `fetchFromMultipleSources()` → Parallel execution with loading management

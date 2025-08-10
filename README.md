@@ -14,11 +14,12 @@ Transform scrambled letters into news headlines using crossword-style logic! No 
 Headlines combines engaging elements:
 - **Crossword Structure**: Words intersect at shared letters in a proper crossword layout
 - **Letter Manipulation**: Swap individual letters instead of solving clues
+- **Contextual Hints**: Use semantic clues from news descriptions to guide solving
 - **News Awareness**: Learn real headlines as you solve puzzles
 - **Multi-language Support**: Play in English or Russian with automatic language detection
 - **Real-time RSS Integration**: Current news headlines from multiple sources
 
-Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where the challenge is spatial and strategic.
+Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where contextual hints make the challenge engaging and solvable. During development, it was discovered that pure guessing wasn't engaging enough - the hint system with semantic clues from news descriptions dramatically increased player interest and made puzzles much more enjoyable.
 
 ## 🚀 Quick Start
 
@@ -38,9 +39,12 @@ git clone https://github.com/Pak911/headlines.git
 ## 🎯 How to Play
 
 1. **Observe the Grid**: Letters are arranged in a crossword pattern but scrambled
-2. **Click Two Letters**: Select any two letters to swap their positions
-3. **Use Color Feedback**: Colors guide you toward the correct solution
-4. **Solve the Headlines**: Reconstruct all news headlines to win
+2. **Read the Hint**: Check the description below the grid for contextual clues about the headline
+3. **Click Two Letters**: Select any two letters to swap their positions
+4. **Use Color Feedback**: Colors guide you toward the correct solution
+5. **Solve the Headlines**: Reconstruct all news headlines to win
+
+The hint system is crucial - descriptions provide semantic clues that help you think about what words might fit in the scrambled headline. Most of the time, words present in the description are also present or have synonyms in the headlines, giving you meaningful guidance for solving.
 
 ### 🎨 Color Guide
 

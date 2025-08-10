@@ -3,6 +3,14 @@
 ## Current Task: ✅ COMPLETED
 **RSS Language Configuration Implementation** - Added comprehensive RSS language configuration system with independent control over UI language and RSS source language.
 
+## Documentation Update: Essential Hint System Information
+**Added crucial gameplay information** about the hint system to memory bank documentation:
+- Updated `productContext.md` with hint system evolution and contextual clues philosophy
+- Enhanced `projectbrief.md` with hint system requirements and success criteria
+- Improved `README.md` with detailed explanation of contextual hints and gameplay flow
+- Documented hint system flow in `systemPatterns.md` and implementation details in `techContext.md`
+
+
 ## Session Log
 
 ### 2025-08-10 - Recent Enhancements
