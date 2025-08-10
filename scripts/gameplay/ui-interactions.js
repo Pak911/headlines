@@ -231,6 +231,9 @@ function swapLetters(pos1, pos2) {
         cell1.style.animation = '';
         cell2.style.animation = '';
         
+        // Re-render the entire grid to update all dependent letters
+        renderCrossword();
+        
         // Check for word completions (but not if this completes the entire puzzle)
         if (!checkVictory()) {
             // Check each word to see if it's now complete
