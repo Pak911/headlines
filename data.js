@@ -43,7 +43,7 @@ const headlineScoringConfig = {
     // RSS parsing configuration
     rssConfig: {
         minWordLengthForParsing: 2,  // Minimum word length during RSS parsing
-        skipWordsInParsing: ['THE', 'AND', 'OR', 'BUT', 'FOR', 'NOR', 'SO', 'YET', 'A', 'AN'], // Words to skip during parsing
+        skipWordsInParsing: ['THE', 'AND', 'OR', 'BUT', 'FOR', 'NOR', 'SO', 'YET', 'A', 'AN', 'И', 'В', 'НА', 'С', 'ПО', 'К', 'О', 'ТО', 'ТАКЖЕ', 'ТАК', 'НЕ', 'НИ', 'ЧТО', 'КАК', 'КТО', 'ГДЕ', 'КОГДА', 'ПОЧЕМУ', 'ЗАЧЕМ'], // Words to skip during parsing
         defaultCount: 10,            // Default number of headlines to fetch per source
         cacheTimeout: 300000,        // Cache timeout in milliseconds (5 minutes)
         loadingAnimationDelay: 300,  // Show loading animation after 5ms (for debugging)
@@ -127,6 +127,35 @@ const rssNewsSources = [
     {
         name: "Sky News",
         url: "http://feeds.skynews.com/feeds/rss/home.xml",
+        category: "general"
+    }
+];
+
+// Russian RSS News Sources
+const russianRssNewsSources = [
+    {
+        name: "Kommersant",
+        url: "https://www.kommersant.ru/rss/main.xml",
+        category: "general"
+    },
+    {
+        name: "RIA",
+        url: "https://ria.ru/export/rss2/index.xml",
+        category: "general"
+    },
+    {
+        name: "RBC",
+        url: "https://rssexport.rbc.ru/rbcnews/news/30/full.rss",
+        category: "general"
+    },
+    {
+        name: "TASS",
+        url: "https://tass.ru/rss/v2.xml",
+        category: "general"
+    },
+    {
+        name: "Lenta",
+        url: "https://lenta.ru/rss/news",
         category: "general"
     }
 ];

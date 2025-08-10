@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russian RSS Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .test-section {
+            background: #f5f5f5;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        .results {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .headline-item {
+            background: #e9f7ef;
+            border: 1px solid #d4edda;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .original {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🇷🇺 Russian RSS Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Controls</h2>
+        <button onclick="testCommersantProcessing()">Test Commersant Headline Processing</button>
+        <button onclick="testRussianSources()">Test Russian RSS Sources</button>
+        <button onclick="testHeadlineProcessing()">Test Headline Processing Pipeline</button>
+        <button onclick="testLanguageDetection()">Test Language Detection</button>
+        <button onclick="clearResults()">Clear Results</button>
+    </div>
+    
+    <div class="test-section">
+        <h2>Results</h2>
+        <div id="results" class="results">
+            <p>Click a test button to start...</p>
+        </div>
+    </div>
+
+    <!-- Load dependencies -->
+    <script src="../data.js"></script>
+    <script src="../scripts/utils/rss-parser.js"></script>
+    <script src="../scripts/utils/async-rss-fetcher.js"></script>
+    <script src="../scripts/utils/headline-scorer.js"></script>
+    
+    <script>
+        function displayResult(content) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = content;
+        }
+        
+        function testCommersantProcessing() {
+            const testHeadlines = [
+                '«Формула-1» развернула доходы // Liberty Media сообщила о финансовых показателях самой престижной гоночной серии мира',
+                'Экономика // ЦБ снизил ключевую ставку до 7,5%',
+                'Политика // Путин подписал закон о новом бюджете',
+                'Спорт // Зенит выиграл чемпионат России'
+            ];
+            
+            let html = '<h3>Commersant Headline Processing Results:</h3>';
+            
+            if (typeof window.RSSParser === 'undefined' || typeof window.RSSParser.processCommersantHeadline !== 'function') {
+                displayResult('<p style="color: red;">RSSParser or processCommersantHeadline function not available!</p>');
+                return;
+            }
+            
+            testHeadlines.forEach(headline => {
+                const processed = window.RSSParser.processCommersantHeadline(headline);
+                html += `
+                    <div class="headline-item">
+                        <strong>Processed:</strong> ${processed}<br>
+                        <div class="original">Original: "${headline}"</div>
+                    </div>
+                `;
+            });
+            
+            displayResult(html);
+        }
+        
+        function testRussianSources() {
+            if (typeof russianRssNewsSources === 'undefined') {
+                displayResult('<p style="color: red;">Russian RSS sources not found!</p>');
+                return;
+            }
+            
+            displayResult('<p>Testing all Russian RSS sources... This may take a moment.</p>');
+            
+            // Test all Russian sources
+            window.RSSParser.fetchFromMultipleSources(russianRssNewsSources, 3)
+                .then(headlines => {
+                    let html = `<h3>Russian RSS Sources Test Results</h3>`;
+                    html += `<p>Found ${headlines.length} total headlines from ${russianRssNewsSources.length} sources</p>`;
+                    
+                    // Process each headline through the scoring system
+                    const scoredHeadlines = headlines.map(headline => {
+                        if (typeof window.HeadlineScorer !== 'undefined') {
+                            return window.HeadlineScorer.scoreHeadline(headline);
+                        }
+                        return headline;
+                    });
+                    
+                    // Group by source
+                    const headlinesBySource = {};
+                    scoredHeadlines.forEach(headline => {
+                        const source = headline.sourceName || 'Unknown';
+                        if (!headlinesBySource[source]) {
+                            headlinesBySource[source] = [];
+                        }
+                        headlinesBySource[source].push(headline);
+                    });
+                    
+                    // Display results by source
+                    Object.keys(headlinesBySource).forEach(source => {
+                        html += `<h4>${source} (${headlinesBySource[source].length} headlines)</h4>`;
+                        headlinesBySource[source].forEach(headline => {
+                            // Show description if available
+                            const hasDescription = headline.description && headline.description.trim() !== '';
+                            const descriptionPreview = hasDescription ? 
+                                `<div style="margin: 8px 0; padding: 8px; background: #fff3cd; border-radius: 4px; font-size: 0.85em;">
+                                    <strong>Description:</strong> ${headline.description.substring(0, 200)}${headline.description.length > 200 ? '...' : ''}
+                                </div>` : '';
+                            
+                            // Show scoring information if available
+                            let scoringInfo = '';
+                            if (typeof headline.score !== 'undefined') {
+                                scoringInfo = `
+                                    <div style="margin: 8px 0; padding: 8px; background: #d1ecf1; border-radius: 4px; font-size: 0.85em;">
+                                        <strong>Score:</strong> ${headline.score} | 
+                                        <strong>Filtered Words:</strong> ${headline.filteredWords ? headline.filteredWords.join(', ') : 'N/A'}<br>
+                                        <strong>Word Count:</strong> ${headline.wordCount || headline.words.length} |
+                                        <strong>Valid:</strong> ${headline.isValid ? 'Yes' : 'No'}
+                                    </div>
+                                `;
+                                
+                                // Show filtering reasons if any
+                                if (headline.filterReasons && headline.filterReasons.length > 0) {
+                                    const reasons = headline.filterReasons.map(reason => 
+                                        `${reason.word ? '"' + reason.word + '": ' : ''}${reason.description}`
+                                    ).join('<br>');
+                                    scoringInfo += `
+                                        <div style="margin-top: 5px; padding: 5px; background: #f8d7da; border-radius: 4px; font-size: 0.8em;">
+                                            <strong>Filtering Reasons:</strong><br>${reasons}
+                                        </div>
+                                    `;
+                                }
+                            }
+                            
+                            html += `
+                                <div class="headline-item">
+                                    <strong>Headline:</strong> ${headline.text}<br>
+                                    ${descriptionPreview}
+                                    ${scoringInfo}
+                                    <div class="original">Words: ${headline.words.length} | Source: ${headline.sourceName}</div>
+                                    <div class="original">Original: "${headline.originalTitle}"</div>
+                                </div>
+                            `;
+                        });
+                    });
+                    
+                    if (headlines.length === 0) {
+                        html += '<p style="color: orange;">No valid headlines found (4+ words required)</p>';
+                    }
+                    
+                    displayResult(html);
+                })
+                .catch(error => {
+                    displayResult(`<p style="color: red;">Error: ${error.message}</p>`);
+                });
+        }
+        
+        function testLanguageDetection() {
+            let html = '<h3>Language Detection Test:</h3>';
+            
+            if (typeof window.i18n !== 'undefined') {
+                html += `<p>Current language: ${window.i18n.currentLanguage}</p>`;
+                html += `<p>Available languages: ${Object.keys(window.i18n.languages).join(', ')}</p>`;
+            } else {
+                html += '<p>i18n not available</p>';
+            }
+            
+            // Test RSS sources selection
+            const sources = window.getRSSSourcesForCurrentLanguage ? 
+                window.getRSSSourcesForCurrentLanguage() : 
+                'Function not available';
+                
+            html += `<p>RSS sources function: ${sources ? 'Available' : 'Not available'}</p>`;
+            
+            displayResult(html);
+        }
+        
+        function testHeadlineProcessing() {
+            if (typeof russianRssNewsSources === 'undefined') {
+                displayResult('<p style="color: red;">Russian RSS sources not found!</p>');
+                return;
+            }
+            
+            displayResult('<p>Testing headline processing pipeline... This may take a moment.</p>');
+            
+            // Fetch one headline from each source for detailed analysis
+            window.RSSParser.fetchFromMultipleSources(russianRssNewsSources, 1)
+                .then(headlines => {
+                    if (headlines.length === 0) {
+                        displayResult('<p style="color: orange;">No headlines found for processing.</p>');
+                        return;
+                    }
+                    
+                    let html = `<h3>Headline Processing Pipeline Analysis</h3>`;
+                    html += `<p>Analyzing ${headlines.length} headlines through the full processing pipeline...</p>`;
+                    
+                    headlines.slice(0, 5).forEach((headline, index) => {
+                        html += `<h4>Headline #${index + 1}</h4>`;
+                        
+                        // Step 1: Original RSS data
+                        html += `
+                            <div style="margin: 10px 0; padding: 10px; background: #f8f9fa; border-left: 3px solid #007bff;">
+                                <strong>1. Original RSS Data:</strong><br>
+                                <strong>Title:</strong> "${headline.originalTitle}"<br>
+                                <strong>Source:</strong> ${headline.sourceName}<br>
+                            </div>
+                        `;
+                        
+                        // Step 2: RSS Processing
+                        const processedTitle = window.RSSParser.processCommersantHeadline(headline.originalTitle);
+                        const processedWords = window.RSSParser.extractWords(processedTitle);
+                        html += `
+                            <div style="margin: 10px 0; padding: 10px; background: #e7f3ff; border-left: 3px solid #0056b3;">
+                                <strong>2. RSS Processing:</strong><br>
+                                <strong>Processed Title:</strong> "${processedTitle}"<br>
+                                <strong>Extracted Words:</strong> [${processedWords.join(', ')}]<br>
+                                <strong>Word Count:</strong> ${processedWords.length}
+                            </div>
+                        `;
+                        
+                        // Step 3: Scoring System Processing
+                        if (typeof window.HeadlineScorer !== 'undefined') {
+                            const scoredHeadline = window.HeadlineScorer.scoreHeadline(headline);
+                            
+                            html += `
+                                <div style="margin: 10px 0; padding: 10px; background: #d1ecf1; border-left: 3px solid #0c5460;">
+                                    <strong>3. Scoring System Processing:</strong><br>
+                                    <strong>Score:</strong> ${scoredHeadline.score}<br>
+                                    <strong>Original Words:</strong> [${scoredHeadline.originalWords.join(', ')}]<br>
+                                    <strong>Filtered Words:</strong> [${scoredHeadline.filteredWords.join(', ')}]<br>
+                                    <strong>Final Word Count:</strong> ${scoredHeadline.wordCount}<br>
+                                    <strong>Valid for Crossword:</strong> ${scoredHeadline.isValid ? 'Yes' : 'No'}
+                                </div>
+                            `;
+                            
+                            // Show description if available
+                            if (scoredHeadline.description && scoredHeadline.description.trim() !== '') {
+                                html += `
+                                    <div style="margin: 10px 0; padding: 10px; background: #fff3cd; border-left: 3px solid #856404;">
+                                        <strong>Description:</strong> ${scoredHeadline.description.substring(0, 150)}${scoredHeadline.description.length > 150 ? '...' : ''}
+                                    </div>
+                                `;
+                            }
+                            
+                            // Show filtering details
+                            if (scoredHeadline.filterReasons && scoredHeadline.filterReasons.length > 0) {
+                                const reasonsHtml = scoredHeadline.filterReasons.map(reason => 
+                                    `<div style="margin: 2px 0; font-size: 0.9em;">
+                                        ${reason.word ? `• "${reason.word}": ` : '• '}${reason.description}
+                                    </div>`
+                                ).join('');
+                                
+                                html += `
+                                    <div style="margin: 10px 0; padding: 10px; background: #f8d7da; border-left: 3px solid #721c24;">
+                                        <strong>Filtering Details:</strong>
+                                        ${reasonsHtml}
+                                    </div>
+                                `;
+                            }
+                            
+                            // Final result for crossword
+                            html += `
+                                <div style="margin: 10px 0; padding: 15px; background: #d4edda; border-left: 4px solid #155724; font-weight: bold;">
+                                    <strong>🎯 Final Result for Crossword:</strong><br>
+                                    <strong>Headline:</strong> "${scoredHeadline.filteredText}"<br>
+                                    <strong>Words:</strong> [${scoredHeadline.filteredWords.join(', ')}]
+                                </div>
+                            `;
+                        }
+                        
+                        html += '<hr style="margin: 20px 0;">';
+                    });
+                    
+                    displayResult(html);
+                })
+                .catch(error => {
+                    displayResult(`<p style="color: red;">Error: ${error.message}</p>`);
+                });
+        }
+        
+        function clearResults() {
+            document.getElementById('results').innerHTML = '<p>Results cleared. Click a test button to start...</p>';
+        }
+        
+        // Test on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Russian RSS Test page loaded');
+            console.log('Russian sources available:', typeof russianRssNewsSources !== 'undefined');
+        });
+    </script>
+</body>
+</html>

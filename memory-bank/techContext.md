@@ -44,10 +44,13 @@ headlines/
 │       ├── rss-parser.js               # RSS feed parsing and extraction
 │       ├── html-processor.js           # HTML detection and stripping utilities
 │       └── debug-utils.js              # Debug panel and development tools
-├── test.html                           # Color logic testing framework
-├── test-rss-parser.html                # RSS parser testing framework
-├── test-html-processor.html            # HTML processing testing framework
-├── test-explanation.md                 # Documentation for test framework
+├── test/                               # Test framework and utilities
+│   ├── test.html                       # Main test interface
+│   ├── test-rss-parser.html            # RSS parser testing framework
+│   ├── test-html-processor.html        # HTML processing testing framework
+│   ├── test-russian-rss.html           # Russian RSS testing framework
+│   ├── test-russian-text.html          # Russian text processing tests
+│   └── test-explanation.md             # Documentation for test framework
 └── memory-bank/                        # Project documentation
     ├── projectbrief.md                 # Project scope and requirements
     ├── productContext.md               # User experience and goals
@@ -129,9 +132,9 @@ headlines/
 
 - **`rss-parser.js`** (200+ lines)
   - **Functions**: RSS feed parsing and headline extraction
-  - **Key APIs**: `fetchLatestHeadlines()`, `fetchFromMultipleSources()`, `testAllSources()`
+  - **Key APIs**: `fetchLatestHeadlines()`, `fetchFromMultipleSources()`, `testAllSources()`, `processCommersantHeadline()`
   - **Dependencies**: Requires RSS configuration from data.js
-  - **Purpose**: RSS2JSON API integration with source attribution
+  - **Purpose**: RSS2JSON API integration with source attribution and Commersant headline processing
 
 - **`html-processor.js`** (300+ lines)
   - **Functions**: HTML detection, stripping, and entity decoding

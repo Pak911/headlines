@@ -123,6 +123,28 @@ async function fetchFromRSSWithTimeout() {
 }
 
 /**
+ * Gets the appropriate RSS sources based on current language
+ * @returns {Array} Array of RSS source objects
+ */
+function getRSSSourcesForCurrentLanguage() {
+    // Check if i18n is available and get current language
+    if (typeof window !== 'undefined' && window.i18n) {
+        const currentLanguage = window.i18n.currentLanguage;
+        console.log(`🌐 Current language detected: ${currentLanguage}`);
+        
+        // Return Russian sources if language is Russian
+        if (currentLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+            console.log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
+            return russianRssNewsSources;
+        }
+    }
+    
+    // Default to English sources
+    console.log(`🇺🇸 Using English RSS sources (${rssNewsSources.length} sources)`);
+    return rssNewsSources;
+}
+
+/**
  * Fetches from all RSS sources simultaneously (async/parallel)
  * @returns {Promise<Array>} Combined headlines from working sources
  */
@@ -134,17 +156,27 @@ async function fetchFromRSSSourcesSequentially() {
         await new Promise(resolve => setTimeout(resolve, fetchDelay));
     }
     
-    console.log(`🚀 Fetching from ${rssNewsSources.length} RSS sources simultaneously...`);
+    // Get appropriate RSS sources based on current language
+    const currentRSSSources = getRSSSourcesForCurrentLanguage();
+    
+    // For Russian language, fetch 3x more articles to compensate for shorter descriptions
+    const isRussian = currentRSSSources === russianRssNewsSources;
+    const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
+    
+    console.log(`🚀 Fetching from ${currentRSSSources.length} RSS sources simultaneously...`);
+    if (isRussian) {
+        console.log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
+    }
     
     const workingSources = [];
     const failedSources = [];
     
     // Create promises for all sources simultaneously
-    const sourcePromises = rssNewsSources.map(async (source, index) => {
-        console.log(`📡 Starting fetch from source ${index + 1}/${rssNewsSources.length}: ${source.name}`);
+    const sourcePromises = currentRSSSources.map(async (source, index) => {
+        console.log(`📡 Starting fetch from source ${index + 1}/${currentRSSSources.length}: ${source.name}`);
         
         try {
-            const headlines = await RSSParser.fetchLatestHeadlines(source.url, 5);
+            const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource);
             
             if (headlines && headlines.length > 0) {
                 headlines.forEach(headline => {
@@ -169,7 +201,7 @@ async function fetchFromRSSSourcesSequentially() {
     });
     
     // Wait for all sources to complete simultaneously
-    console.log(`⏳ Waiting for all ${rssNewsSources.length} sources to complete...`);
+    console.log(`⏳ Waiting for all ${currentRSSSources.length} sources to complete...`);
     const results = await Promise.all(sourcePromises);
     
     // Combine all results
@@ -189,7 +221,7 @@ async function fetchFromRSSSourcesSequentially() {
     
     // If we got at least some headlines, consider it a success
     if (uniqueHeadlines.length > 0) {
-        console.log(`🎉 Successfully fetched headlines from ${workingSources.length}/${rssNewsSources.length} sources in parallel`);
+        console.log(`🎉 Successfully fetched headlines from ${workingSources.length}/${currentRSSSources.length} sources in parallel`);
     }
     
     return uniqueHeadlines;

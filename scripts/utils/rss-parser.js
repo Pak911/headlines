@@ -72,8 +72,8 @@ function processRSSItems(items) {
     
     for (const item of items) {
         try {
-            // Clean and process the title
-            const cleanTitle = cleanHeadlineText(item.title);
+            // Process Commersant-style headlines (extract text before " //")
+            const cleanTitle = processCommersantHeadline(item.title);
             
             if (!cleanTitle) {
                 console.log(`⚠️ Skipping empty title: ${item.title}`);
@@ -112,6 +112,29 @@ function processRSSItems(items) {
 }
 
 /**
+ * Processes Commersant-style headlines with " //" pattern
+ * Extracts the short headline before " //"
+ * @param {string} title - Raw headline title
+ * @returns {string} Processed headline text
+ */
+function processCommersantHeadline(title) {
+    if (!title || typeof title !== 'string') {
+        return '';
+    }
+    
+    // Check if it's a Commersant-style headline with //
+    if (title.includes(' // ')) {
+        // Extract the part before //
+        const shortHeadline = title.split(' // ')[0];
+        // Process the extracted headline
+        return cleanHeadlineText(shortHeadline);
+    }
+    
+    // Return original processing for other headlines
+    return cleanHeadlineText(title);
+}
+
+/**
  * Cleans headline text by removing unwanted characters and formatting
  * Enhanced with HTML processor integration
  * @param {string} title - Raw headline title
@@ -145,6 +168,7 @@ function cleanHeadlineText(title) {
 
 /**
  * Extracts valid words from headline text
+ * Supports both English and Russian text
  * @param {string} text - Cleaned headline text
  * @returns {Array} Array of valid words
  */
@@ -159,8 +183,8 @@ function extractWords(text) {
             // Must be non-empty
             if (!word || word.length === 0) return false;
             
-            // Must contain only letters (no numbers or special chars)
-            if (!/^[A-Z]+$/.test(word)) return false;
+            // Must contain only letters (allow both English and Russian)
+            if (!/^[A-ZА-ЯЁ]+$/.test(word)) return false;
             
             // Must be at least minWordLengthForParsing characters
             if (word.length < config.minWordLengthForParsing) return false;
@@ -263,6 +287,35 @@ async function testAllSources() {
     return await fetchFromMultipleSources(rssNewsSources, 3);
 }
 
+/**
+ * Test function for Russian text processing
+ * @param {string} text - Text to test
+ * @returns {Object} Test results
+ */
+function testRussianTextProcessing(text) {
+    console.log(`🧪 Testing Russian text processing: "${text}"`);
+    
+    // Test clean headline text
+    const cleaned = cleanHeadlineText(text);
+    console.log(`🧹 Cleaned: "${cleaned}"`);
+    
+    // Test word extraction
+    const words = extractWords(cleaned);
+    console.log(`🔤 Words extracted: [${words.join(', ')}]`);
+    
+    // Test word count
+    console.log(`🔢 Word count: ${words.length}`);
+    
+    return {
+        original: text,
+        cleaned: cleaned,
+        words: words,
+        wordCount: words.length,
+        isValid: words.length >= 4
+    };
+}
+
+
 // Export functions for use in other modules
 if (typeof window !== 'undefined') {
     // Browser environment - attach to window
@@ -274,6 +327,7 @@ if (typeof window !== 'undefined') {
         processRSSItems,
         cleanHeadlineText,
         extractWords,
-        removeDuplicateHeadlines
+        removeDuplicateHeadlines,
+        processCommersantHeadline
     };
 }

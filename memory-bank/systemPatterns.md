@@ -563,3 +563,112 @@ const en = {
 5. **Material Design**: Consistent styling with existing UI
 6. **Maintainable**: Clean separation of translations from code logic
 7. **Performance**: Instant language switching with minimal overhead
+
+## Russian RSS Support (2025-08-10)
+
+### Language-Aware Architecture Pattern
+**Achievement**: Implemented comprehensive Russian language RSS feed support with automatic language detection and source selection, maintaining full backward compatibility with existing English functionality.
+
+### Multi-Language RSS Integration
+**Location**: `data.js` - Centralized RSS source configuration
+
+```javascript
+// English RSS News Sources (existing)
+const rssNewsSources = [
+    { name: "BBC News", url: "http://feeds.bbci.co.uk/news/rss.xml", category: "general" },
+    // ... other English sources
+];
+
+// Russian RSS News Sources (new)
+const russianRssNewsSources = [
+    { name: "Kommersant", url: "https://www.kommersant.ru/rss/main.xml", category: "general" },
+    { name: "RIA", url: "https://ria.ru/export/rss2/index.xml", category: "general" },
+    { name: "RBC", url: "https://rssexport.rbc.ru/rbcnews/news/30/full.rss", category: "general" },
+    { name: "TASS", url: "https://tass.ru/rss/v2.xml", category: "general" },
+    { name: "Lenta", url: "https://lenta.ru/rss/news", category: "general" }
+];
+```
+
+### Language Detection Integration Pattern
+**Location**: `scripts/utils/async-rss-fetcher.js` - Language-aware RSS source selection
+
+#### Core Architecture
+- **Automatic Language Detection**: Uses existing i18n system for seamless integration
+- **Dynamic Source Selection**: Switches between English/Russian sources based on current language
+- **Volume Compensation**: Loads 3x more articles for Russian to compensate for shorter descriptions
+- **Backward Compatibility**: No changes to existing English functionality
+
+#### Key Functions
+- `getRSSSourcesForCurrentLanguage()`: Selects appropriate RSS sources based on detected language
+- `fetchFromRSSSourcesSequentially()`: Language-aware parallel fetching with volume adjustment
+
+```javascript
+// Language-aware source selection
+function getRSSSourcesForCurrentLanguage() {
+    if (typeof window !== 'undefined' && window.i18n) {
+        const currentLanguage = window.i18n.currentLanguage;
+        if (currentLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+            return russianRssNewsSources; // Russian sources
+        }
+    }
+    return rssNewsSources; // Default to English sources
+}
+
+// Volume compensation for Russian sources
+const isRussian = currentRSSSources === russianRssNewsSources;
+const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
+```
+
+### Commersant Headline Processing Pattern
+**Location**: `scripts/utils/rss-parser.js` - Special handling for Russian headline format
+
+#### Core Architecture
+- **Pattern Recognition**: Detects " //" separator in headlines
+- **Content Extraction**: Extracts short headline before separator for crossword use
+- **Text Processing**: Applies standard cleaning and formatting
+
+#### Key Functions
+- `processCommersantHeadline()`: Special processing for " //" pattern headlines
+- `processRSSItems()`: Integrated into main RSS processing pipeline
+
+```javascript
+// Commersant headline processing
+function processCommersantHeadline(title) {
+    if (title.includes(' // ')) {
+        // Extract the part before //
+        const shortHeadline = title.split(' // ')[0];
+        return cleanHeadlineText(shortHeadline); // Apply standard processing
+    }
+    return cleanHeadlineText(title); // Standard processing for other headlines
+}
+
+// Integration into RSS processing
+function processRSSItems(items) {
+    for (const item of items) {
+        const cleanTitle = processCommersantHeadline(item.title); // Use new function
+        // ... rest of processing
+    }
+}
+```
+
+### Test Framework Integration Pattern
+**Location**: `test/test-russian-rss.html` - Multi-language testing interface
+
+#### Core Architecture
+- **Language Selection**: Dropdown to switch between English/Russian sources
+- **Dynamic Source Population**: Updates source list based on selected language
+- **Language-Aware Testing**: Tests appropriate sources for selected language
+
+#### Key Features
+- **Real-time Language Switching**: Instant update of available sources
+- **Source Attribution**: Clear indication of source language and category
+- **Performance Monitoring**: Tracks success rates for each language
+
+### Benefits Achieved
+1. **Seamless Integration**: No changes to existing English functionality
+2. **Automatic Detection**: Uses existing i18n system for language detection
+3. **Content Optimization**: Special processing for Commersant-style headlines
+4. **Volume Compensation**: 3x more articles loaded for Russian sources
+5. **Backward Compatible**: Existing English sources work unchanged
+6. **Extensible**: Easy to add more languages and sources
+7. **Maintainable**: Clean separation of language-specific logic

@@ -228,6 +228,10 @@
             <button id="testBBCBtn" class="test-button">Test BBC News</button>
             <button id="testCNNBtn" class="test-button">Test CNN</button>
             <button id="testReutersBtn" class="test-button">Test Reuters</button>
+            <select id="languageSelect">
+                <option value="en">English Sources</option>
+                <option value="ru">Russian Sources</option>
+            </select>
             <select id="sourceSelect">
                 <option value="">Select a source to test...</option>
             </select>
@@ -253,8 +257,8 @@
     </div>
 
     <!-- Load dependencies -->
-    <script src="data.js"></script>
-    <script src="scripts/utils/rss-parser.js"></script>
+    <script src="../data.js"></script>
+    <script src="../scripts/utils/rss-parser.js"></script>
     
     <script>
         // Test suite implementation
@@ -292,17 +296,37 @@
                 document.getElementById('testReutersBtn').addEventListener('click', () => this.testSingleSource('Reuters Top News'));
                 document.getElementById('testSelectedBtn').addEventListener('click', () => this.testSelectedSource());
                 document.getElementById('clearBtn').addEventListener('click', () => this.clearResults());
+                
+                // Add language change listener
+                document.getElementById('languageSelect').addEventListener('change', () => this.populateSourceSelect());
             }
             
             populateSourceSelect() {
-                if (typeof rssNewsSources !== 'undefined') {
-                    rssNewsSources.forEach(source => {
+                // Clear existing options
+                this.sourceSelect.innerHTML = '<option value="">Select a source to test...</option>';
+                
+                // Get current language
+                const language = document.getElementById('languageSelect').value || 'en';
+                let sources;
+                let sourceCount;
+                
+                if (language === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+                    sources = russianRssNewsSources;
+                    sourceCount = russianRssNewsSources.length;
+                    this.logToConsole(`Loaded ${sourceCount} Russian RSS sources`, 'success');
+                } else {
+                    sources = rssNewsSources;
+                    sourceCount = rssNewsSources.length;
+                    this.logToConsole(`Loaded ${sourceCount} English RSS sources`, 'success');
+                }
+                
+                if (sources) {
+                    sources.forEach(source => {
                         const option = document.createElement('option');
                         option.value = source.name;
                         option.textContent = `${source.name} (${source.category})`;
                         this.sourceSelect.appendChild(option);
                     });
-                    this.logToConsole(`Loaded ${rssNewsSources.length} RSS sources`, 'success');
                 } else {
                     this.logToConsole('RSS sources not found - check data.js', 'error');
                 }
@@ -313,7 +337,20 @@
                 this.logToConsole('Starting test of all RSS sources', 'info');
                 
                 try {
-                    const headlines = await window.RSSParser.testAllSources();
+                    // Get current language
+                    const language = document.getElementById('languageSelect').value || 'en';
+                    let headlines;
+                    
+                    if (language === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+                        // Test all Russian sources
+                        this.logToConsole('Testing all Russian RSS sources...', 'info');
+                        headlines = await window.RSSParser.fetchFromMultipleSources(russianRssNewsSources, 3);
+                    } else {
+                        // Test all English sources
+                        this.logToConsole('Testing all English RSS sources...', 'info');
+                        headlines = await window.RSSParser.testAllSources();
+                    }
+                    
                     this.processResults(headlines, 'All Sources');
                     this.setStatus('success', `Successfully tested all sources. Found ${headlines.length} valid headlines.`);
                 } catch (error) {
@@ -327,7 +364,29 @@
                 this.logToConsole(`Testing single source: ${sourceName}`, 'info');
                 
                 try {
-                    const headlines = await window.RSSParser.testSingleSource(sourceName);
+                    // Get current language
+                    const language = document.getElementById('languageSelect').value || 'en';
+                    let headlines;
+                    
+                    if (language === 'ru' && typeof russianRssNewsSources !== 'undefined') {
+                        // Find source in Russian sources
+                        const source = russianRssNewsSources.find(s => s.name === sourceName);
+                        if (source) {
+                            this.logToConsole(`Testing Russian source: ${sourceName}`, 'info');
+                            headlines = await window.RSSParser.fetchLatestHeadlines(source.url, 5);
+                            // Add source metadata
+                            headlines.forEach(headline => {
+                                headline.sourceName = source.name;
+                                headline.category = source.category;
+                            });
+                        } else {
+                            throw new Error(`Source "${sourceName}" not found in Russian sources`);
+                        }
+                    } else {
+                        // Use English sources
+                        headlines = await window.RSSParser.testSingleSource(sourceName);
+                    }
+                    
                     this.processResults(headlines, sourceName);
                     this.setStatus('success', `Successfully tested ${sourceName}. Found ${headlines.length} valid headlines.`);
                 } catch (error) {
