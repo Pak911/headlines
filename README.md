@@ -19,7 +19,7 @@ Headlines combines engaging elements:
 - **Multi-language Support**: Play in English or Russian with automatic language detection
 - **Real-time RSS Integration**: Current news headlines from multiple sources
 
-Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where contextual hints make the challenge engaging and solvable. During development, it was discovered that pure guessing wasn't engaging enough - the hint system with semantic clues from news descriptions dramatically increased player interest and made puzzles much more enjoyable.
+Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where contextual hints make the challenge engaging and solvable.
 
 ## 🚀 Quick Start
 
@@ -68,11 +68,6 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 - **Intersection cell handling** for letters belonging to multiple words
 - **Connected word logic** showing relationships between crossing words
 
-### 🎲 Strategic Difficulty System
-- **Constraint-based scrambling** with green letter percentage limits
-- **Solvability guarantee** - every puzzle has a known minimum solution
-- **State tracking** to ensure optimal difficulty targeting
-
 ### 🌐 Multi-language Support
 - **English and Russian** with automatic language detection
 - **Language selector dropdown** for manual switching
@@ -90,7 +85,7 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 
 ## 🏗️ Architecture
 
-### Modular Design (12 Focused Modules)
+### Modular Design
 
 ```
 scripts/
@@ -152,15 +147,6 @@ This project uses a comprehensive **memory-bank** system for development guidanc
 
 **For developers**: Start by reading the memory-bank files to understand the project's design philosophy and technical decisions.
 
-### Adding New Headlines
-Edit `data.js` to add headlines to the `headlines` array:
-```javascript
-headlines.push({
-    words: ["BREAKING", "NEWS", "STORY", "DEVELOPS"],
-    url: "https://example.com/article"
-});
-```
-
 ### Debug Panel
 Press **'D'** during gameplay to access:
 - Current game state analysis
@@ -187,7 +173,6 @@ The project includes multiple test files:
 - **No Build Process**: Direct browser execution
 - **Modular Architecture**: Clean separation of concerns
 - **Advanced Algorithms**: Sophisticated crossword generation and scrambling
-- **Comprehensive Testing**: Dedicated test framework for edge cases
 - **Developer-Friendly**: Extensive debug tools and documentation
 - **RSS Integration**: Real-time headline fetching with parallel processing
 - **Multi-language Support**: Zero-dependency localization system with automatic detection
@@ -243,9 +228,3 @@ This attribution helps support the open-source community and gives credit where 
 - Built with modern web technologies
 - Designed for educational and entertainment purposes
 - Created by **Pak911** with love for game design and code
-
----
-
-**Ready to play?** [Download and open index.html](index.html) in your browser! 🎮
-
-*For developers: Press 'D' in-game to explore the debug panel and check out the memory-bank for comprehensive development guidelines.*
