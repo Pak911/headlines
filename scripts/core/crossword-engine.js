@@ -126,12 +126,13 @@ function generateCrosswordLayout(words) {
     for (let attempt = 0; attempt < maxAttempts; attempt++) {
         const layout = tryGenerateLayout(words, attempt);
         if (layout.words.length === words.length) { // Only consider complete layouts
-            // Validate layout connectivity, parallel spacing, no end-to-end adjacency, proper non-intersecting spacing, and valid letter sharing
+            // Validate layout connectivity, parallel spacing, no end-to-end adjacency, proper non-intersecting spacing, valid letter sharing, and each word having shared letters
             if (isLayoutConnected(layout, words) && 
                 hasProperParallelSpacing(layout, words) && 
                 hasNoEndToEndAdjacency(layout, words) &&
                 hasProperNonIntersectingSpacing(layout, words) &&
-                hasValidLetterSharing(layout, words)) {
+                hasValidLetterSharing(layout, words) &&
+                doesEachWordHaveSharedLetter(layout, words)) {
                 const score = scoreLayout(layout, words);
                 if (score < bestScore) {
                     bestScore = score;
@@ -150,7 +151,8 @@ function generateCrosswordLayout(words) {
             hasProperParallelSpacing(simpleLayout, words) &&
             hasNoEndToEndAdjacency(simpleLayout, words) &&
             hasProperNonIntersectingSpacing(simpleLayout, words) &&
-            hasValidLetterSharing(simpleLayout, words)) {
+            hasValidLetterSharing(simpleLayout, words) &&
+            doesEachWordHaveSharedLetter(simpleLayout, words)) {
             normalizeLayout(simpleLayout, words);
             return simpleLayout;
         }
@@ -641,6 +643,79 @@ function hasValidLetterSharing(layout, words) {
         }
     }
     return true; // All word pairs share at most one letter
+}
+
+// Check if each word in the layout has at least one shared letter with another word
+function doesEachWordHaveSharedLetter(layout, words) {
+    // Single word or empty layout is valid by default
+    if (layout.words.length <= 1) return true;
+    
+    // For each word, check if it shares at least one letter with another word
+    for (let i = 0; i < layout.words.length; i++) {
+        let hasSharedLetter = false;
+        
+        // Check against all other words
+        for (let j = 0; j < layout.words.length; j++) {
+            if (i !== j) {
+                // Check if word i shares at least one letter with word j
+                if (doWordsShareAnyLetter(layout.words[i], layout.words[j], words)) {
+                    hasSharedLetter = true;
+                    break; // Found at least one shared letter, no need to check other words
+                }
+            }
+        }
+        
+        // If this word doesn't share any letters with other words, layout is invalid
+        if (!hasSharedLetter) {
+            return false;
+        }
+    }
+    
+    return true; // All words have at least one shared letter
+}
+
+// Check if two words share any letter (at least one intersection)
+function doWordsShareAnyLetter(word1, word2, words) {
+    const word1Text = words[word1.word];
+    const word2Text = words[word2.word];
+    
+    // Get all positions for both words
+    const positions1 = new Map(); // position -> letter
+    const positions2 = new Map(); // position -> letter
+    
+    for (let i = 0; i < word1Text.length; i++) {
+        let row = word1.row;
+        let col = word1.col;
+        if (word1.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions1.set(`${row},${col}`, word1Text[i]);
+    }
+    
+    for (let i = 0; i < word2Text.length; i++) {
+        let row = word2.row;
+        let col = word2.col;
+        if (word2.direction === 'horizontal') {
+            col += i;
+        } else {
+            row += i;
+        }
+        positions2.set(`${row},${col}`, word2Text[i]);
+    }
+    
+    // Check for any intersections (shared positions with same letters)
+    for (let [pos, letter1] of positions1) {
+        if (positions2.has(pos)) {
+            const letter2 = positions2.get(pos);
+            if (letter1 === letter2) {
+                return true; // Found shared letter
+            }
+        }
+    }
+    
+    return false; // No shared letters found
 }
 
 // Check if a word placement is valid

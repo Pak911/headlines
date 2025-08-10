@@ -1,3 +1,9 @@
+// Default language configuration
+const defaultLanguageConfig = {
+    // Set to 'auto' to detect browser language, or specify 'en' or 'ru'
+    defaultLanguage: 'auto'
+};
+
 // Headline Scoring Configuration
 const headlineScoringConfig = {
     // Word count constraints

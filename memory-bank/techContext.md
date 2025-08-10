@@ -22,6 +22,10 @@ headlines/
 ├── styles.css                          # Game styling and animations
 ├── data.js                             # Headlines data and configuration
 ├── script.js                           # Original monolithic file (backup)
+├── localization/                       # Localization system
+│   ├── en.js                           # English translations
+│   ├── ru.js                           # Russian translations
+│   └── i18n.js                         # Localization manager
 ├── scripts/                            # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
 │   ├── core/                           # Core engine modules

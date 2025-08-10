@@ -481,3 +481,85 @@ headline = {
 - **Headline Quality**: Real current news with intelligent scoring
 - **Cache Efficiency**: 5-minute cache prevents API rate limiting
 - **Source Attribution**: Complete source tracking from RSS to display
+
+## Localization System (2025-08-10)
+
+### Zero-Dependency Architecture Pattern
+**Achievement**: Implemented fully functional localization system with zero external dependencies, following pure JavaScript approach consistent with existing architecture.
+
+### File Structure Pattern
+**Location**: `localization/` directory with modular language files
+
+```
+localization/
+├── en.js          # English translations (key-value structure)
+├── ru.js          # Russian translations (key-value structure)  
+└── i18n.js        # Localization manager and core logic
+```
+
+### Configuration-Driven Design
+**Location**: `data.js` - Centralized default language configuration
+
+```javascript
+// Default language configuration
+const defaultLanguageConfig = {
+    // Set to 'auto' to detect browser language, or specify 'en' or 'ru'
+    defaultLanguage: 'auto'
+};
+```
+
+### Localization Manager Pattern
+**Location**: `localization/i18n.js`
+
+#### Core Architecture
+- **Language Detection**: Browser language detection with fallback to English
+- **Configuration Override**: Respects `defaultLanguageConfig` from data.js
+- **Storage Management**: localStorage for user preference persistence
+- **Dynamic Updates**: Real-time UI updates when language changes
+
+#### Key Functions
+- `detectLanguage()`: Smart language detection with configuration override
+- `t(key)`: Translation function with dot-notation key access
+- `setLanguage(lang)`: Language switching with UI updates
+- `updateUI()`: Coordinated UI refresh across all modules
+
+#### Translation Structure Pattern
+**Location**: Individual language files (`en.js`, `ru.js`)
+
+```javascript
+// Example: English translations (en.js)
+const en = {
+    game: {
+        title: "Headlines",
+        instructions: "Swap letters to reconstruct the news headline!<br>Click two letters to swap their positions.<br>The tip below is a hint about the article's headline."
+    },
+    ui: {
+        swaps: "Swaps",
+        nextHeadline: "Next Headline"
+    }
+    // ... more translation keys
+};
+```
+
+### Integration Pattern
+**Location**: `scripts/main.js` and individual modules
+
+#### Global Access
+- `t('key.path')`: Universal translation function available everywhere
+- `setLanguage('en')`: Global language switching function
+- Automatic UI updates through coordinated refresh system
+
+#### Module Integration
+- **Main.js**: Centralized text updating (`updateLocalizedText()`)
+- **Game Controller**: Dynamic victory modal content
+- **UI Interactions**: Real-time legend and button text updates
+- **Data.js**: Configurable default language behavior
+
+### Benefits Achieved
+1. **Zero Dependencies**: Pure JavaScript implementation consistent with project philosophy
+2. **Configurable**: Easy default language setting in data.js
+3. **Extensible**: Simple addition of new languages through new files
+4. **Persistent**: User preferences saved in localStorage
+5. **Material Design**: Consistent styling with existing UI
+6. **Maintainable**: Clean separation of translations from code logic
+7. **Performance**: Instant language switching with minimal overhead

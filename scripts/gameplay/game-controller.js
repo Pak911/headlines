@@ -48,6 +48,30 @@ function getStarThresholds(wordCount) {
     return thresholds;
 }
 
+// Helper function to get Russian plural form
+function getRussianPluralForm(number) {
+    const lastDigit = number % 10;
+    const lastTwoDigits = number % 100;
+    
+    // Special cases for 11-19
+    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return 'many';
+    }
+    
+    // 1 - one form
+    if (lastDigit === 1) {
+        return 'one';
+    }
+    
+    // 2, 3, 4 - twoFour form
+    if (lastDigit >= 2 && lastDigit <= 4) {
+        return 'twoFour';
+    }
+    
+    // 5-9, 0 - many form
+    return 'many';
+}
+
 // Generate tooltip content for star hover
 function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
     const thresholds = getStarThresholds(wordCount);
@@ -55,18 +79,56 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
     if (starIndex <= currentStars) {
         // Player achieved this star level
         if (currentStars === 5) {
-            return "🏆 Perfect! You achieved the maximum 5-star rating!";
+            return t('victory.tooltips.perfect');
         } else {
             const nextStarThreshold = thresholds[currentStars + 1];
-            return `🌟 You earned ${currentStars} stars by completing in ${swapCount} swaps!<br>⭐ Get ${currentStars + 1} stars by completing in ${nextStarThreshold} swaps or fewer`;
+            const earnedTooltips = t('victory.tooltips.earned');
+            let tooltipText;
+            
+            // Handle different languages - Russian has plural forms, English has default
+            if (typeof earnedTooltips === 'object' && earnedTooltips !== null) {
+                if (i18n.currentLanguage === 'ru') {
+                    const pluralForm = getRussianPluralForm(currentStars);
+                    tooltipText = earnedTooltips[pluralForm] || earnedTooltips.default || earnedTooltips.one;
+                } else {
+                    tooltipText = earnedTooltips.default || Object.values(earnedTooltips)[0];
+                }
+            } else {
+                tooltipText = earnedTooltips;
+            }
+            
+            tooltipText = tooltipText.replace('{stars}', currentStars);
+            tooltipText = tooltipText.replace('{swaps}', swapCount);
+            tooltipText = tooltipText.replace('{nextStars}', currentStars + 1);
+            tooltipText = tooltipText.replace('{threshold}', nextStarThreshold);
+            return tooltipText;
         }
     } else {
         // Player didn't achieve this star level
         const requiredSwaps = thresholds[starIndex];
         if (requiredSwaps === Infinity) {
-            return `⭐ Get ${starIndex} star by completing the puzzle`;
+            let tooltipText = t('victory.tooltips.getOneStar');
+            tooltipText = tooltipText.replace('{starIndex}', starIndex);
+            return tooltipText;
         } else {
-            return `⭐ Get ${starIndex} stars by completing the puzzle in ${requiredSwaps} swaps or fewer`;
+            const getStarsTooltips = t('victory.tooltips.getStars');
+            let tooltipText;
+            
+            // Handle different languages - Russian has plural forms, English has default
+            if (typeof getStarsTooltips === 'object' && getStarsTooltips !== null) {
+                if (i18n.currentLanguage === 'ru') {
+                    const pluralForm = getRussianPluralForm(starIndex);
+                    tooltipText = getStarsTooltips[pluralForm] || getStarsTooltips.default || getStarsTooltips.one;
+                } else {
+                    tooltipText = getStarsTooltips.default || Object.values(getStarsTooltips)[0];
+                }
+            } else {
+                tooltipText = getStarsTooltips;
+            }
+            
+            tooltipText = tooltipText.replace('{starIndex}', starIndex);
+            tooltipText = tooltipText.replace('{requiredSwaps}', requiredSwaps);
+            return tooltipText;
         }
     }
 }
@@ -136,6 +198,40 @@ function hideStarTooltip() {
 }
 
 function showVictory() {
+    // Update victory modal content with localization
+    const victoryTitle = document.querySelector('.victory-title');
+    const victorySubtitle = document.querySelector('.victory-subtitle');
+    const headlineLabel = document.querySelector('.headline-label');
+    const replayBtn = document.querySelector('.btn-secondary:first-child');
+    const readArticleBtn = document.querySelector('.btn-primary');
+    const nextHeadlineBtn = document.querySelector('.btn-secondary:last-child');
+    
+    // Update stat labels
+    const statCards = document.querySelectorAll('.stat-card');
+    const swapsLabel = statCards[0]?.querySelector('.stat-label');
+    const ratingLabel = statCards[1]?.querySelector('.stat-label');
+    
+    if (typeof t !== 'undefined') {
+        if (victoryTitle) victoryTitle.textContent = t('victory.title');
+        if (victorySubtitle) victorySubtitle.textContent = t('victory.subtitle');
+        if (headlineLabel) headlineLabel.textContent = t('victory.headlineLabel');
+        if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps');
+        if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
+        
+        // Update button texts - no icons
+        if (replayBtn) {
+            replayBtn.textContent = t('ui.replay');
+        }
+        
+        if (readArticleBtn) {
+            readArticleBtn.textContent = t('ui.readFullArticle');
+        }
+        
+        if (nextHeadlineBtn) {
+            nextHeadlineBtn.textContent = t('ui.newHeadline');
+        }
+    }
+    
     document.getElementById('headlineReveal').textContent = currentHeadline.text;
     document.getElementById('finalSwaps').textContent = swapCount;
     
@@ -143,7 +239,14 @@ function showVictory() {
     const wordCount = currentHeadline.words.length;
     const { rating, starCount } = calculateStarRating(swapCount, wordCount);
     
-    document.getElementById('performanceRating').textContent = rating;
+    // Get localized rating text
+    let localizedRating = rating;
+    if (typeof t !== 'undefined') {
+        const ratingKey = rating.toLowerCase();
+        localizedRating = t(`victory.ratings.${ratingKey}`) || rating;
+    }
+    
+    document.getElementById('performanceRating').textContent = localizedRating;
     document.getElementById('articleLink').href = currentHeadline.link || '#';
     
     // Generate star display
@@ -451,8 +554,16 @@ function displayHeadlineDescription() {
         }
         
         descriptionElement.textContent = cleanDescription;
+        
+        // Set the tip prefix for localization
+        if (typeof t !== 'undefined') {
+            descriptionElement.setAttribute('data-tip-prefix', t('hints.tipPrefix').replace('💡 ', '').replace(':', ''));
+        } else {
+            descriptionElement.setAttribute('data-tip-prefix', 'Tip');
+        }
     } else {
         descriptionElement.textContent = '';
+        descriptionElement.setAttribute('data-tip-prefix', 'Tip');
     }
 }
 

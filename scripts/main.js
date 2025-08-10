@@ -45,8 +45,71 @@ async function enhancedInitGameWithReset() {
     }
 }
 
+// Initialize language selector with current language
+function initLanguageSelector() {
+    if (typeof i18n !== 'undefined' && document.getElementById('languageSelect')) {
+        const languageSelect = document.getElementById('languageSelect');
+        languageSelect.value = i18n.currentLanguage;
+    }
+}
+
+// Update page text with localized content
+function updateLocalizedText() {
+    if (typeof t !== 'undefined') {
+        // Update main title and instructions
+        const gameTitle = document.querySelector('h1');
+        const gameInstructions = document.querySelector('.instructions');
+        
+        if (gameTitle) {
+            gameTitle.textContent = t('game.title');
+        }
+        
+        if (gameInstructions) {
+            gameInstructions.innerHTML = t('game.instructions');
+        }
+        
+        // Update swap counter label
+        const swapCounter = document.querySelector('.swap-counter');
+        if (swapCounter) {
+            const currentSwaps = document.getElementById('swapCount').textContent;
+            swapCounter.innerHTML = `${t('ui.swaps')}: <span id="swapCount">${currentSwaps}</span>`;
+        }
+        
+        // Update next headline button
+        const nextHeadlineBtn = document.querySelector('.new-game-btn-header');
+        if (nextHeadlineBtn) {
+            nextHeadlineBtn.textContent = t('ui.nextHeadline');
+        }
+        
+        // Update color legend text
+        const legendItems = document.querySelectorAll('.legend-item .legend-text');
+        if (legendItems.length >= 4) {
+            legendItems[0].textContent = t('legend.correct');
+            legendItems[1].textContent = t('legend.wrongPosition');
+            legendItems[2].textContent = t('legend.connectedWord');
+            legendItems[3].textContent = t('legend.otherWord');
+        }
+        
+        // Update debug panel text
+        const debugToggleHint = document.querySelector('.debug-toggle-hint small');
+        if (debugToggleHint) {
+            debugToggleHint.textContent = t('debug.toggleHint');
+        }
+        
+        // Update headline description tip prefix
+        const descriptionElement = document.getElementById('headlineDescription');
+        if (descriptionElement) {
+            const tipPrefix = t('hints.tipPrefix').replace('💡 ', '').replace(':', '');
+            descriptionElement.setAttribute('data-tip-prefix', tipPrefix);
+        }
+    }
+}
+
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Initialize language selector
+    initLanguageSelector();
+    
     // Only initialize if we're on the main game page (not test page)
     if (document.getElementById('crosswordGrid')) {
         // Use the enhanced initialization that resets word tracking

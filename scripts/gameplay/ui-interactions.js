@@ -69,6 +69,17 @@ function renderCrossword() {
         
         container.appendChild(rowDiv);
     }
+    
+    // Update color legend with localized text
+    updateColorLegend();
+}
+
+// Update color legend with localized text
+function updateColorLegend() {
+    // Call the main update function to handle all localization
+    if (typeof updateLocalizedText === 'function') {
+        updateLocalizedText();
+    }
 }
 
 function selectCell(row, col) {
