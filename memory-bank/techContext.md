@@ -128,6 +128,7 @@ The engine uses a sophisticated **three-phase backbone-first algorithm** to gene
   - Intersection bonuses: Non-linear rewards for well-connected words
   - Area penalty: `(width × height) × 0.4` (strongly favors compact grids)
   - Unused word penalty: **300 points per letter** (ensures all words are placed)
+- **Variant Selection**: Uses weighted random selection from top N variants (default: 5). Higher-scored variants have proportionally higher probability of selection, but all candidates remain possible. This adds variety so different users receive different grid layouts from the same word bag while maintaining quality bias toward better solutions.
 
 ### Key Features
 - **Language Detection**: Automatically detects Russian vs English based on character patterns.

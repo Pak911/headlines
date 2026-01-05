@@ -18,6 +18,12 @@ let debugInfo = {
         minimumSolution: 0,
         intersectionsPreserved: 0,
         totalIntersections: 0
+    },
+    variantSelection: {
+        totalVariants: 0,
+        topScore: 0,
+        selectedIndex: 0,
+        selectedScore: 0
     }
 };
 let debugPanelVisible = false;
@@ -94,6 +100,17 @@ function updateDebugInfo() {
         : '<em>Compatibility analysis in progress...</em>';
     
     document.getElementById('debugCompatibility').innerHTML = compatibilityHtml;
+    
+    // Update variant selection info (use window.debugInfo to get latest data)
+    const variantInfo = window.debugInfo.variantSelection;
+    const variantHtml = variantInfo && variantInfo.totalVariants > 0
+        ? `<strong>Total Variants Generated:</strong> ${variantInfo.totalVariants}<br>
+           <strong>Top Variant Score:</strong> ${Math.round(variantInfo.topScore)}<br>
+           <strong>Selected Variant:</strong> #${variantInfo.selectedIndex + 1} from top<br>
+           <strong>Selected Score:</strong> ${Math.round(variantInfo.selectedScore)}`
+        : '<em>No variant selection data available</em>';
+    
+    document.getElementById('debugVariantSelection').innerHTML = variantHtml;
     
     // Update grid state code
     updateGridStateCode();

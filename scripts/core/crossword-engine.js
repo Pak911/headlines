@@ -463,6 +463,89 @@ function solveRemainingWords(backbone, allWords, config) {
     };
 }
 
+// === VARIANT SELECTION ===
+
+function selectVariantWeightedRandom(sortedResults, config) {
+    // Validate and normalize finalVariantCount
+    let variantCount = config.finalVariantCount;
+    if (!Number.isInteger(variantCount) || variantCount < 1) {
+        variantCount = 1;
+    }
+    
+    // If only one result, return it directly
+    if (sortedResults.length === 1) {
+        if (window.debugInfo) {
+            window.debugInfo.variantSelection = {
+                totalVariants: 1,
+                topScore: sortedResults[0].finalScore,
+                selectedIndex: 0,
+                selectedScore: sortedResults[0].finalScore
+            };
+        }
+        return sortedResults[0];
+    }
+    
+    // Take top N variants (or all if fewer than N)
+    const topVariants = sortedResults.slice(0, Math.min(variantCount, sortedResults.length));
+    
+    // If only one in selection, return it
+    if (topVariants.length === 1) {
+        if (window.debugInfo) {
+            window.debugInfo.variantSelection = {
+                totalVariants: sortedResults.length,
+                topScore: sortedResults[0].finalScore,
+                selectedIndex: 0,
+                selectedScore: topVariants[0].finalScore
+            };
+        }
+        return topVariants[0];
+    }
+    
+    // Calculate baseline: (lowest score - 1) to ensure all weights are positive
+    // The lowest variant will get weight of 1
+    const lowestScore = topVariants[topVariants.length - 1].finalScore;
+    const baseline = lowestScore - 1;
+    
+    // Calculate weights (adjusted scores)
+    const weights = topVariants.map(variant => variant.finalScore - baseline);
+    const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+    
+    // Weighted random selection
+    let random = Math.random() * totalWeight;
+    for (let i = 0; i < topVariants.length; i++) {
+        random -= weights[i];
+        if (random <= 0) {
+            _log(`Selected variant ${i + 1}/${topVariants.length} (score: ${Math.round(topVariants[i].finalScore)}, weight: ${Math.round(weights[i])})`);
+            
+            // Store selection info for debug panel
+            console.log('[crossword-engine] Storing variant selection - window.debugInfo exists?', typeof window.debugInfo !== 'undefined');
+            if (window.debugInfo) {
+                window.debugInfo.variantSelection = {
+                    totalVariants: sortedResults.length,
+                    topScore: sortedResults[0].finalScore,
+                    selectedIndex: i,
+                    selectedScore: topVariants[i].finalScore
+                };
+            } else {
+                console.warn('[crossword-engine] window.debugInfo not available!');
+            }
+            
+            return topVariants[i];
+        }
+    }
+    
+    // Fallback (should never reach here due to floating point precision)
+    if (window.debugInfo) {
+        window.debugInfo.variantSelection = {
+            totalVariants: sortedResults.length,
+            topScore: sortedResults[0].finalScore,
+            selectedIndex: 0,
+            selectedScore: topVariants[0].finalScore
+        };
+    }
+    return topVariants[0];
+}
+
 // === MAIN ENTRY POINT ===
 
 function generateCrosswordLayout(words) {
@@ -502,9 +585,11 @@ function generateCrosswordLayout(words) {
         return null;
     }
     
-    // Sort by score and take best
+    // Sort by score (highest first)
     finalResults.sort((a, b) => b.finalScore - a.finalScore);
-    const bestResult = finalResults[0];
+    
+    // Weighted random selection from top variants
+    const bestResult = selectVariantWeightedRandom(finalResults, config);
     
     // Check if all words were used
     if (bestResult.usedCount < words.length) {

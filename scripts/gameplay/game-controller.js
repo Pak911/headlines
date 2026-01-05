@@ -396,14 +396,28 @@ async function enhancedInitGame() {
     const startTime = performance.now();
     
     // Reset debug info
-    debugInfo = {
+    window.debugInfo = {
         layoutAttempts: 0,
         layoutScore: 0,
         rejectedHeadlines: [],
         alternativeHeadlines: [],
         compatibilityScores: {},
-        generationTime: 0
+        generationTime: 0,
+        variantSelection: {
+            totalVariants: 0,
+            topScore: 0,
+            selectedIndex: 0,
+            selectedScore: 0
+        },
+        shuffleInfo: {
+            difficulty: 'medium',
+            swapsPerformed: 0,
+            minimumSolution: 0,
+            intersectionsPreserved: 0,
+            totalIntersections: 0
+        }
     };
+    const debugInfo = window.debugInfo; // Local reference
     
     // Reset game state
     swapCount = 0;
