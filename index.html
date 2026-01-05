@@ -15,25 +15,20 @@
         </select>
     </div>
     
-    <div class="header">
+    <div class="header" style="display: none;">
         <h1 id="gameTitle">Headlines</h1>
         <p class="instructions" id="gameInstructions">
             Swap letters to reconstruct the news headline!<br>Click two letters to swap their positions.<br>The tip below is a hint about the article's headline.
         </p>
     </div>
 
-    <div class="game-info">
-        <div class="swap-counter">Swaps: <span id="swapCount">0</span></div>
-        <button class="new-game-btn-header" onclick="initGame()">Next Headline</button>
-    </div>
-
-    <div class="headline-description">
-        <div id="headlineDescription" class="description-text">
-            <!-- Description will be displayed here as a hint -->
-        </div>
-    </div>
-
-    <div class="crossword-container">
+    <div class="main-game-container">
+        <div class="crossword-container">
+            <!-- Moves counter circle overlaid on grid -->
+            <div class="moves-counter-circle">
+                <div class="moves-number" id="swapCount">0</div>
+                <div class="moves-label">moves</div>
+            </div>
         <div class="color-legend">
             <ul class="legend-list">
                 <li class="legend-item">
@@ -55,6 +50,19 @@
             </ul>
         </div>
         <div id="crosswordGrid" class="crossword-grid"></div>
+        </div>
+        
+        <!-- Hint section integrated with playing field -->
+        <div class="hint-section">
+            <div class="hint-title" id="hintTitle">News Description</div>
+            <div class="hint-content-wrapper">
+                <div class="hint-icon">💡</div>
+                <div id="headlineDescription" class="hint-text">
+                    <!-- Description will be displayed here as a hint -->
+                </div>
+            </div>
+            <button class="next-headline-btn" onclick="initGame()">Next Headline</button>
+        </div>
     </div>
 
     <div class="debug-toggle-hint">

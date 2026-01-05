@@ -207,9 +207,19 @@ function swapLetters(pos1, pos2) {
     cell1.classList.add('swapping');
     cell2.classList.add('swapping');
     
-    // Update swap counter immediately
+    // Update swap counter immediately with animation
     swapCount++;
-    document.getElementById('swapCount').textContent = swapCount;
+    const swapCountElement = document.getElementById('swapCount');
+    swapCountElement.textContent = swapCount;
+    
+    // Add pulse animation to moves counter circle
+    const movesCircle = document.querySelector('.moves-counter-circle');
+    if (movesCircle) {
+        movesCircle.classList.remove('pulse');
+        // Force reflow to restart animation
+        void movesCircle.offsetWidth;
+        movesCircle.classList.add('pulse');
+    }
     
     // After first 180 degrees, swap letters and update colors immediately
     setTimeout(() => {
@@ -286,8 +296,105 @@ function resetCompletedWords() {
     completedWords.clear();
 }
 
+// Position the moves counter to avoid intersections with grid elements
+function positionMovesCounter() {
+    const movesCounter = document.querySelector('.moves-counter-circle');
+    const gridContainer = document.querySelector('.crossword-container');
+    const legend = document.querySelector('.color-legend');
+    const grid = document.querySelector('.crossword-grid');
+    
+    if (!movesCounter || !gridContainer) {
+        return;
+    }
+    
+    // Get grid and legend dimensions
+    const containerRect = gridContainer.getBoundingClientRect();
+    const legendRect = legend ? legend.getBoundingClientRect() : null;
+    const gridRect = grid ? grid.getBoundingClientRect() : null;
+    
+    // Counter dimensions
+    const counterSize = 80; // width and height of the circle
+    const margin = 16;
+    
+    // Define corner positions to try (in order: bottom-right, bottom-left, top-left, top-right)
+    const positions = [
+        { bottom: margin, right: margin, top: 'auto', left: 'auto', name: 'bottom-right' },
+        { bottom: margin, left: margin, top: 'auto', right: 'auto', name: 'bottom-left' },
+        { top: margin, left: margin, bottom: 'auto', right: 'auto', name: 'top-left' },
+        { top: margin, right: margin, bottom: 'auto', left: 'auto', name: 'top-right' }
+    ];
+    
+    // Check each position for intersections
+    for (let pos of positions) {
+        let hasIntersection = false;
+        
+        // Calculate absolute position of counter for this corner
+        let counterTop, counterLeft;
+        if (pos.top !== 'auto') {
+            counterTop = containerRect.top + pos.top;
+        } else {
+            counterTop = containerRect.bottom - pos.bottom - counterSize;
+        }
+        if (pos.left !== 'auto') {
+            counterLeft = containerRect.left + pos.left;
+        } else {
+            counterLeft = containerRect.right - pos.right - counterSize;
+        }
+        
+        const counterRect = {
+            top: counterTop,
+            left: counterLeft,
+            right: counterLeft + counterSize,
+            bottom: counterTop + counterSize
+        };
+        
+        // Check intersection with legend
+        if (legendRect) {
+            if (!(counterRect.right < legendRect.left || 
+                  counterRect.left > legendRect.right || 
+                  counterRect.bottom < legendRect.top || 
+                  counterRect.top > legendRect.bottom)) {
+                hasIntersection = true;
+            }
+        }
+        
+        // Check intersection with grid (basic check)
+        if (!hasIntersection && gridRect) {
+            if (!(counterRect.right < gridRect.left || 
+                  counterRect.left > gridRect.right || 
+                  counterRect.bottom < gridRect.top || 
+                  counterRect.top > gridRect.bottom)) {
+                // Allow slight overlap with grid, but not too much
+                const overlapX = Math.min(counterRect.right, gridRect.right) - Math.max(counterRect.left, gridRect.left);
+                const overlapY = Math.min(counterRect.bottom, gridRect.bottom) - Math.max(counterRect.top, gridRect.top);
+                if (overlapX > counterSize * 0.3 && overlapY > counterSize * 0.3) {
+                    hasIntersection = true;
+                }
+            }
+        }
+        
+        // If no intersection, use this position
+        if (!hasIntersection) {
+            movesCounter.style.top = pos.top === 'auto' ? 'auto' : pos.top + 'px';
+            movesCounter.style.bottom = pos.bottom === 'auto' ? 'auto' : pos.bottom + 'px';
+            movesCounter.style.left = pos.left === 'auto' ? 'auto' : pos.left + 'px';
+            movesCounter.style.right = pos.right === 'auto' ? 'auto' : pos.right + 'px';
+            _log(`Moves counter positioned at: ${pos.name}`);
+            return;
+        }
+    }
+    
+    // If all positions have intersections, use bottom-right as default
+    movesCounter.style.bottom = margin + 'px';
+    movesCounter.style.right = margin + 'px';
+    movesCounter.style.top = 'auto';
+    movesCounter.style.left = 'auto';
+    _log('Moves counter positioned at: bottom-right (default)');
+}
+
 // Make functions globally available
 window.renderCrossword = renderCrossword;
 window.resetCompletedWords = resetCompletedWords;
+window.positionMovesCounter = positionMovesCounter;
 
 })();

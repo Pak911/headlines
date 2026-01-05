@@ -554,6 +554,13 @@ async function enhancedInitGame() {
     // Render the crossword
     renderCrossword();
     
+    // Position the moves counter to avoid intersections
+    setTimeout(() => {
+        if (typeof positionMovesCounter === 'function') {
+            positionMovesCounter();
+        }
+    }, 100);
+    
     // Display headline description as hint
     displayHeadlineDescription();
     
@@ -619,25 +626,24 @@ function displayHeadlineDescription() {
             sourceName = currentHeadline.source;
         }
         
-        // Build the new HTML structure with source moved to tip content area
-        const tipHeaderHTML = `
-            <div class="tip-header">
-                <div class="tip-icon">💡</div>
-                <div class="tip-label-section">
-                    <div class="tip-label">${tipText}</div>
-                </div>
-            </div>
-        `;
+        // Get source link
+        let sourceLink = '';
+        if (currentHeadline.link) {
+            sourceLink = currentHeadline.link;
+        }
         
-        const tipContentHTML = `
-            <div class="tip-content">
-                ${cleanDescription}
-                ${sourceName ? `<div class="tip-source-right">[${sourceName}]</div>` : ''}
-            </div>
-        `;
+        // Build the hint text with optional source link
+        let hintHTML = cleanDescription;
+        if (sourceName) {
+            if (sourceLink) {
+                hintHTML += ` <a href="${sourceLink}" target="_blank" rel="noopener noreferrer">[${sourceName}]</a>`;
+            } else {
+                hintHTML += ` <span style="opacity: 0.7;">[${sourceName}]</span>`;
+            }
+        }
         
-        // Set the complete HTML structure
-        descriptionElement.innerHTML = tipHeaderHTML + tipContentHTML;
+        // Set the hint text
+        descriptionElement.innerHTML = hintHTML;
         
     } else {
         // Clear the content if no description

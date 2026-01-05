@@ -68,17 +68,35 @@ function updateLocalizedText() {
             gameInstructions.innerHTML = t('game.instructions');
         }
         
-        // Update swap counter label
+        // Update swap counter label (now in moves counter circle)
         const swapCounter = document.querySelector('.swap-counter');
         if (swapCounter) {
             const currentSwaps = document.getElementById('swapCount').textContent;
             swapCounter.innerHTML = `${t('ui.swaps')}: <span id="swapCount">${currentSwaps}</span>`;
         }
         
-        // Update next headline button
-        const nextHeadlineBtn = document.querySelector('.new-game-btn-header');
+        // Update moves label in the new circle counter
+        const movesLabel = document.querySelector('.moves-label');
+        if (movesLabel) {
+            movesLabel.textContent = t('ui.moves') || 'moves';
+        }
+        
+        // Update hint title
+        const hintTitle = document.getElementById('hintTitle');
+        if (hintTitle) {
+            hintTitle.textContent = t('hints.hintTitle') || 'News Description';
+        }
+        
+        // Update next headline button (new location)
+        const nextHeadlineBtn = document.querySelector('.next-headline-btn');
         if (nextHeadlineBtn) {
             nextHeadlineBtn.textContent = t('ui.nextHeadline');
+        }
+        
+        // Update old button location for compatibility
+        const oldNextHeadlineBtn = document.querySelector('.new-game-btn-header');
+        if (oldNextHeadlineBtn) {
+            oldNextHeadlineBtn.textContent = t('ui.nextHeadline');
         }
         
         // Update color legend text

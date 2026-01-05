@@ -82,7 +82,7 @@ h1 {
 }
 
 .game-info {
-    display: flex;
+    display: none; /* Hidden - moved functionality to new locations */
     justify-content: space-between;
     align-items: center;
     width: 100%;
@@ -114,7 +114,72 @@ h1 {
     padding: 24px;
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
-    margin-bottom: 30px;
+    margin-bottom: 0;
+    position: relative;
+}
+
+/* Main game container */
+.main-game-container {
+    max-width: 700px;
+    width: 100%;
+    margin: 0 auto;
+}
+
+/* Moves counter circle - positioned inside the playing field */
+.moves-counter-circle {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    z-index: 50;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.moves-counter-circle:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+}
+
+.moves-number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    animation: fadeIn 0.3s ease;
+}
+
+.moves-label {
+    font-size: 0.7rem;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* Pulse animation when moves change */
+@keyframes movePulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.moves-counter-circle.pulse {
+    animation: movePulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 .crossword-grid {
@@ -799,11 +864,104 @@ h1 {
     border-bottom: none;
 }
 
-/* Headline Description Styling */
+/* Hint Section - Integrated with Playing Field */
+.hint-section {
+    background: white;
+    padding: 20px 24px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    margin-top: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.hint-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin: 0;
+    padding: 0;
+}
+
+.hint-content-wrapper {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    min-height: 40px;
+}
+
+.hint-icon {
+    font-size: 1.8rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 2px;
+    filter: drop-shadow(0 2px 4px rgba(255, 193, 7, 0.3));
+}
+
+.hint-text {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #1f2937;
+    font-weight: 500;
+    text-align: left;
+    flex: 1;
+}
+
+.hint-text:empty {
+    display: none;
+}
+
+/* Next Headline Button */
+.next-headline-btn {
+    padding: 12px 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+    white-space: nowrap;
+    width: 100%;
+}
+
+.next-headline-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5568d3 0%, #653a8b 100%);
+}
+
+.next-headline-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 6px rgba(102, 126, 234, 0.3);
+}
+
+/* Source link styling within hint text */
+.hint-text a {
+    color: #667eea;
+    text-decoration: none;
+    font-weight: 600;
+    border-bottom: 1px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.hint-text a:hover {
+    border-bottom-color: #667eea;
+    color: #5568d3;
+}
+
+/* Headline Description Styling - Old styles kept for compatibility */
 .headline-description {
     margin: 24px auto;
     max-width: 600px;
     width: 100%;
+    display: none; /* Hidden in new layout */
 }
 
 .description-text {
@@ -889,4 +1047,66 @@ h1 {
     right: 0;
     bottom: 0;
     transform: translateY(100%);
+}
+
+/* Responsive Design for New Layout */
+@media (max-width: 768px) {
+    .moves-counter-circle {
+        width: 70px;
+        height: 70px;
+        bottom: 12px;
+        right: 12px;
+    }
+    
+    .moves-number {
+        font-size: 1.5rem;
+    }
+    
+    .moves-label {
+        font-size: 0.65rem;
+    }
+    
+    .hint-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .hint-content-wrapper {
+        flex-direction: row;
+    }
+    
+    .next-headline-btn {
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .moves-counter-circle {
+        width: 60px;
+        height: 60px;
+        bottom: 8px;
+        right: 8px;
+    }
+    
+    .moves-number {
+        font-size: 1.3rem;
+    }
+    
+    .moves-label {
+        font-size: 0.6rem;
+    }
+    
+    .hint-icon {
+        font-size: 1.5rem;
+    }
+    
+    .hint-text {
+        font-size: 0.9rem;
+    }
+    
+    .next-headline-btn {
+        padding: 10px 16px;
+        font-size: 0.9rem;
+    }
 }

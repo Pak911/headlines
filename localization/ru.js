@@ -8,8 +8,7 @@ const ru = {
     
     // UI elements
     ui: {
-        swaps: "Ходы",
-        nextHeadline: "Следующий заголовок",
+        swaps: "Ходы",        moves: "ходов",        nextHeadline: "Следующий заголовок",
         replay: "Играть снова",
         readFullArticle: "Читать статью полностью",
         newHeadline: "Дальше"
@@ -85,7 +84,8 @@ const ru = {
     
     // Tooltips and hints
     hints: {
-        tipPrefix: "💡 Подсказка:"
+        tipPrefix: "💡 Подсказка:",
+        hintTitle: "Описание новости"
     }
 };
 

@@ -9,6 +9,7 @@ const en = {
     // UI elements
     ui: {
         swaps: "Swaps",
+        moves: "moves",
         nextHeadline: "Next Headline",
         replay: "Replay",
         readFullArticle: "Read Full Article",
@@ -81,7 +82,8 @@ const en = {
     
     // Tooltips and hints
     hints: {
-        tipPrefix: "💡 Tip:"
+        tipPrefix: "💡 Tip:",
+        hintTitle: "News Description"
     }
 };
 
