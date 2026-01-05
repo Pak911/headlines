@@ -1,4 +1,43 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+@font-face {
+    font-family: 'Comfortaa';
+    src: url('../fonts/Comfortaa-Medium.ttf') format('truetype'),
+    url('https://fonts.gstatic.com/s/comfortaa/v34/4UaGrENt0d7j0II9g7-JVCKQ7Q.woff2') format('woff2');
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Comfortaa';
+    src: url('../fonts/Comfortaa-SemiBold.ttf') format('truetype'),
+    url('https://fonts.gstatic.com/s/comfortaa/v34/4UaGrENt0d7j0II9g7-JVCKQ7Q.woff2') format('woff2');
+    font-weight: 600;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Comfortaa';
+    src: url('../fonts/Comfortaa-Bold.ttf') format('truetype'),
+    url('https://fonts.gstatic.com/s/comfortaa/v34/4UaGrENt0d7j0II9g7-JVCKQ7Q.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Text stroke utility classes */
+.text-stroke-thick {
+    -webkit-text-stroke: 2px currentColor;
+    paint-order: stroke fill;
+}
+
+.text-stroke-medium {
+    -webkit-text-stroke: 1px currentColor;
+    paint-order: stroke fill;
+}
+
+.text-stroke-thin {
+    -webkit-text-stroke: 0.5px currentColor;
+    paint-order: stroke fill;
+}
 
 /* Language Selector */
 .language-selector {
@@ -13,7 +52,7 @@
     border: 2px solid #e5e7eb;
     border-radius: 12px;
     background: white;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Comfortaa', sans-serif;
     font-size: 0.9rem;
     font-weight: 500;
     color: #374151;
@@ -57,7 +96,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    font-family: 'Comfortaa', sans-serif;
     background-color: #f5f7fa;
     display: flex;
     flex-direction: column;

@@ -218,7 +218,7 @@
 
 .victory-subtitle {
     font-size: 1rem;
-    font-weight: 400;
+    font-weight: 500;
     margin: 0;
     opacity: 0.95;
 }
@@ -274,6 +274,8 @@
     font-weight: 700;
     color: #6366f1;
     margin-bottom: 4px;
+    -webkit-text-stroke: 1px currentColor;
+    paint-order: stroke fill;
 }
 
 .stat-label {
@@ -297,7 +299,7 @@
     padding: 12px 24px;
     border-radius: 12px;
     font-size: 1rem;
-    font-weight: 600;
+    font-weight: 700;
     border: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -308,6 +310,8 @@
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     min-width: 140px;
     text-align: center;
+    -webkit-text-stroke: 0.5px currentColor;
+    paint-order: stroke fill;
 }
 
 .btn-primary {
@@ -324,6 +328,7 @@
 .btn-secondary {
     background: #3b82f6;
     color: white;
+    font-family: 'Comfortaa', sans-serif;
 }
 
 .btn-secondary:hover {
