@@ -3,6 +3,16 @@
  * Implements smart loading strategies and graceful degradation
  */
 
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('rss-fetcher', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[rss-fetcher]', message);
+    }
+}
+
 // Configuration
 const FETCH_TIMEOUT = 10000; // 10 seconds - increased for rate limiting
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
@@ -19,11 +29,11 @@ let headlineCache = {
     set: function(data) {
         this.data = data;
         this.timestamp = Date.now();
-        console.log(`💾 Cached ${data.length} headlines for ${CACHE_DURATION/1000} seconds`);
+        _log(`💾 Cached ${data.length} headlines for ${CACHE_DURATION/1000} seconds`);
     },
     get: function() {
         if (this.isValid()) {
-            console.log(`🎯 Using cached headlines (${this.data.length} items)`);
+            _log(`🎯 Using cached headlines (${this.data.length} items)`);
             return this.data;
         }
         return null;
@@ -31,7 +41,7 @@ let headlineCache = {
     clear: function() {
         this.data = null;
         this.timestamp = null;
-        console.log('🗑️ Headline cache cleared');
+        _log('🗑️ Headline cache cleared');
     }
 };
 
@@ -49,17 +59,17 @@ let loadingState = {
  * @returns {Promise<Array>} Array of headlines
  */
 async function fetchHeadlinesWithFallback(forceRefresh = false) {
-    console.log('🚀 Starting headline fetch process...');
+    _log('🚀 Starting headline fetch process...');
     
     // Check cache first (unless forced refresh)
     if (!forceRefresh) {
         const cachedHeadlines = headlineCache.get();
         if (cachedHeadlines) {
-            console.log(`🎯 Returning ${cachedHeadlines.length} cached headlines`);
+            _log(`🎯 Returning ${cachedHeadlines.length} cached headlines`);
             return cachedHeadlines;
         }
     } else {
-        console.log('🔄 Force refresh requested, bypassing cache');
+        _log('🔄 Force refresh requested, bypassing cache');
     }
     
     // Start loading process
@@ -67,21 +77,21 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     
     try {
         // Try to fetch from RSS sources
-        console.log('📡 Attempting to fetch headlines from RSS sources...');
+        _log('📡 Attempting to fetch headlines from RSS sources...');
         const rssHeadlines = await fetchFromRSSWithTimeout();
         
         if (rssHeadlines && rssHeadlines.length > 0) {
-            console.log(`✅ Successfully fetched ${rssHeadlines.length} headlines from RSS`);
+            _log(`✅ Successfully fetched ${rssHeadlines.length} headlines from RSS`);
             headlineCache.set(rssHeadlines);
             stopLoadingProcess();
             return rssHeadlines;
         }
         
-        console.log('⚠️ RSS fetch returned no headlines, falling back to mock data');
+        _log('⚠️ RSS fetch returned no headlines, falling back to mock data');
         
     } catch (error) {
         console.error('❌ RSS fetch failed:', error);
-        console.log('🔄 Falling back to mock data');
+        _log('🔄 Falling back to mock data');
     }
     
     // Fallback to mock headlines
@@ -94,7 +104,7 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
         pubDate: new Date().toISOString()
     }));
     
-    console.log(`📋 Using ${mockHeadlinesWithMetadata.length} mock headlines as fallback`);
+    _log(`📋 Using ${mockHeadlinesWithMetadata.length} mock headlines as fallback`);
     return mockHeadlinesWithMetadata;
 }
 
@@ -106,7 +116,7 @@ async function fetchFromRSSWithTimeout() {
     return new Promise(async (resolve, reject) => {
         // Set up timeout
         const timeoutId = setTimeout(() => {
-            console.log(`⏰ RSS fetch timeout after ${FETCH_TIMEOUT}ms`);
+            _log(`⏰ RSS fetch timeout after ${FETCH_TIMEOUT}ms`);
             reject(new Error('RSS fetch timeout'));
         }, FETCH_TIMEOUT);
         
@@ -132,27 +142,27 @@ function getRSSSourcesForCurrentLanguage() {
     
     if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage) {
         rssLanguage = rssLanguageConfig.rssLanguage;
-        console.log(`📡 RSS language configuration: ${rssLanguage}`);
+        _log(`📡 RSS language configuration: ${rssLanguage}`);
         
         // If set to 'auto', detect from UI language
         if (rssLanguage === 'auto' && typeof window !== 'undefined' && window.i18n) {
             rssLanguage = window.i18n.currentLanguage;
-            console.log(`🌐 Auto-detected RSS language from UI: ${rssLanguage}`);
+            _log(`🌐 Auto-detected RSS language from UI: ${rssLanguage}`);
         }
     } else if (typeof window !== 'undefined' && window.i18n) {
         // Fallback to UI language if no RSS config
         rssLanguage = window.i18n.currentLanguage;
-        console.log(`🌐 Using UI language as RSS language: ${rssLanguage}`);
+        _log(`🌐 Using UI language as RSS language: ${rssLanguage}`);
     }
     
     // Return Russian sources if language is Russian
     if (rssLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
-        console.log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
+        _log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
         return russianRssNewsSources;
     }
     
     // Default to English sources
-    console.log(`🇺🇸 Using English RSS sources (${rssNewsSources.length} sources)`);
+    _log(`🇺🇸 Using English RSS sources (${rssNewsSources.length} sources)`);
     return rssNewsSources;
 }
 
@@ -164,7 +174,7 @@ async function fetchFromRSSSourcesSequentially() {
     // Apply fetch delay if configured (for debugging)
     const fetchDelay = headlineScoringConfig?.rssConfig?.fetchDelay || 0;
     if (fetchDelay > 0) {
-        console.log(`⏳ Waiting ${fetchDelay}ms before starting RSS fetch (debug delay)`);
+        _log(`⏳ Waiting ${fetchDelay}ms before starting RSS fetch (debug delay)`);
         await new Promise(resolve => setTimeout(resolve, fetchDelay));
     }
     
@@ -175,9 +185,9 @@ async function fetchFromRSSSourcesSequentially() {
     const isRussian = currentRSSSources === russianRssNewsSources;
     const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
     
-    console.log(`🚀 Fetching from ${currentRSSSources.length} RSS sources simultaneously...`);
+    _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources simultaneously...`);
     if (isRussian) {
-        console.log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
+        _log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
     }
     
     const workingSources = [];
@@ -185,7 +195,7 @@ async function fetchFromRSSSourcesSequentially() {
     
     // Create promises for all sources simultaneously
     const sourcePromises = currentRSSSources.map(async (source, index) => {
-        console.log(`📡 Starting fetch from source ${index + 1}/${currentRSSSources.length}: ${source.name}`);
+        _log(`📡 Starting fetch from source ${index + 1}/${currentRSSSources.length}: ${source.name}`);
         
         try {
             const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource);
@@ -197,11 +207,11 @@ async function fetchFromRSSSourcesSequentially() {
                 });
                 
                 workingSources.push(source.name);
-                console.log(`✅ ${source.name}: Successfully fetched ${headlines.length} headlines`);
+                _log(`✅ ${source.name}: Successfully fetched ${headlines.length} headlines`);
                 return headlines;
             } else {
                 failedSources.push(source.name);
-                console.log(`⚠️ ${source.name}: No headlines returned`);
+                _log(`⚠️ ${source.name}: No headlines returned`);
                 return [];
             }
             
@@ -213,7 +223,7 @@ async function fetchFromRSSSourcesSequentially() {
     });
     
     // Wait for all sources to complete simultaneously
-    console.log(`⏳ Waiting for all ${currentRSSSources.length} sources to complete...`);
+    _log(`⏳ Waiting for all ${currentRSSSources.length} sources to complete...`);
     const results = await Promise.all(sourcePromises);
     
     // Combine all results
@@ -223,17 +233,17 @@ async function fetchFromRSSSourcesSequentially() {
     });
     
     // Summary
-    console.log(`📊 RSS Fetch Summary:`);
-    console.log(`✅ Working sources (${workingSources.length}): ${workingSources.join(', ')}`);
-    console.log(`❌ Failed sources (${failedSources.length}): ${failedSources.join(', ')}`);
+    _log(`📊 RSS Fetch Summary:`);
+    _log(`✅ Working sources (${workingSources.length}): ${workingSources.join(', ')}`);
+    _log(`❌ Failed sources (${failedSources.length}): ${failedSources.join(', ')}`);
     
     // Remove duplicates
     const uniqueHeadlines = RSSParser.removeDuplicateHeadlines(allHeadlines);
-    console.log(`📰 Total unique headlines from RSS: ${uniqueHeadlines.length}`);
+    _log(`📰 Total unique headlines from RSS: ${uniqueHeadlines.length}`);
     
     // If we got at least some headlines, consider it a success
     if (uniqueHeadlines.length > 0) {
-        console.log(`🎉 Successfully fetched headlines from ${workingSources.length}/${currentRSSSources.length} sources in parallel`);
+        _log(`🎉 Successfully fetched headlines from ${workingSources.length}/${currentRSSSources.length} sources in parallel`);
     }
     
     return uniqueHeadlines;
@@ -254,11 +264,11 @@ function startLoadingProcess() {
     loadingState.timeoutId = setTimeout(() => {
         if (loadingState.isLoading) {
             showLoadingAnimation();
-            console.log(`🎭 Loading animation triggered after ${loadingDelay}ms delay`);
+            _log(`🎭 Loading animation triggered after ${loadingDelay}ms delay`);
         }
     }, loadingDelay);
     
-    console.log(`⏳ Loading process started with ${loadingDelay}ms delay...`);
+    _log(`⏳ Loading process started with ${loadingDelay}ms delay...`);
 }
 
 /**
@@ -279,7 +289,7 @@ function stopLoadingProcess() {
         hideLoadingAnimation();
     }
     
-    console.log(`✅ Loading process completed in ${duration}ms`);
+    _log(`✅ Loading process completed in ${duration}ms`);
 }
 
 /**
@@ -289,7 +299,7 @@ function showLoadingAnimation() {
     if (loadingState.showingAnimation) return;
     
     loadingState.showingAnimation = true;
-    console.log('🎭 Showing loading animation...');
+    _log('🎭 Showing loading animation...');
     
     // Create loading overlay
     const overlay = document.createElement('div');
@@ -366,7 +376,7 @@ function hideLoadingAnimation() {
     if (!loadingState.showingAnimation) return;
     
     loadingState.showingAnimation = false;
-    console.log('🎭 Hiding loading animation...');
+    _log('🎭 Hiding loading animation...');
     
     const overlay = document.getElementById('rss-loading-overlay');
     if (overlay) {
@@ -393,7 +403,7 @@ function getLoadingState() {
  * @returns {Promise<Array>} Fresh headlines
  */
 async function refreshHeadlines() {
-    console.log('🔄 Forcing headline refresh...');
+    _log('🔄 Forcing headline refresh...');
     headlineCache.clear();
     return await fetchHeadlinesWithFallback(true);
 }

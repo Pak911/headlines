@@ -3,6 +3,16 @@
  * Fetches and processes RSS feeds to extract headlines suitable for the game
  */
 
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('rss-parser', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[rss-parser]', message);
+    }
+}
+
 // RSS2JSON API configuration
 const RSS_API_BASE = 'https://api.rss2json.com/v1/api.json';
 
@@ -29,7 +39,7 @@ async function fetchLatestHeadlines(rssUrl, count) {
     const config = getRSSConfig();
     const defaultCount = count || config.defaultCount;
     try {
-        console.log(`🔄 Fetching headlines from: ${rssUrl}`);
+        _log(`🔄 Fetching headlines from: ${rssUrl}`);
         
         // Construct RSS2JSON API URL (without count parameter for better compatibility)
         const apiUrl = `${RSS_API_BASE}?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -47,12 +57,12 @@ async function fetchLatestHeadlines(rssUrl, count) {
             throw new Error(`RSS API error: ${data.message || 'Unknown error'}`);
         }
         
-        console.log(`✅ Successfully fetched ${data.items.length} items from RSS`);
+        _log(`✅ Successfully fetched ${data.items.length} items from RSS`);
         
         // Process and filter headlines
         const processedHeadlines = processRSSItems(data.items);
         
-        console.log(`📰 Processed ${processedHeadlines.length} valid headlines (4+ words)`);
+        _log(`📰 Processed ${processedHeadlines.length} valid headlines (4+ words)`);
         
         return processedHeadlines;
         
@@ -76,7 +86,7 @@ function processRSSItems(items) {
             const cleanTitle = processCommersantHeadline(item.title);
             
             if (!cleanTitle) {
-                console.log(`⚠️ Skipping empty title: ${item.title}`);
+                _log(`⚠️ Skipping empty title: ${item.title}`);
                 continue;
             }
             
@@ -85,7 +95,7 @@ function processRSSItems(items) {
             
             // Only include headlines with 4+ words (game requirement)
             if (words.length < 4) {
-                console.log(`⚠️ Skipping short headline (${words.length} words): ${cleanTitle}`);
+                _log(`⚠️ Skipping short headline (${words.length} words): ${cleanTitle}`);
                 continue;
             }
             
@@ -101,7 +111,7 @@ function processRSSItems(items) {
             };
             
             processedHeadlines.push(headline);
-            console.log(`✅ Processed: "${headline.text}" (${words.length} words)`);
+            _log(`✅ Processed: "${headline.text}" (${words.length} words)`);
             
         } catch (error) {
             console.error(`❌ Error processing item:`, item, error);
@@ -203,7 +213,7 @@ function extractWords(text) {
  * @returns {Promise<Array>} Combined array of headlines from all sources
  */
 async function fetchFromMultipleSources(sources, countPerSource = 5) {
-    console.log(`🔄 Fetching from ${sources.length} RSS sources...`);
+    _log(`🔄 Fetching from ${sources.length} RSS sources...`);
     
     const allHeadlines = [];
     const fetchPromises = sources.map(async (source) => {
@@ -232,7 +242,7 @@ async function fetchFromMultipleSources(sources, countPerSource = 5) {
     // Remove duplicates based on text content
     const uniqueHeadlines = removeDuplicateHeadlines(allHeadlines);
     
-    console.log(`📰 Total unique headlines fetched: ${uniqueHeadlines.length}`);
+    _log(`📰 Total unique headlines fetched: ${uniqueHeadlines.length}`);
     
     return uniqueHeadlines;
 }
@@ -254,7 +264,7 @@ function removeDuplicateHeadlines(headlines) {
             seen.add(key);
             unique.push(headline);
         } else {
-            console.log(`🔄 Removing duplicate: "${headline.text}"`);
+            _log(`🔄 Removing duplicate: "${headline.text}"`);
         }
     }
     
@@ -274,7 +284,7 @@ async function testSingleSource(sourceName) {
         return [];
     }
     
-    console.log(`🧪 Testing source: ${source.name}`);
+    _log(`🧪 Testing source: ${source.name}`);
     return await fetchLatestHeadlines(source.url);
 }
 
@@ -283,7 +293,7 @@ async function testSingleSource(sourceName) {
  * @returns {Promise<Array>} Headlines from all sources
  */
 async function testAllSources() {
-    console.log(`🧪 Testing all ${rssNewsSources.length} RSS sources...`);
+    _log(`🧪 Testing all ${rssNewsSources.length} RSS sources...`);
     return await fetchFromMultipleSources(rssNewsSources, 3);
 }
 
@@ -293,18 +303,18 @@ async function testAllSources() {
  * @returns {Object} Test results
  */
 function testRussianTextProcessing(text) {
-    console.log(`🧪 Testing Russian text processing: "${text}"`);
+    _log(`🧪 Testing Russian text processing: "${text}"`);
     
     // Test clean headline text
     const cleaned = cleanHeadlineText(text);
-    console.log(`🧹 Cleaned: "${cleaned}"`);
+    _log(`🧹 Cleaned: "${cleaned}"`);
     
     // Test word extraction
     const words = extractWords(cleaned);
-    console.log(`🔤 Words extracted: [${words.join(', ')}]`);
+    _log(`🔤 Words extracted: [${words.join(', ')}]`);
     
     // Test word count
-    console.log(`🔢 Word count: ${words.length}`);
+    _log(`🔢 Word count: ${words.length}`);
     
     return {
         original: text,

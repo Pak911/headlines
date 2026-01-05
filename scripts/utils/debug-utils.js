@@ -491,3 +491,79 @@ function updateHeadlinePoolsDebugInfo() {
         `;
     }
 }
+
+// Initialize global debug utilities
+window.__cosic = window.__cosic || {};
+
+// Debug logging state - read from data.js config, default to false
+let debugEnabled = (typeof debugConfig !== 'undefined' && debugConfig.enabled) || false;
+
+// Helper function to format timestamp
+function _formatTimestamp() {
+    const now = new Date();
+    return now.toLocaleTimeString('en-US', { 
+        hour12: false, 
+        hour: '2-digit', 
+        minute: '2-digit', 
+        second: '2-digit' 
+    });
+}
+
+// prefixedLog: (prefix, messageOrArgs, opts)
+// - prefix: string label shown inside brackets
+// - messageOrArgs: string or array/varargs passed to console (what to output)
+// - opts: { always, level } ONLY - controls behavior, never output as content
+window.__cosic.prefixedLog = function(prefix, messageOrArgs, opts) {
+    try {
+        // Extract options - ONLY recognize objects that contain 'always' or 'level' properties
+        // Everything else is treated as message content
+        let o = {};
+        if (opts && typeof opts === 'object' && !Array.isArray(opts)) {
+            // Check if this looks like an options object (has options keys)
+            if (opts.always !== undefined || opts.level !== undefined) {
+                o = opts;
+            }
+            // Otherwise, opts is treated as content (strange but possible)
+        }
+        
+        const always = !!o.always;
+        const level = o.level || 'log'; // 'log', 'warn', or 'error'
+        
+        if (!always && !debugEnabled) return;
+        
+        const ts = _formatTimestamp();
+        const effectivePrefix = prefix || 'debug';
+        
+        // Select console method based on level
+        const consoleFn = (level === 'error') ? console.error : 
+                        (level === 'warn') ? console.warn : 
+                        console.log;
+        
+        // Add emoji indicators for visibility
+        const levelIndicator = (level === 'error') ? '❌' : 
+                              (level === 'warn') ? '⚠️' : 
+                              '';
+        
+        const fullPrefix = levelIndicator ? `${levelIndicator} ${ts} [${effectivePrefix}]` : `${ts} [${effectivePrefix}]`;
+        
+        if (Array.isArray(messageOrArgs)) {
+            consoleFn(fullPrefix, ...messageOrArgs);
+        } else {
+            // Single message or varargs (but NOT including opts)
+            consoleFn(fullPrefix, messageOrArgs);
+        }
+    } catch (e) { /* noop */ }
+};
+
+// Very short alias for prefixedLog so modules can call a compact helper (e.g. __cosic.flog)
+// Simple pass-through: flog(prefix, messageOrArgs, opts)
+// - The SECOND argument (messageOrArgs) is ALWAYS what gets output
+// - The THIRD argument (opts) is ALWAYS the control object { always, level, ... }
+// - prefixedLog recognizes opts only by its properties (always, level) and ignores the rest
+window.__cosic.flog = function(prefix, messageOrArgs, opts) {
+    try {
+        if (window.__cosic && typeof window.__cosic.prefixedLog === 'function') {
+            return window.__cosic.prefixedLog(prefix, messageOrArgs, opts);
+        }
+    } catch (e) { /* noop */ }
+};

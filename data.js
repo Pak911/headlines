@@ -10,6 +10,11 @@ const rssLanguageConfig = {
     rssLanguage: 'auto'  // Set to Russian by default as requested
 };
 
+// Debug configuration - controls debug mode and logging
+const debugConfig = {
+    enabled: true  // Set to true to enable debug mode and logging
+};
+
 // Crossword Engine Configuration (Smart Backbone-First Algorithm)
 const crosswordEngineConfig = {
     // Phase 1: Matchmaker - Find best word pairs for backbone

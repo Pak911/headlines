@@ -1,6 +1,16 @@
 // Enhanced Headline Manager - Advanced headline selection with scoring and pool management
 // Integrates with HeadlineScorer and AsyncRSSFetcher for intelligent headline management
 
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('headline-manager', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[headline-manager]', message);
+    }
+}
+
 // Headline pool management system
 let headlinePools = null; // Will store grouped headlines by score
 let usedHeadlines = [];
@@ -13,11 +23,11 @@ let isInitialized = false;
  */
 async function initializeHeadlineManagement() {
     if (isInitialized && headlinePools && headlinePools.totalValid > 0) {
-        console.log('📋 Headline management already initialized');
+        _log('📋 Headline management already initialized');
         return;
     }
     
-    console.log('🚀 Initializing enhanced headline management system...');
+    _log('🚀 Initializing enhanced headline management system...');
     
     try {
         // Fetch headlines with fallback mechanisms
@@ -31,14 +41,14 @@ async function initializeHeadlineManagement() {
         rejectedHeadlines = [];
         isInitialized = true;
         
-        console.log(`✅ Headline management initialized with ${headlinePools.totalValid} valid headlines`);
-        console.log(`📊 Score pools: ${headlinePools.sortedScores.join(', ')}`);
+        _log(`✅ Headline management initialized with ${headlinePools.totalValid} valid headlines`);
+        _log(`📊 Score pools: ${headlinePools.sortedScores.join(', ')}`);
         
     } catch (error) {
         console.error('❌ Failed to initialize headline management:', error);
         
         // Emergency fallback to mock headlines
-        console.log('🔄 Using emergency fallback to mock headlines');
+        _log('🔄 Using emergency fallback to mock headlines');
         const mockHeadlinesWithMetadata = mockHeadlines.map(headline => ({
             ...headline,
             source: 'mock',
@@ -60,7 +70,7 @@ async function getNextHeadline() {
     await initializeHeadlineManagement();
     
     if (!headlinePools || headlinePools.totalValid === 0) {
-        console.log('❌ No headlines available, reinitializing...');
+        _log('❌ No headlines available, reinitializing...');
         isInitialized = false;
         await initializeHeadlineManagement();
         
@@ -68,7 +78,7 @@ async function getNextHeadline() {
             console.error('❌ Failed to get any headlines after reinitialization');
             // Use Russian fallback headlines if RSS language is Russian
             if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'ru') {
-                console.log('🇷🇺 Using Russian fallback headlines...');
+                _log('🇷🇺 Using Russian fallback headlines...');
                 const mockHeadlinesWithMetadata = mockRussianHeadlines.map(headline => ({
                     ...headline,
                     source: 'mock',
@@ -87,13 +97,13 @@ async function getNextHeadline() {
     const selectedHeadline = HeadlineScorer.selectBestHeadline(headlinePools);
     
     if (!selectedHeadline) {
-        console.log('❌ No more headlines available in pools, reinitializing...');
+        _log('❌ No more headlines available in pools, reinitializing...');
         isInitialized = false;
         return await getNextHeadline(); // Recursive call to reinitialize
     }
     
-    console.log(`🎯 Selected headline: "${selectedHeadline.filteredText}" (score: ${selectedHeadline.score})`);
-    console.log(`📊 Remaining pools: ${headlinePools.sortedScores.map(s => `${s}:${headlinePools.scoreGroups[s].length}`).join(', ')}`);
+    _log(`🎯 Selected headline: "${selectedHeadline.filteredText}" (score: ${selectedHeadline.score})`);
+    _log(`📊 Remaining pools: ${headlinePools.sortedScores.map(s => `${s}:${headlinePools.scoreGroups[s].length}`).join(', ')}`);
     
     return selectedHeadline;
 }
@@ -105,7 +115,7 @@ async function getNextHeadline() {
 function markHeadlineAsUsed(headline) {
     if (!usedHeadlines.some(used => used.text === headline.text)) {
         usedHeadlines.push(headline);
-        console.log(`✅ Marked headline as used: "${headline.filteredText || headline.text}"`);
+        _log(`✅ Marked headline as used: "${headline.filteredText || headline.text}"`);
         
         // Remove from pools
         if (headlinePools) {
@@ -121,7 +131,7 @@ function markHeadlineAsUsed(headline) {
 function markHeadlineAsRejected(headline) {
     if (!rejectedHeadlines.some(rejected => rejected.text === headline.text)) {
         rejectedHeadlines.push(headline);
-        console.log(`❌ Marked headline as rejected: "${headline.filteredText || headline.text}"`);
+        _log(`❌ Marked headline as rejected: "${headline.filteredText || headline.text}"`);
         
         // Remove from pools
         if (headlinePools) {
@@ -135,7 +145,7 @@ function markHeadlineAsRejected(headline) {
  * @returns {Promise<void>}
  */
 async function refreshHeadlinePools() {
-    console.log('🔄 Forcing headline pools refresh...');
+    _log('🔄 Forcing headline pools refresh...');
     isInitialized = false;
     headlinePools = null;
     await initializeHeadlineManagement();

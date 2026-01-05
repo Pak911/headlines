@@ -3,6 +3,16 @@
  * Enhanced HTML detection, stripping, and text extraction utilities
  */
 
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('html-processor', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[html-processor]', message);
+    }
+}
+
 /**
  * Detects if text contains HTML tags
  * @param {string} text - Text to check for HTML
@@ -207,17 +217,18 @@ function processRSSContent(rssContent) {
 function testWithExample() {
     const exampleContent = `<p>Poor safety practices, lack of oversight and toxic workplace blamed for implosion in which five people died</p> <p>Inadequate safety practices, deliberate efforts to avoid oversight and a "toxic workplace culture" were among the factors that led to the 2023 implosion of the Titan submersible, the US Coast Guard has said in a damning report that described the disaster as a "preventable tragedy".</p> <p>The submersible <a href="https://www.theguardian.com/world/titanic-sub-incident">was on a commercial voyage</a> to explore the wreck of the Titanic when it disappeared in the Atlantic, leading to the deaths of all five people on board. The ensuing search captured headlines around the world for days as it evolved from a potential <a href="https://www.theguardian.com/world/2023/jun/28/titan-sub-debris-implosion-wreckage-oceangate">rescue mission to a recovery operation</a>.</p> <a href="https://www.theguardian.com/world/2025/aug/05/us-coast-guard-releases-damning-report-into-implosion-of-titan-submersible">Continue reading...</a>`;
     
-    console.log('🧪 Testing HTML Processor with RSS example...');
+    _log('🧪 Testing HTML Processor with RSS example...');
     
     const result = processRSSContent(exampleContent);
     
-    console.log('📊 Processing Results:');
-    console.log(`HTML Detected: ${result.hasHTML}`);
-    console.log(`Clean Text: "${result.cleanText}"`);
-    console.log(`Headline Text: "${result.headlineText}"`);
-    console.log(`Words: [${result.words.join(', ')}]`);
-    console.log(`Word Count: ${result.wordCount}`);
-    console.log(`Suitable for Game: ${result.suitableForGame}`);
+    _log('🧪 Testing HTML Processor with RSS example...');
+    _log('📊 Processing Results:');
+    _log(`HTML Detected: ${result.hasHTML}`);
+    _log(`Clean Text: "${result.cleanText}"`);
+    _log(`Headline Text: "${result.headlineText}"`);
+    _log(`Words: [${result.words.join(', ')}]`);
+    _log(`Word Count: ${result.wordCount}`);
+    _log(`Suitable for Game: ${result.suitableForGame}`);
     
     return result;
 }

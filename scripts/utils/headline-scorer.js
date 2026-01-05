@@ -3,6 +3,16 @@
  * Implements sophisticated filtering rules and scoring metrics for crossword suitability
  */
 
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('headline-scorer', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[headline-scorer]', message);
+    }
+}
+
 // Get configuration from data.js
 const getConfig = () => {
     if (typeof headlineScoringConfig !== 'undefined') {
@@ -121,12 +131,12 @@ function scoreHeadline(headline) {
  * @returns {Object} Grouped headlines by score with metadata
  */
 function processAndGroupHeadlines(headlines) {
-    console.log(`🔄 Processing ${headlines.length} headlines for scoring...`);
+    _log(`🔄 Processing ${headlines.length} headlines for scoring...`);
     
     const scoredHeadlines = headlines.map(scoreHeadline);
     const validHeadlines = scoredHeadlines.filter(h => h.isValid);
     
-    console.log(`✅ ${validHeadlines.length}/${headlines.length} headlines passed filtering`);
+    _log(`✅ ${validHeadlines.length}/${headlines.length} headlines passed filtering`);
     
     // Group by score
     const scoreGroups = {};
@@ -143,8 +153,7 @@ function processAndGroupHeadlines(headlines) {
         .map(Number)
         .sort((a, b) => b - a);
     
-    console.log(`📊 Score distribution:`, 
-        sortedScores.map(score => `${score}: ${scoreGroups[score].length}`).join(', '));
+    _log(`📊 Score distribution: ${sortedScores.map(score => `${score}: ${scoreGroups[score].length}`).join(', ')}`);
     
     return {
         scoreGroups: scoreGroups,
@@ -165,7 +174,7 @@ function selectBestHeadline(groupedHeadlines) {
     const { scoreGroups, sortedScores } = groupedHeadlines;
     
     if (sortedScores.length === 0) {
-        console.log('❌ No valid headlines available for selection');
+        _log('❌ No valid headlines available for selection');
         return null;
     }
     
@@ -174,7 +183,7 @@ function selectBestHeadline(groupedHeadlines) {
         const group = scoreGroups[score];
         if (group && group.length > 0) {
             const selectedHeadline = group[Math.floor(Math.random() * group.length)];
-            console.log(`🎯 Selected headline from score ${score}: "${selectedHeadline.filteredText}"`);
+            _log(`🎯 Selected headline from score ${score}: "${selectedHeadline.filteredText}"`);
             return selectedHeadline;
         }
     }
@@ -196,7 +205,7 @@ function removeHeadlineFromGroups(groupedHeadlines, headlineToRemove) {
         const index = scoreGroups[score].findIndex(h => h.text === headlineToRemove.text);
         if (index !== -1) {
             scoreGroups[score].splice(index, 1);
-            console.log(`🗑️ Removed headline from score ${score} group: "${headlineToRemove.filteredText}"`);
+            _log(`🗑️ Removed headline from score ${score} group: "${headlineToRemove.filteredText}"`);
             
             // Update total count
             groupedHeadlines.totalValid -= 1;
