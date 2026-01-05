@@ -1,6 +1,11 @@
 // Game Controller - Main Game Flow and State Management
 // Handles game initialization, victory conditions, and overall game state
 
+// Normalize Russian Ё to Е for crossword algorithm (32-letter alphabet)
+function normalizeRussianWords(words) {
+    return words.map(word => word.replace(/Ё/g, 'Е').replace(/ё/g, 'е'));
+}
+
 function checkVictory() {
     // Check if all letters are in their correct positions
     for (let r = 0; r < grid.length; r++) {
@@ -339,8 +344,11 @@ function initGame() {
         // Select random headline
         currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
         
+        // Normalize Russian Ё → Е for crossword algorithm
+        const normalizedWords = normalizeRussianWords(currentHeadline.words);
+        
         // Generate crossword layout
-        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+        crosswordLayout = generateCrosswordLayout(normalizedWords);
         
         // If layout generation succeeded, break out of loop
         if (crosswordLayout !== null) {
@@ -412,22 +420,28 @@ async function enhancedInitGame() {
             // Use filtered words if available, otherwise fall back to original words
             const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
             
-            console.log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${wordsToUse.length} words)`);
+            // Normalize Russian Ё → Е for crossword algorithm
+            const normalizedWords = normalizeRussianWords(wordsToUse);
+            
+            console.log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${normalizedWords.length} words)`);
             
             // Generate crossword layout
-            crosswordLayout = generateCrosswordLayout(wordsToUse);
-            debugInfo.layoutAttempts = 50; // From generateCrosswordLayout maxAttempts
+            crosswordLayout = generateCrosswordLayout(normalizedWords);
+            debugInfo.layoutAttempts = 'Beam search';
             
             // If layout generation succeeded, mark as used and break
             if (crosswordLayout !== null) {
-                debugInfo.layoutScore = scoreLayout(crosswordLayout, wordsToUse);
+                debugInfo.layoutScore = 'Generated';
                 markHeadlineAsUsed(currentHeadline);
                 console.log(`✅ Successfully generated layout for: "${currentHeadline.filteredText || currentHeadline.text}"`);
                 
-                // Update currentHeadline to use filtered words for the game
+                // Update currentHeadline to use normalized filtered words for the game
                 if (currentHeadline.filteredWords) {
-                    currentHeadline.words = currentHeadline.filteredWords;
-                    currentHeadline.text = currentHeadline.filteredText;
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.filteredText.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                } else {
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
                 }
                 
                 break;
@@ -447,18 +461,22 @@ async function enhancedInitGame() {
             
             if (currentHeadline) {
                 const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
-                crosswordLayout = generateSimpleLayout(wordsToUse);
+                const normalizedWords = normalizeRussianWords(wordsToUse);
+                crosswordLayout = generateSimpleLayout(normalizedWords);
                 
-                if (crosswordLayout && crosswordLayout.words.length === wordsToUse.length) {
-                    normalizeLayout(crosswordLayout, wordsToUse);
-                    debugInfo.layoutScore = scoreLayout(crosswordLayout, wordsToUse);
+                if (crosswordLayout && crosswordLayout.words.length === normalizedWords.length) {
+                    normalizeLayout(crosswordLayout, normalizedWords);
+                    debugInfo.layoutScore = 'Simple layout';
                     markHeadlineAsUsed(currentHeadline);
                     console.log(`✅ Simple layout succeeded for: "${currentHeadline.filteredText || currentHeadline.text}"`);
                     
-                    // Update currentHeadline to use filtered words
+                    // Update currentHeadline to use normalized words
                     if (currentHeadline.filteredWords) {
-                        currentHeadline.words = currentHeadline.filteredWords;
-                        currentHeadline.text = currentHeadline.filteredText;
+                        currentHeadline.words = normalizedWords;
+                        currentHeadline.text = currentHeadline.filteredText.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                    } else {
+                        currentHeadline.words = normalizedWords;
+                        currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
                     }
                 } else {
                     console.error('❌ Even simple layout failed');
@@ -472,8 +490,11 @@ async function enhancedInitGame() {
             console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
             // Use a guaranteed working headline from mock data
             currentHeadline = mockHeadlines[0];
-            crosswordLayout = generateSimpleLayout(currentHeadline.words);
-            normalizeLayout(crosswordLayout, currentHeadline.words);
+            const normalizedWords = normalizeRussianWords(currentHeadline.words);
+            crosswordLayout = generateSimpleLayout(normalizedWords);
+            normalizeLayout(crosswordLayout, normalizedWords);
+            currentHeadline.words = normalizedWords;
+            currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
         }
         
     } catch (error) {
@@ -482,12 +503,15 @@ async function enhancedInitGame() {
         // Emergency fallback to old system
         console.log('🔄 Falling back to legacy headline system');
         currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
-        crosswordLayout = generateCrosswordLayout(currentHeadline.words);
+        const normalizedWords = normalizeRussianWords(currentHeadline.words);
+        crosswordLayout = generateCrosswordLayout(normalizedWords);
         
         if (!crosswordLayout) {
-            crosswordLayout = generateSimpleLayout(currentHeadline.words);
-            normalizeLayout(crosswordLayout, currentHeadline.words);
+            crosswordLayout = generateSimpleLayout(normalizedWords);
+            normalizeLayout(crosswordLayout, normalizedWords);
         }
+        currentHeadline.words = normalizedWords;
+        currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
     }
     
     // Place words in grid

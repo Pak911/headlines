@@ -10,6 +10,29 @@ const rssLanguageConfig = {
     rssLanguage: 'auto'  // Set to Russian by default as requested
 };
 
+// Crossword Engine Configuration (Smart Backbone-First Algorithm)
+const crosswordEngineConfig = {
+    // Phase 1: Matchmaker - Find best word pairs for backbone
+    bridgeWeight: 50,           // Bonus for pairs with high bridge potential
+    lengthBonus: 10,            // Bonus for longer word pairs
+    
+    // Phase 2: Backbone Generation
+    variantsToTry: 100,         // How many backbones to try filling (affects quality vs speed)
+    squarenessWeight: 2,        // Penalty for non-square grids (difference between width/height)
+    
+    // Phase 3: Beam Search Fill
+    beamWidth: 10,              // Number of states to keep in beam search (higher = better but slower)
+    timeLimit: 300,             // Maximum time to spend generating layout (ms)
+    
+    // Final Scoring
+    finalCompactness: 0.4,      // Penalty per unit of area (width × height) - lower values prefer compact grids
+    finalUnusedWeight: 300,     // Heavy penalty for unused words (ensures all words are placed)
+    
+    // Intersection Bonuses (non-linear rewards for well-connected words)
+    // [1 intersection, 2 intersections, 3 intersections, 4 intersections, 5+ intersections]
+    intersectionWeights: [10, 20, 40, 80, 150]
+};
+
 // Headline Scoring Configuration
 const headlineScoringConfig = {
     // Word count constraints
