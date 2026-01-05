@@ -517,8 +517,6 @@ function selectVariantWeightedRandom(sortedResults, config) {
         if (random <= 0) {
             _log(`Selected variant ${i + 1}/${topVariants.length} (score: ${Math.round(topVariants[i].finalScore)}, weight: ${Math.round(weights[i])})`);
             
-            // Store selection info for debug panel
-            console.log('[crossword-engine] Storing variant selection - window.debugInfo exists?', typeof window.debugInfo !== 'undefined');
             if (window.debugInfo) {
                 window.debugInfo.variantSelection = {
                     totalVariants: sortedResults.length,

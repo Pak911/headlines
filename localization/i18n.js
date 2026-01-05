@@ -66,8 +66,8 @@ class LocalizationManager {
         document.documentElement.lang = this.currentLanguage;
     }
 
-    // Get translation for a key
-    t(key) {
+    // Get translation for a key with optional pluralization
+    t(key, count = null) {
         const keys = key.split('.');
         let value = this.languages[this.currentLanguage];
         
@@ -90,7 +90,82 @@ class LocalizationManager {
             }
         }
         
+        // Handle pluralization if count is provided and value is an object with plural forms
+        if (count !== null && typeof value === 'object' && value !== null) {
+            const pluralForm = this.getPluralForm(this.currentLanguage, count);
+            
+            // Try the current language's plural form first
+            if (value[pluralForm]) {
+                value = value[pluralForm];
+            } else {
+                // If current language's plural form doesn't exist, try smart fallbacks
+                // When English rules ('other') don't exist, try Slavic forms ('few', 'many', 'one')
+                if (pluralForm === 'other') {
+                    if (count === 1 && value['one']) {
+                        // Singular form
+                        value = value['one'];
+                    } else if (count !== 1 && value['few']) {
+                        // Few form (covers 2-4, and 22-24, 32-34, etc.)
+                        value = value['few'];
+                    } else if (count !== 1 && value['many']) {
+                        // Many form (covers 0, 5-20, 25-30, etc.)
+                        value = value['many'];
+                    } else if (value['other']) {
+                        // Fallback to English 'other'
+                        value = value['other'];
+                    } else {
+                        // Last resort: use first available form
+                        const keys = Object.keys(value);
+                        value = keys.length > 0 ? value[keys[0]] : key;
+                    }
+                } else if (value['other']) {
+                    // Standard fallback to 'other' for other languages
+                    value = value['other'];
+                } else {
+                    // Last resort: use first available form
+                    const keys = Object.keys(value);
+                    value = keys.length > 0 ? value[keys[0]] : key;
+                }
+            }
+        }
+        
+        // If value is still an object (plural forms object), use default 'other' or first available
+        if (typeof value === 'object' && value !== null) {
+            if (value['other']) {
+                value = value['other'];
+            } else {
+                const keys = Object.keys(value);
+                value = keys.length > 0 ? value[keys[0]] : key;
+            }
+        }
+        
         return value || key; // Return key if no translation found
+    }
+
+    // Get plural form based on language and count
+    getPluralForm(language, count) {
+        if (language === 'ru') {
+            return this.getRussianPluralForm(count);
+        } else {
+            // Default to English plural rules
+            return count === 1 ? 'one' : 'other';
+        }
+    }
+
+    // Russian pluralization rules
+    getRussianPluralForm(count) {
+        const mod10 = count % 10;
+        const mod100 = count % 100;
+        
+        if (mod100 >= 11 && mod100 <= 19) {
+            return 'many'; // 11-19
+        } else if (mod10 === 1) {
+            return 'one'; // ends with 1 (except 11-19)
+        } else if (mod10 >= 2 && mod10 <= 4) {
+            return 'few'; // ends with 2-4 (except 12-14)
+        } else {
+            return 'many'; // ends with 0, 5-9, or 11-19
+        }
     }
 
     // Change language
@@ -153,8 +228,8 @@ class LocalizationManager {
 const i18n = new LocalizationManager();
 
 // Make translate function globally available
-function t(key) {
-    return i18n.t(key);
+function t(key, count = null) {
+    return i18n.t(key, count);
 }
 
 // Make setLanguage function globally available

@@ -9,7 +9,10 @@ const en = {
     // UI elements
     ui: {
         swaps: "Swaps",
-        moves: "moves",
+        moves: {
+            one: "move",
+            other: "moves"
+        },
         nextHeadline: "Next Headline",
         replay: "Replay",
         readFullArticle: "Read Full Article",
@@ -30,7 +33,10 @@ const en = {
         subtitle: "You've reconstructed the headline!",
         headlineLabel: "RECONSTRUCTED HEADLINE",
         stats: {
-            swaps: "SWAPS",
+            swaps: {
+                one: "SWAP",
+                other: "SWAPS"
+            },
             rating: "RATING"
         },
         ratings: {
@@ -43,10 +49,12 @@ const en = {
         tooltips: {
             perfect: "🏆 Perfect! You achieved the maximum 5-star rating!",
             earned: {
-                default: "🌟 You earned {stars} stars by completing in {swaps} swaps!<br>⭐ Get {nextStars} stars by completing in {threshold} swaps or fewer"
+                one: "🌟 You earned 1 star by completing in {swaps} {swapsWord}!<br>⭐ Get {nextStars} stars by completing in {threshold} {thresholdWord} or fewer",
+                other: "🌟 You earned {stars} stars by completing in {swaps} {swapsWord}!<br>⭐ Get {nextStars} stars by completing in {threshold} {thresholdWord} or fewer"
             },
             getStars: {
-                default: "⭐ Get {starIndex} stars by completing the puzzle in {requiredSwaps} swaps or fewer"
+                one: "⭐ Get 1 star by completing the puzzle in {requiredSwaps} {requiredSwapsWord} or fewer",
+                other: "⭐ Get {starIndex} stars by completing the puzzle in {requiredSwaps} {requiredSwapsWord} or fewer"
             },
             getOneStar: "⭐ Get {starIndex} star by completing the puzzle"
         }

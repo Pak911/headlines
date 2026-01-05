@@ -117,8 +117,10 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
             
             tooltipText = tooltipText.replace('{stars}', currentStars);
             tooltipText = tooltipText.replace('{swaps}', swapCount);
+            tooltipText = tooltipText.replace('{swapsWord}', t('ui.moves', swapCount));
             tooltipText = tooltipText.replace('{nextStars}', currentStars + 1);
             tooltipText = tooltipText.replace('{threshold}', nextStarThreshold);
+            tooltipText = tooltipText.replace('{thresholdWord}', t('ui.moves', nextStarThreshold));
             return tooltipText;
         }
     } else {
@@ -146,6 +148,7 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
             
             tooltipText = tooltipText.replace('{starIndex}', starIndex);
             tooltipText = tooltipText.replace('{requiredSwaps}', requiredSwaps);
+            tooltipText = tooltipText.replace('{requiredSwapsWord}', t('ui.moves', requiredSwaps));
             return tooltipText;
         }
     }
@@ -225,15 +228,14 @@ function showVictory() {
     const nextHeadlineBtn = document.querySelector('.btn-secondary:last-child');
     
     // Update stat labels
-    const statCards = document.querySelectorAll('.stat-card');
-    const swapsLabel = statCards[0]?.querySelector('.stat-label');
-    const ratingLabel = statCards[1]?.querySelector('.stat-label');
+    const swapsLabel = document.querySelector('#finalSwaps').parentElement.querySelector('.stat-label');
+    const ratingLabel = document.querySelector('#performanceRating').parentElement.querySelector('.stat-label');
     
     if (typeof t !== 'undefined') {
         if (victoryTitle) victoryTitle.textContent = t('victory.title');
         if (victorySubtitle) victorySubtitle.textContent = t('victory.subtitle');
         if (headlineLabel) headlineLabel.textContent = t('victory.headlineLabel');
-        if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps');
+        if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
         if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
         
         // Update button texts - no icons
@@ -323,6 +325,12 @@ function replayGame() {
     selectedCell = null;
     document.getElementById('swapCount').textContent = '0';
     
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
+    
     // Reset completed words tracking
     if (typeof resetCompletedWords === 'function') {
         resetCompletedWords();
@@ -348,6 +356,12 @@ function initGame() {
     selectedCell = null;
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
+    
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
     
     // Try to generate a valid layout with different captions
     const maxCaptionAttempts = 10;
@@ -424,6 +438,12 @@ async function enhancedInitGame() {
     selectedCell = null;
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
+    
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
     
     _log('🎮 Starting enhanced game initialization...');
     

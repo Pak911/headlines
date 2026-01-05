@@ -8,7 +8,13 @@ const ru = {
     
     // UI elements
     ui: {
-        swaps: "Ходы",        moves: "ходов",        nextHeadline: "Следующий заголовок",
+        swaps: "Ходы",
+        moves: {
+            one: "ход",
+            few: "хода",
+            many: "ходов"
+        },
+        nextHeadline: "Следующий заголовок",
         replay: "Играть снова",
         readFullArticle: "Читать статью полностью",
         newHeadline: "Дальше"
@@ -28,7 +34,11 @@ const ru = {
         subtitle: "Вы верно воссоздали заголовок!",
         headlineLabel: "ВОССТАНОВЛЕННЫЙ ЗАГОЛОВОК",
         stats: {
-            swaps: "ХОДЫ",
+            swaps: {
+                one: "ХОД",
+                few: "ХОДА",
+                many: "ХОДОВ"
+            },
             rating: "РЕЙТИНГ"
         },
         ratings: {
@@ -41,14 +51,14 @@ const ru = {
         tooltips: {
             perfect: "🏆 Идеально! Вы достигли максимального рейтинга в 5 звезд!",
             earned: {
-                one: "🌟 Вы заработали {stars} звезду, завершив за {swaps} ходов!<br>⭐ Получите {nextStars} звезды, завершив за {threshold} ходов или меньше",
-                twoFour: "🌟 Вы заработали {stars} звезды, завершив за {swaps} ходов!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} ходов или меньше",
-                many: "🌟 Вы заработали {stars} звезд, завершив за {swaps} ходов!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} ходов или меньше"
+                one: "🌟 Вы заработали 1 звезду, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезды, завершив за {threshold} {thresholdWord} или меньше",
+                few: "🌟 Вы заработали {stars} звезды, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} {thresholdWord} или меньше",
+                many: "🌟 Вы заработали {stars} звезд, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} {thresholdWord} или меньше"
             },
             getStars: {
-                one: "⭐ Получите {starIndex} звезду, завершив головоломку за {requiredSwaps} ходов",
-                twoFour: "⭐ Получите {starIndex} звезды, завершив головоломку за {requiredSwaps} ходов",
-                many: "⭐ Получите {starIndex} звезд, завершив головоломку за {requiredSwaps} ходов"
+                one: "⭐ Получите 1 звезду, завершив головоломку за {requiredSwaps} {requiredSwapsWord}",
+                few: "⭐ Получите {starIndex} звезды, завершив головоломку за {requiredSwaps} {requiredSwapsWord}",
+                many: "⭐ Получите {starIndex} звезд, завершив головоломку за {requiredSwaps} {requiredSwapsWord}"
             },
             getOneStar: "⭐ Получите {starIndex} звезду, завершив головоломку"
         }

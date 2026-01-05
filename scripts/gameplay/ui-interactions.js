@@ -212,6 +212,12 @@ function swapLetters(pos1, pos2) {
     const swapCountElement = document.getElementById('swapCount');
     swapCountElement.textContent = swapCount;
     
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
+    
     // Add pulse animation to moves counter circle
     const movesCircle = document.querySelector('.moves-counter-circle');
     if (movesCircle) {

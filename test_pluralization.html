@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pluralization Test</title>
+</head>
+<body>
+    <h1>Pluralization Test</h1>
+    <div id="output"></div>
+
+    <script src="localization/en.js"></script>
+    <script src="localization/ru.js"></script>
+    <script src="localization/i18n.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function testPluralization() {
+            output.innerHTML = '<h2>English Pluralization:</h2>';
+
+            // Test English
+            i18n.currentLanguage = 'en';
+            output.innerHTML += '<p>1 star: ' + t('victory.tooltips.earned', 1) + '</p>';
+            output.innerHTML += '<p>2 stars: ' + t('victory.tooltips.earned', 2) + '</p>';
+            output.innerHTML += '<p>5 stars: ' + t('victory.tooltips.earned', 5) + '</p>';
+
+            output.innerHTML += '<h2>Russian Pluralization:</h2>';
+
+            // Test Russian
+            i18n.currentLanguage = 'ru';
+            output.innerHTML += '<p>1 звезда: ' + t('victory.tooltips.earned', 1) + '</p>';
+            output.innerHTML += '<p>2 звезды: ' + t('victory.tooltips.earned', 2) + '</p>';
+            output.innerHTML += '<p>5 звезд: ' + t('victory.tooltips.earned', 5) + '</p>';
+            output.innerHTML += '<p>21 звезда: ' + t('victory.tooltips.earned', 21) + '</p>';
+            output.innerHTML += '<p>25 звезд: ' + t('victory.tooltips.earned', 25) + '</p>';
+
+            // Test moves pluralization
+            output.innerHTML += '<h2>Moves Pluralization:</h2>';
+
+            i18n.currentLanguage = 'en';
+            output.innerHTML += '<p>English 0 moves: ' + t('ui.moves', 0) + '</p>';
+            output.innerHTML += '<p>English 1 move: ' + t('ui.moves', 1) + '</p>';
+            output.innerHTML += '<p>English 2 moves: ' + t('ui.moves', 2) + '</p>';
+
+            i18n.currentLanguage = 'ru';
+            output.innerHTML += '<p>Russian 0 ходов: ' + t('ui.moves', 0) + '</p>';
+            output.innerHTML += '<p>Russian 1 ход: ' + t('ui.moves', 1) + '</p>';
+            output.innerHTML += '<p>Russian 2 хода: ' + t('ui.moves', 2) + '</p>';
+            output.innerHTML += '<p>Russian 5 ходов: ' + t('ui.moves', 5) + '</p>';
+            output.innerHTML += '<p>Russian 21 ход: ' + t('ui.moves', 21) + '</p>';
+
+            // Test victory stats pluralization
+            output.innerHTML += '<h2>Victory Stats Pluralization:</h2>';
+
+            i18n.currentLanguage = 'en';
+            output.innerHTML += '<p>English 1 swap: ' + t('victory.stats.swaps', 1) + '</p>';
+            output.innerHTML += '<p>English 2 swaps: ' + t('victory.stats.swaps', 2) + '</p>';
+
+            i18n.currentLanguage = 'ru';
+            output.innerHTML += '<p>Russian 1 ход: ' + t('victory.stats.swaps', 1) + '</p>';
+            output.innerHTML += '<p>Russian 2 хода: ' + t('victory.stats.swaps', 2) + '</p>';
+            output.innerHTML += '<p>Russian 5 ходов: ' + t('victory.stats.swaps', 5) + '</p>';
+            output.innerHTML += '<p>Russian 21 ход: ' + t('victory.stats.swaps', 21) + '</p>';
+
+            // Test edge cases
+            output.innerHTML += '<h2>Edge Cases:</h2>';
+            output.innerHTML += '<p>Russian 11 (many): ' + t('ui.moves', 11) + '</p>';
+            output.innerHTML += '<p>Russian 12 (many): ' + t('ui.moves', 12) + '</p>';
+            output.innerHTML += '<p>Russian 14 (many): ' + t('ui.moves', 14) + '</p>';
+            output.innerHTML += '<p>Russian 15 (many): ' + t('ui.moves', 15) + '</p>';
+        }
+
+        // Wait for scripts to load
+        setTimeout(testPluralization, 100);
+    </script>
+</body>
+</html>

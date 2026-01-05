@@ -78,7 +78,7 @@ function updateLocalizedText() {
         // Update moves label in the new circle counter
         const movesLabel = document.querySelector('.moves-label');
         if (movesLabel) {
-            movesLabel.textContent = t('ui.moves') || 'moves';
+            movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
         }
         
         // Update hint title
@@ -97,6 +97,17 @@ function updateLocalizedText() {
         const oldNextHeadlineBtn = document.querySelector('.new-game-btn-header');
         if (oldNextHeadlineBtn) {
             oldNextHeadlineBtn.textContent = t('ui.nextHeadline');
+        }
+        
+        // Update victory modal stat labels if modal exists
+        const finalSwaps = document.getElementById('finalSwaps');
+        if (finalSwaps) {
+            const swapCount = parseInt(finalSwaps.textContent) || 0;
+            const swapsLabel = finalSwaps.parentElement.querySelector('.stat-label');
+            const ratingLabel = document.querySelector('#performanceRating')?.parentElement.querySelector('.stat-label');
+            
+            if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
+            if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
         }
         
         // Update color legend text
