@@ -20,6 +20,7 @@ headlines/
 ├── index.html                          # Main game interface
 ├── styles.css                          # Game styling and animations
 ├── data.js                             # Configuration and data
+├── README.md                           # Project documentation
 ├── localization/                       # Localization system
 │   ├── en.js                           # English translations
 │   ├── ru.js                           # Russian translations
@@ -27,25 +28,32 @@ headlines/
 ├── scripts/                            # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
 │   ├── core/                           # Core engine modules
-│   │   ├── crossword-engine.js         # Layout generation
+│   │   ├── crossword-engine.js         # Smart backbone-first layout generation
 │   │   ├── grid-manager.js             # Grid management
-│   │   └── color-logic.js              # Color feedback
+│   │   └── color-logic.js              # Color feedback logic
 │   ├── gameplay/                       # Game features
-│   │   ├── difficulty-system.js         # Letter scrambling
+│   │   ├── difficulty-system.js        # Letter scrambling algorithms
 │   │   ├── game-controller.js          # Game flow control
-│   │   ├── ui-interactions.js          # User interface
+│   │   ├── ui-interactions.js          # User interface & rendering
 │   │   └── victory-animations.js       # Victory animations
 │   └── utils/                          # Utilities
-│       ├── headline-manager.js         # Headline management
-│       ├── async-rss-fetcher.js        # RSS fetching
-│       ├── headline-scorer.js          # Headline scoring
-│       ├── rss-parser.js               # RSS parsing
-│       ├── html-processor.js           # HTML processing
-│       └── debug-utils.js              # Debug tools
+│       ├── headline-manager.js         # Headline pool management
+│       ├── async-rss-fetcher.js        # Parallel RSS fetching
+│       ├── headline-scorer.js          # Headline filtering & scoring
+│       ├── rss-parser.js               # RSS feed parsing
+│       ├── html-processor.js           # HTML cleaning
+│       └── debug-utils.js              # Debug panel tools
 ├── test/                               # Test framework
 │   ├── test.html                       # Main test interface
+│   ├── crossword-generator_1.html      # Algorithm prototype/demo
 │   └── other test files...             # Various test utilities
 └── memory-bank/                        # Project documentation
+    ├── projectbrief.md                 # Project requirements
+    ├── techContext.md                  # Technical documentation
+    ├── systemPatterns.md               # System architecture
+    ├── productContext.md               # Product specifications
+    ├── designGuidelines.md             # Design guidelines
+    └── activeContext.md                # Current development context
 ```
 
 ## Hint System Implementation
@@ -84,25 +92,62 @@ Each headline starts with a base score of **0** and is evaluated against several
 
 ## Crossword Grid Generation (`crossword-engine.js`)
 
-The engine uses a stochastic, score-based algorithm to arrange selected words into a compact crossword layout.
+The engine uses a sophisticated **three-phase backbone-first algorithm** to generate optimal crossword layouts. This strategic approach ensures high-quality, well-connected grids with all words successfully placed.
 
-### 1. Generation Process
-- **Attempts**: Performs up to 50 attempts per headline to find the optimal layout.
-- **Placement**: Starts with a seed word and iteratively places remaining words perpendicularly at shared letter intersections.
-- **Validation**: Each placement must pass strict crossword rules:
-    - **Connectivity**: All words must form a single connected component.
-    - **Single Intersection**: Words can share exactly one letter; multiple intersections are forbidden.
-    - **Spacing**: Parallel words must have a 1-square gap; end-to-end touching is prohibited.
+### Algorithm Overview: Matchmaker → Backbone → Beam Search
 
-### 2. Scoring and Optimization
-The engine evaluates valid layouts using a "lower is better" score:
-- **Compactness**: Penalizes large grid areas and high aspect ratios (prefers squares).
-- **Intersections**: Rewards layouts with more shared letters and multi-crossing words.
+#### Phase 1: Matchmaker (Word Pair Selection)
+- **Bitmask Optimization**: Uses 32-bit masks (RU: 32 letters, EN: 26 letters) for fast letter comparison. Note: Russian Ё is normalized to Е for consistency.
+- **Bridge Potential Analysis**: Evaluates all word pairs to find which have the highest potential for connections. Scoring formula:
+  - `score = (bridgePotential × 50) + (combinedLength × 10)`
+  - Bridge potential = count of other words that share letters with BOTH words in the pair
+- **Output**: Top-scored word pairs sorted by connection potential.
 
-### 3. Fallback and Normalization
-- **Fallback Mechanism**: If the engine fails to find a valid interconnected layout after 50 attempts, it triggers `generateSimpleLayout`.
-- **Word Loss**: The simple layout generator prioritizes grid validity over completeness. If it cannot find valid, non-conflicting spots for all words, it may return a layout containing only a subset of the original headline words (e.g., 3 words instead of 5).
-- **Normalization**: Final coordinates are shifted to a (0,0) origin with padding for UI rendering.
+#### Phase 2: Backbone Generation with Topological Fingerprinting
+- **Backbone Creation**: For top 30 word pairs, creates "backbone" structures (two horizontal words at a gap distance).
+- **Bridge Discovery**: Finds vertical words that connect both backbone words at matching letters.
+- **Dynamic Gap Calculation**: Maximum gap is based on the 3rd longest word length minus 2.
+- **Topological Deduplication**: Uses unique structural fingerprints to eliminate duplicate configurations regardless of coordinates.
+- **Intermediate Scoring**:
+  - Non-linear intersection bonuses: [1→10, 2→20, 3→40, 4→80, 5+→150 points]
+  - Squareness penalty: -2 per unit difference between width and height
+  - Unused letter penalty: -5 per letter (light penalty at this stage)
+- **Output**: ~100-200 unique backbone structures with bridges, sorted by score.
+
+#### Phase 3: Beam Search Fill (Remaining Words)
+- **Initialization**: Places backbone words (horizontal) and all bridge words (vertical).
+- **Iterative Expansion**: 
+  - For each grid anchor point, attempts to place remaining words both horizontally and vertically.
+  - Keeps top K candidates (beam width = 10) at each step.
+  - Continues until no more words can be added.
+- **Placement Validation**:
+  - No character conflicts at intersections
+  - No adjacent parallel words (classic crossword spacing rule)
+  - No extending existing words at their ends
+- **Final Scoring**:
+  - Intersection bonuses: Non-linear rewards for well-connected words
+  - Area penalty: `(width × height) × 0.4` (strongly favors compact grids)
+  - Unused word penalty: **300 points per letter** (ensures all words are placed)
+
+### Key Features
+- **Language Detection**: Automatically detects Russian vs English based on character patterns.
+- **Guaranteed Completeness**: Heavy penalty (300×) for unused words ensures all headline words are placed.
+- **Configurable Parameters**: All weights and limits defined in `data.js` under `crosswordEngineConfig`.
+- **Time-Limited**: Maximum 300ms generation time prevents hanging on difficult layouts.
+- **Fallback Safety**: If main algorithm fails completely, creates minimal valid layout with all words.
+
+### Output Format
+Returns layout object with word placements:
+```javascript
+{
+  words: [
+    { word: 0, row: 2, col: 0, direction: 'horizontal' },
+    { word: 1, row: 0, col: 2, direction: 'vertical' },
+    // ...
+  ]
+}
+```
+Also sets global `gridSize = { rows, cols }` for grid creation.
 
 ## Modular Architecture
 
