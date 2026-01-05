@@ -68,6 +68,27 @@ function scoreHeadline(headline) {
         };
     }
     
+    // Second check: Description must be at least 2x longer than headline
+    const headlineLength = headline.text.replace(/\s+/g, '').length; // Count letters only, ignore spaces
+    const descriptionLength = headline.description.replace(/\s+/g, '').length; // Count letters only, ignore spaces
+    
+    if (descriptionLength < headlineLength * 2) {
+        return {
+            ...headline,
+            originalWords: [...headline.words],
+            filteredWords: [],
+            score: config.noDescriptionPenalty, // Use same penalty as no description
+            wordCount: 0,
+            filterReasons: [{
+                word: null,
+                reason: 'description_too_short',
+                description: `Excluded - description too short (${descriptionLength} chars vs ${headlineLength * 2} required)`
+            }],
+            isValid: false,
+            filteredText: ''
+        };
+    }
+    
     const originalWords = [...headline.words];
     const filteredWords = [];
     const filterReasons = [];
