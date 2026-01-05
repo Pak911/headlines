@@ -552,7 +552,11 @@ async function enhancedInitGame() {
     scrambleLetters();
     
     // Render the crossword
-    renderCrossword();
+    if (typeof renderCrossword === 'function') {
+        renderCrossword();
+    } else {
+        console.error('renderCrossword function not available');
+    }
     
     // Position the moves counter to avoid intersections
     setTimeout(() => {

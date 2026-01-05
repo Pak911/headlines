@@ -12,7 +12,7 @@ const rssLanguageConfig = {
 
 // Debug configuration - controls debug mode and logging
 const debugConfig = {
-    enabled: true  // Set to true to enable debug mode and logging
+    enabled: false  // Set to true to enable debug mode and logging
 };
 
 // Crossword Engine Configuration (Smart Backbone-First Algorithm)

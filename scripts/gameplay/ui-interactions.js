@@ -316,6 +316,10 @@ function positionMovesCounter() {
     const counterSize = 80; // width and height of the circle
     const margin = 16;
     
+    // Get all filled grid cells
+    const filledCells = document.querySelectorAll('.grid-cell.filled');
+    const cellRects = Array.from(filledCells).map(cell => cell.getBoundingClientRect());
+    
     // Define corner positions to try (in order: bottom-right, bottom-left, top-left, top-right)
     const positions = [
         { bottom: margin, right: margin, top: 'auto', left: 'auto', name: 'bottom-right' },
@@ -348,32 +352,20 @@ function positionMovesCounter() {
             bottom: counterTop + counterSize
         };
         
-        // Check intersection with legend
-        if (legendRect) {
-            if (!(counterRect.right < legendRect.left || 
-                  counterRect.left > legendRect.right || 
-                  counterRect.bottom < legendRect.top || 
-                  counterRect.top > legendRect.bottom)) {
+        // Check intersection with any filled grid cell (letters)
+        for (let cellRect of cellRects) {
+            if (!(counterRect.right <= cellRect.left || 
+                  counterRect.left >= cellRect.right || 
+                  counterRect.bottom <= cellRect.top || 
+                  counterRect.top >= cellRect.bottom)) {
                 hasIntersection = true;
+                _log(`Position ${pos.name} would hide a letter`);
+                break;
             }
         }
         
-        // Check intersection with grid (basic check)
-        if (!hasIntersection && gridRect) {
-            if (!(counterRect.right < gridRect.left || 
-                  counterRect.left > gridRect.right || 
-                  counterRect.bottom < gridRect.top || 
-                  counterRect.top > gridRect.bottom)) {
-                // Allow slight overlap with grid, but not too much
-                const overlapX = Math.min(counterRect.right, gridRect.right) - Math.max(counterRect.left, gridRect.left);
-                const overlapY = Math.min(counterRect.bottom, gridRect.bottom) - Math.max(counterRect.top, gridRect.top);
-                if (overlapX > counterSize * 0.3 && overlapY > counterSize * 0.3) {
-                    hasIntersection = true;
-                }
-            }
-        }
-        
-        // If no intersection, use this position
+        // If no intersection with letters, use this position
+        // Note: We allow intersection with legend at top-left position as per user request
         if (!hasIntersection) {
             movesCounter.style.top = pos.top === 'auto' ? 'auto' : pos.top + 'px';
             movesCounter.style.bottom = pos.bottom === 'auto' ? 'auto' : pos.bottom + 'px';
@@ -384,12 +376,12 @@ function positionMovesCounter() {
         }
     }
     
-    // If all positions have intersections, use bottom-right as default
-    movesCounter.style.bottom = margin + 'px';
-    movesCounter.style.right = margin + 'px';
-    movesCounter.style.top = 'auto';
-    movesCounter.style.left = 'auto';
-    _log('Moves counter positioned at: bottom-right (default)');
+    // If all positions hide letters, use top-left as last resort (may hide legend but that's acceptable)
+    movesCounter.style.top = margin + 'px';
+    movesCounter.style.left = margin + 'px';
+    movesCounter.style.bottom = 'auto';
+    movesCounter.style.right = 'auto';
+    _log('Moves counter positioned at: top-left (fallback - may overlap legend)');
 }
 
 // Make functions globally available
