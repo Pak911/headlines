@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crossword Backbone Generator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 { margin-top: 0; font-size: 1.5rem; color: var(--text); }
+        h2 { font-size: 1.1rem; margin-bottom: 10px; color: #64748b; font-weight: 600; }
+
+        /* Controls Layout */
+        .controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr;
+            gap: 20px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .section-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #334155;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .param-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .param-group label { font-size: 0.85rem; color: #475569; }
+        .param-group input { width: 60px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center;}
+
+        /* Intersection Weights Grid */
+        .int-weights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+        .int-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;}
+        .int-row input { width: 40px; padding: 2px; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+            grid-column: 1 / -1;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+
+        /* Metrics Display */
+        .metrics-bar {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* Grid Display */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-header {
+            font-size: 0.9rem;
+            color: #334155;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .score-breakdown {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 10px;
+        }
+        .score-item { display: flex; justify-content: space-between; }
+        .score-total { 
+            grid-column: 1 / -1; 
+            border-top: 1px dashed #cbd5e1; 
+            margin-top: 4px; 
+            padding-top: 4px; 
+            font-weight: bold; 
+            color: var(--primary);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .crossword-container {
+            overflow: auto;
+            flex-grow: 1;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+
+        .crossword-grid {
+            display: grid;
+            gap: 2px;
+            padding: 10px;
+            /* Ensure small grids don't look weird */
+            min-width: min-content; 
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .cell.empty { background: transparent; border: none; }
+        .cell.backbone-a { background-color: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .cell.backbone-b { background-color: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .cell.bridge { background-color: #dcfce7; color: #166534; border-color: #86efac; }
+        .cell.intersection { background-color: #fef3c7; color: #92400e; border-color: #fcd34d; font-weight: 900;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧩 Smart Crossword Backbone Generator</h1>
+    
+    <div class="controls">
+        <div class="input-section">
+            <div class="section-title">1. Word Input (Auto-detects RU/EN)</div>
+            <textarea id="wordInput">АЛГОРИТМ, ПРОГРАММА, ОПТИМИЗАЦИЯ, СТРУКТУРА, ДАННЫЕ, ИНТЕРФЕЙС, СЕРВЕР, БРАУЗЕР, СКРИПТ, КОД</textarea>
+            <div style="margin-top: 5px; font-size: 0.75rem; color: #64748b;">
+                * Max Gap will be calculated automatically based on the 3rd longest word.
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-title">2. Matchmaker (Pair Selection)</div>
+            <div class="param-group">
+                <label title="Bonus for pairs that share letters with many other words">Bridge Potential Weight</label>
+                <input type="number" id="wBridge" value="50">
+            </div>
+            <div class="param-group">
+                <label title="Bonus for choosing long words">Word Length Bonus</label>
+                <input type="number" id="wLength" value="10">
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">3. Backbone Scoring (Final Rank)</div>
+            
+            <div class="param-group">
+                <label title="Number of top results to display">Show Top Results</label>
+                <input type="number" id="wMaxResults" value="7" min="1" max="100">
+            </div>
+
+            <div class="param-group">
+                <label title="Penalty per unit of difference between Width and Height">Squareness Penalty</label>
+                <input type="number" id="wSquare" value="1">
+            </div>
+            
+            <div class="param-group">
+                <label title="Penalty per letter for words NOT in the grid">Unused Letter Penalty</label>
+                <input type="number" id="wUnused" value="10">
+            </div>
+
+            <div style="margin-top:10px; font-size:0.8rem; font-weight:bold; color:#475569;">Intersection Bonuses (per word):</div>
+            <div class="int-weights">
+                <div class="int-row"><label>1 Intersect:</label> <input type="number" id="wInt1" value="10"></div>
+                <div class="int-row"><label>2 Intersects:</label> <input type="number" id="wInt2" value="20"></div>
+                <div class="int-row"><label>3 Intersects:</label> <input type="number" id="wInt3" value="40"></div>
+                <div class="int-row"><label>4 Intersects:</label> <input type="number" id="wInt4" value="80"></div>
+                <div class="int-row"><label>5+ Intersects:</label> <input type="number" id="wInt5" value="150"></div>
+            </div>
+        </div>
+
+        <button onclick="runAlgorithm()">Run Generator</button>
+    </div>
+
+    <div id="metrics" class="metrics-bar"></div>
+
+    <div id="results" class="results-grid"></div>
+</div>
+
+<script>
+/**
+ * CORE ALGORITHM
+ */
+
+const ALPHABET_RU = "абвгдежзийклмнопрстуфхцчшщъыьэюя"; // 32 chars (ё merged with е)
+const ALPHABET_EN = "abcdefghijklmnopqrstuvwxyz"; // 26 chars
+let CURRENT_ALPHABET = ALPHABET_RU;
+
+// --- UTILS ---
+
+function detectAndSetLanguage(words) {
+    const combinedText = words.join("");
+    if (/[а-яА-ЯёЁ]/.test(combinedText)) {
+        CURRENT_ALPHABET = ALPHABET_RU;
+        return "RU";
+    } else {
+        CURRENT_ALPHABET = ALPHABET_EN;
+        return "EN";
+    }
+}
+
+function getBitIndex(char) {
+    char = char.toLowerCase();
+    if (CURRENT_ALPHABET === ALPHABET_RU && char === 'ё') char = 'е';
+    const idx = CURRENT_ALPHABET.indexOf(char);
+    return idx === -1 ? null : idx;
+}
+
+function getBitmask(word) {
+    let mask = 0;
+    for (let char of word) {
+        const idx = getBitIndex(char);
+        if (idx !== null) {
+            mask |= (1 << idx);
+        }
+    }
+    return mask;
+}
+
+function parseWords(input) {
+    const raw = input.split(/[\n,]+/)
+        .map(w => w.trim().toUpperCase().replace(/Ё/g, 'Е'))
+        .filter(w => w.length >= 2);
+    // Remove duplicates from input to avoid confusion
+    return [...new Set(raw)]; 
+}
+
+// --- PHASE 1: MATCHMAKER (Selection) ---
+
+function findBestPairs(words, weights) {
+    const masks = words.map(getBitmask);
+    const pairs = [];
+
+    for (let i = 0; i < words.length; i++) {
+        for (let j = i + 1; j < words.length; j++) {
+            let bridgePotentials = 0;
+            
+            for (let k = 0; k < words.length; k++) {
+                if (k === i || k === j) continue;
+                if ((masks[k] & masks[i]) !== 0 && (masks[k] & masks[j]) !== 0) {
+                    bridgePotentials++;
+                }
+            }
+
+            const lenScore = (words[i].length + words[j].length);
+            // Matchmaker Score logic
+            const score = (bridgePotentials * weights.bridge) + (lenScore * weights.lengthBonus);
+
+            pairs.push({
+                wordA: words[i],
+                wordB: words[j],
+                matchScore: score, // Store separate from Final Score
+                bridges: bridgePotentials
+            });
+        }
+    }
+    // Sort by Matchmaker Score
+    return pairs.sort((a, b) => b.matchScore - a.matchScore);
+}
+
+// --- PHASE 2: TOPOLOGICAL FINGERPRINTING & GENERATION ---
+
+/**
+ * Creates a unique string signature based on connectivity, not geometry.
+ * This filters out rotations (180 deg) and reflections.
+ * Logic: "List every intersection as a sorted pair of (Word:Index, Word:Index)"
+ */
+function getTopologicalFingerprint(wordA, wordB, shift, bridges) {
+    const connections = [];
+
+    // Helper to create a canonical string for one intersection
+    // e.g., connecting "ALGORITHM" at idx 3 and "DATA" at idx 0
+    const makeConnStr = (w1, i1, w2, i2) => {
+        const s1 = `${w1}:${i1}`;
+        const s2 = `${w2}:${i2}`;
+        // Sort alphabetically to ensure A-B is same as B-A
+        return (s1 < s2) ? `${s1}-${s2}` : `${s2}-${s1}`;
+    };
+
+    bridges.forEach(b => {
+        // Connection 1: Bridge to WordA
+        // Bridge intersects Word A at its own index `b.intersectA`
+        // Word A is intersected at index `b.x`
+        connections.push(makeConnStr(b.word, b.intersectA, wordA, b.x));
+
+        // Connection 2: Bridge to WordB
+        // Bridge intersects Word B at its own index `b.intersectB`
+        // Word B is intersected at index `b.x - shift`
+        connections.push(makeConnStr(b.word, b.intersectB, wordB, b.x - shift));
+    });
+
+    // Sort all connections to ignore bridge order
+    connections.sort();
+
+    // Join into one big signature
+    return connections.join('|');
+}
+
+
+function generateBackbones(topPairs, allWords, scoreParams) {
+    const validBackbones = [];
+    const uniqueTopologies = new Set(); // Stores our topological fingerprints
+    
+    // Dynamic Max Gap Calculation
+    const sortedWords = [...allWords].sort((a,b) => b.length - a.length);
+    let maxGap = 0;
+    if (sortedWords.length >= 3) {
+        const thirdLongest = sortedWords[2];
+        maxGap = Math.max(0, thirdLongest.length - 2);
+    }
+
+    const candidates = topPairs.slice(0, 30); // Try top 30 pairs
+
+    for (const pair of candidates) {
+        const { wordA, wordB } = pair;
+        const availableWords = allWords.filter(w => w !== wordA && w !== wordB);
+
+        tryConfiguration(wordA, wordB, availableWords, maxGap, validBackbones, uniqueTopologies, "below", scoreParams, allWords);
+        tryConfiguration(wordA, wordB, availableWords, maxGap, validBackbones, uniqueTopologies, "above", scoreParams, allWords);
+        
+        if (validBackbones.length > 200) break;
+    }
+
+    return validBackbones.sort((a, b) => b.finalScore.total - a.finalScore.total);
+}
+
+function calculateBackboneScore(backbone, allWords, params) {
+    const { wordA, wordB, bridges, minX, maxX, minY, maxY } = backbone;
+    
+    let score = 0;
+    const details = {
+        intersectionBonus: 0,
+        squarenessPenalty: 0,
+        unusedPenalty: 0,
+        total: 0
+    };
+
+    const numBridges = bridges.length;
+    const intWeights = params.intWeights;
+    const getW = (n) => {
+        if (n <= 0) return 0;
+        if (n === 1) return intWeights[0];
+        if (n === 2) return intWeights[1];
+        if (n === 3) return intWeights[2];
+        if (n === 4) return intWeights[3];
+        return intWeights[4];
+    };
+
+    const scoreA = numBridges * getW(numBridges);
+    const scoreB = numBridges * getW(numBridges);
+    let scoreBridges = 0;
+    bridges.forEach(() => {
+        scoreBridges += (2 * getW(2));
+    });
+
+    details.intersectionBonus = scoreA + scoreB + scoreBridges;
+    score += details.intersectionBonus;
+
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const diff = Math.abs(width - height);
+    
+    details.squarenessPenalty = diff * params.squarenessWeight;
+    score -= details.squarenessPenalty;
+
+    const usedWords = new Set([wordA, wordB, ...bridges.map(b => b.word)]);
+    let unusedLettersCount = 0;
+    let unusedWordsCount = 0;
+
+    allWords.forEach(w => {
+        if (!usedWords.has(w)) {
+            unusedLettersCount += w.length;
+            unusedWordsCount++;
+        }
+    });
+
+    details.unusedPenalty = unusedLettersCount * params.unusedWeight;
+    score -= details.unusedPenalty;
+    
+    details.total = score;
+    details.stats = { 
+        width, height, 
+        usedCount: usedWords.size, 
+        unusedCount: unusedWordsCount 
+    };
+    
+    return details;
+}
+
+function tryConfiguration(wordA, wordB, pool, maxGap, results, uniqueTopologies, direction, scoreParams, allWords) {
+    for (let gap = 1; gap <= maxGap; gap++) {
+        const dist = gap + 1; 
+        const minShift = -(wordB.length - 1);
+        const maxShift = wordA.length - 1;
+
+        for (let shift = minShift; shift <= maxShift; shift++) {
+            
+            const bridges = [];
+            const usedBridgeWords = new Set();
+            
+            const startX = Math.max(0, shift);
+            const endX = Math.min(wordA.length, shift + wordB.length);
+
+            if (endX <= startX) continue; 
+
+            for (let x = startX; x < endX; x++) {
+                const charA = wordA[x];
+                const charB = wordB[x - shift];
+                
+                for (const candidate of pool) {
+                    if (usedBridgeWords.has(candidate)) continue;
+                    if (candidate.length < dist + 1) continue;
+                    
+                    for (let cIdx = 0; cIdx < candidate.length; cIdx++) {
+                        const intersectB_Idx = (direction === "below") ? cIdx + dist : cIdx - dist;
+                        
+                        if (intersectB_Idx >= 0 && intersectB_Idx < candidate.length) {
+                            if (candidate[cIdx] === charA && candidate[intersectB_Idx] === charB) {
+                                // Conflict Check
+                                const neighborConflict = bridges.some(b => Math.abs(b.x - x) <= 1);
+                                if (!neighborConflict) {
+                                    usedBridgeWords.add(candidate);
+                                    bridges.push({
+                                        word: candidate,
+                                        x: x,
+                                        yStart: -cIdx, 
+                                        intersectA: cIdx,
+                                        intersectB: intersectB_Idx
+                                    });
+                                    break; 
+                                }
+                            }
+                        }
+                    }
+                    if (bridges.length > 0 && bridges[bridges.length-1].x === x) break;
+                }
+            }
+
+            if (bridges.length > 0) {
+                // --- NEW DEDUPLICATION LOGIC ---
+                // Generate the topological fingerprint based on connections
+                const fingerprint = getTopologicalFingerprint(wordA, wordB, shift, bridges);
+
+                if (!uniqueTopologies.has(fingerprint)) {
+                    uniqueTopologies.add(fingerprint);
+                    
+                    // Determine Bounds for Scoring (Geometry)
+                    let minX = 0, maxX = wordA.length;
+                    let minY = 0, maxY = 1; 
+                    
+                    const yB = direction === 'below' ? dist : -dist;
+                    minX = Math.min(minX, shift);
+                    maxX = Math.max(maxX, shift + wordB.length);
+                    minY = Math.min(minY, yB);
+                    maxY = Math.max(maxY, yB + 1);
+                    
+                    bridges.forEach(b => {
+                        minY = Math.min(minY, b.yStart);
+                        maxY = Math.max(maxY, b.yStart + b.word.length);
+                    });
+
+                    const backboneObj = {
+                        wordA, wordB, direction, gap, shift, bridges,
+                        minX, maxX, minY, maxY
+                    };
+
+                    const scoreDetails = calculateBackboneScore(backboneObj, allWords, scoreParams);
+                    backboneObj.finalScore = scoreDetails;
+
+                    results.push(backboneObj);
+                }
+            }
+        }
+    }
+}
+
+/**
+ * UI & RUNNER
+ */
+
+function runAlgorithm() {
+    const start = performance.now();
+    
+    // Inputs
+    const rawText = document.getElementById('wordInput').value;
+    const words = parseWords(rawText);
+    const detectedLang = detectAndSetLanguage(words);
+    
+    // Matchmaker Params
+    const weightsMatch = {
+        bridge: parseInt(document.getElementById('wBridge').value),
+        lengthBonus: parseInt(document.getElementById('wLength').value)
+    };
+
+    // Score Params
+    const scoreParams = {
+        squarenessWeight: parseInt(document.getElementById('wSquare').value),
+        unusedWeight: parseInt(document.getElementById('wUnused').value),
+        intWeights: [
+            parseInt(document.getElementById('wInt1').value),
+            parseInt(document.getElementById('wInt2').value),
+            parseInt(document.getElementById('wInt3').value),
+            parseInt(document.getElementById('wInt4').value),
+            parseInt(document.getElementById('wInt5').value)
+        ]
+    };
+
+    // New: Max Results
+    const maxResults = parseInt(document.getElementById('wMaxResults').value) || 15;
+
+    // Execution
+    const pairs = findBestPairs(words, weightsMatch);
+    const backbones = generateBackbones(pairs, words, scoreParams);
+
+    const end = performance.now();
+    
+    // Max Gap Info for UI
+    const sortedWords = [...words].sort((a,b) => b.length - a.length);
+    const calcMaxGap = (sortedWords.length >= 3) ? Math.max(0, sortedWords[2].length - 2) : 0;
+
+    displayMetrics(backbones.length, (end - start).toFixed(2), detectedLang, calcMaxGap);
+    displayResults(backbones, maxResults);
+}
+
+function displayMetrics(count, time, lang, maxGap) {
+    const el = document.getElementById('metrics');
+    el.style.display = 'block';
+    el.innerHTML = `
+        Language: ${lang} | 
+        Unique Backbones Found: ${count} | 
+        Calculated Max Gap: ${maxGap} | 
+        Time: ${time} ms
+    `;
+}
+
+function displayResults(backbones, limit = 15) {
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+
+    const top = backbones.slice(0, limit); // Show top N based on input
+
+    if (top.length === 0) {
+        container.innerHTML = '<div style="padding:20px; color:#64748b;">No valid backbones found. Try adding more bridge words.</div>';
+        return;
+    }
+
+    top.forEach((b, idx) => {
+        container.appendChild(createGridCard(b, idx));
+    });
+}
+
+function createGridCard(data, idx) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const s = data.finalScore;
+
+    const width = data.maxX - data.minX;
+    const height = data.maxY - data.minY;
+
+    card.innerHTML = `
+        <div class="result-header">
+            <span class="result-title">#${idx + 1}: ${data.wordA} + ${data.wordB}</span>
+            <div class="score-breakdown">
+                <div class="score-item"><span>Grid Size:</span> <span>${width}x${height}</span></div>
+                <div class="score-item"><span>Used/Total:</span> <span>${s.stats.usedCount}/${s.stats.usedCount + s.stats.unusedCount}</span></div>
+                <div class="score-item" style="color:#16a34a;"><span>Intersection Bonus:</span> <span>+${s.intersectionBonus}</span></div>
+                <div class="score-item" style="color:#dc2626;"><span>Squareness Penalty:</span> <span>-${s.squarenessPenalty}</span></div>
+                <div class="score-item" style="color:#dc2626;"><span>Unused Penalty:</span> <span>-${s.unusedPenalty}</span></div>
+                <div class="score-total"><span>FINAL SCORE:</span> <span>${s.total}</span></div>
+            </div>
+        </div>
+    `;
+
+    // Render Grid
+    const gridEl = document.createElement('div');
+    gridEl.className = 'crossword-grid';
+    gridEl.style.gridTemplateColumns = `repeat(${width}, 20px)`;
+    gridEl.style.gridTemplateRows = `repeat(${height}, 20px)`;
+
+    const map = new Map();
+    const setCell = (x, y, char, type) => {
+        const key = `${x},${y}`;
+        if (map.has(key)) type = 'intersection';
+        map.set(key, { char, type });
+    };
+
+    const yB = data.direction === 'below' ? (data.gap + 1) : -(data.gap + 1);
+
+    // Plot A
+    for(let i=0; i<data.wordA.length; i++) setCell(i, 0, data.wordA[i], 'backbone-a');
+    
+    // Plot B
+    for(let i=0; i<data.wordB.length; i++) setCell(data.shift + i, yB, data.wordB[i], 'backbone-b');
+
+    // Plot Bridges
+    data.bridges.forEach(b => {
+        for(let i=0; i<b.word.length; i++) {
+            setCell(b.x, b.yStart + i, b.word[i], 'bridge');
+        }
+    });
+
+    for (let y = data.minY; y < data.maxY; y++) {
+        for (let x = data.minX; x < data.maxX; x++) {
+            const cellDiv = document.createElement('div');
+            const key = `${x},${y}`;
+            const cellData = map.get(key);
+
+            if (cellData) {
+                cellDiv.className = `cell ${cellData.type}`;
+                cellDiv.textContent = cellData.char;
+            } else {
+                cellDiv.className = 'cell empty';
+            }
+            gridEl.appendChild(cellDiv);
+        }
+    }
+
+    const containerDiv = document.createElement('div');
+    containerDiv.className = 'crossword-container';
+    containerDiv.appendChild(gridEl);
+    card.appendChild(containerDiv);
+
+    return card;
+}
+</script>
+
+</body>
+</html>

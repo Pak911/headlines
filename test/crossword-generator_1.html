@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crossword Backbone Generator</title>
+    <style>
+        :root {
+            --primary: #2563eb;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --border: #e2e8f0;
+            --text: #1e293b;
+            --danger: #ef4444;
+            --success: #22c55e;
+        }
+
+        body {
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            margin: 0;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        h1 { margin-top: 0; font-size: 1.5rem; color: var(--text); }
+        h2 { font-size: 1.1rem; margin-bottom: 10px; color: #64748b; font-weight: 600; }
+
+        /* Controls Layout */
+        .controls {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 20px;
+            background: var(--card);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 1200px) {
+            .controls { grid-template-columns: 1fr 1fr; }
+        }
+        @media (max-width: 768px) {
+            .controls { grid-template-columns: 1fr; }
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            font-family: monospace;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+
+        .section-box {
+            background: #f1f5f9;
+            padding: 15px;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .section-title {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #334155;
+            border-bottom: 2px solid #cbd5e1;
+            padding-bottom: 5px;
+            margin-bottom: 5px;
+        }
+
+        .param-group {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .param-group label { font-size: 0.85rem; color: #475569; }
+        .param-group input { width: 60px; padding: 4px; border: 1px solid var(--border); border-radius: 4px; text-align: center;}
+
+        /* Intersection Weights Grid */
+        .int-weights {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 5px;
+        }
+        .int-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem;}
+        .int-row input { width: 40px; padding: 2px; }
+
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1rem;
+            width: 100%;
+            margin-top: 10px;
+            transition: background 0.2s;
+            grid-column: 1 / -1;
+        }
+
+        button:hover { background-color: #1d4ed8; }
+
+        /* Metrics Display */
+        .metrics-bar {
+            background: #e0f2fe;
+            color: #0369a1;
+            padding: 10px 15px;
+            border-radius: 6px;
+            margin-bottom: 20px;
+            font-family: monospace;
+            font-weight: bold;
+            display: none;
+        }
+
+        /* Grid Display */
+        .results-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 20px;
+        }
+
+        .result-card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .result-header {
+            font-size: 0.9rem;
+            color: #334155;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .result-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .score-breakdown {
+            font-size: 0.75rem;
+            color: #64748b;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2px 10px;
+        }
+        .score-item { display: flex; justify-content: space-between; }
+        .score-total { 
+            grid-column: 1 / -1; 
+            border-top: 1px dashed #cbd5e1; 
+            margin-top: 4px; 
+            padding-top: 4px; 
+            font-weight: bold; 
+            color: var(--primary);
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .crossword-container {
+            overflow: auto;
+            flex-grow: 1;
+            margin-top: 10px;
+            display: flex;
+            justify-content: center;
+            background: #f8fafc;
+            border-radius: 4px;
+        }
+
+        .crossword-grid {
+            display: grid;
+            gap: 2px;
+            padding: 10px;
+            /* Ensure small grids don't look weird */
+            min-width: min-content; 
+        }
+
+        .cell {
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 1px solid #cbd5e1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+
+        .cell.empty { background: transparent; border: none; }
+        .cell.backbone-a { background-color: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .cell.backbone-b { background-color: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+        .cell.bridge { background-color: #dcfce7; color: #166534; border-color: #86efac; }
+        /* cell.filled are words added in Phase 3 */
+        .cell.filled { background-color: #e0e7ff; color: #3730a3; border-color: #c7d2fe; }
+        .cell.intersection { background-color: #fef3c7; color: #92400e; border-color: #fcd34d; font-weight: 900;}
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>🧩 Smart Crossword Backbone Generator</h1>
+    
+    <div class="controls">
+        <div class="input-section">
+            <div class="section-title">1. Word Input (Auto-detects RU/EN)</div>
+            <textarea id="wordInput">АЛГОРИТМ, ПРОГРАММА, ОПТИМИЗАЦИЯ, СТРУКТУРА, ДАННЫЕ, ИНТЕРФЕЙС, СЕРВЕР, БРАУЗЕР, СКРИПТ, КОД, КОМПЬЮТЕР, ФУНКЦИЯ, МАССИВ, ОБЪЕКТ, СЕТЬ, КЛИЕНТ</textarea>
+            <div style="margin-top: 5px; font-size: 0.75rem; color: #64748b;">
+                * Max Gap will be calculated automatically based on the 3rd longest word.
+            </div>
+        </div>
+        
+        <div class="section-box">
+            <div class="section-title">2. Matchmaker (Backbone)</div>
+            <div class="param-group">
+                <label title="Bonus for pairs that share letters with many other words">Bridge Weight</label>
+                <input type="number" id="wBridge" value="50">
+            </div>
+            <div class="param-group">
+                <label title="Bonus for choosing long words">Length Bonus</label>
+                <input type="number" id="wLength" value="10">
+            </div>
+            <div class="param-group">
+                <label title="How many backbones to try filling">Variants to Try</label>
+                <input type="number" id="wTryLimit" value="100" min="1" max="500">
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">3. Backbone Scoring</div>
+            <div class="param-group">
+                <label title="Penalty per unit of difference between Width and Height">Squareness</label>
+                <input type="number" id="wSquare" value="2">
+            </div>
+            <div class="param-group">
+                <label title="Intersection Bonus Config">Intersections</label>
+            </div>
+            <div class="int-weights">
+                <div class="int-row"><label>1 Intersect:</label> <input type="number" id="wInt1" value="10"></div>
+                <div class="int-row"><label>2 Intersects:</label> <input type="number" id="wInt2" value="20"></div>
+                <div class="int-row"><label>3 Intersects:</label> <input type="number" id="wInt3" value="40"></div>
+                <div class="int-row"><label>4 Intersects:</label> <input type="number" id="wInt4" value="80"></div>
+                <div class="int-row"><label>5+:</label> <input type="number" id="wInt5" value="150"></div>
+            </div>
+        </div>
+
+        <div class="section-box">
+            <div class="section-title">4. Auto-Fill & Finalize</div>
+            <div class="param-group">
+                <label title="Max time to spend filling words (ms)">Time Limit (ms)</label>
+                <input type="number" id="wTimeLimit" value="300">
+            </div>
+            <div class="param-group">
+                <label title="Beam Search Width (Variants to keep per step)">Beam Width</label>
+                <input type="number" id="wBeam" value="10" min="1" max="100">
+            </div>
+             <div class="param-group">
+                <label title="Final Output Count">Show Results</label>
+                <input type="number" id="wMaxResults" value="15" min="1" max="100">
+            </div>
+            <div class="section-title" style="margin-top:10px; border:none; font-size:0.85rem;">Final Scoring Weights</div>
+            <div class="param-group">
+                <label title="Penalty per total area (Width * Height). Keep low (e.g. 0.5)">Compactness (Area)</label>
+                <input type="number" id="wFinalCompactness" value="0.4" step="0.1">
+            </div>
+            <div class="param-group">
+                <label title="Massive penalty for left over words">Unused Letter</label>
+                <input type="number" id="wFinalUnused" value="300">
+            </div>
+        </div>
+
+        <button onclick="runAlgorithm()">Run Generator</button>
+    </div>
+
+    <div id="metrics" class="metrics-bar"></div>
+
+    <div id="results" class="results-grid"></div>
+</div>
+
+<script>
+/**
+ * CORE ALGORITHM
+ */
+
+const ALPHABET_RU = "абвгдежзийклмнопрстуфхцчшщъыьэюя"; // 32 chars (ё merged with е)
+const ALPHABET_EN = "abcdefghijklmnopqrstuvwxyz"; // 26 chars
+let CURRENT_ALPHABET = ALPHABET_RU;
+
+// --- UTILS ---
+
+function detectAndSetLanguage(words) {
+    const combinedText = words.join("");
+    if (/[а-яА-ЯёЁ]/.test(combinedText)) {
+        CURRENT_ALPHABET = ALPHABET_RU;
+        return "RU";
+    } else {
+        CURRENT_ALPHABET = ALPHABET_EN;
+        return "EN";
+    }
+}
+
+function getBitIndex(char) {
+    char = char.toLowerCase();
+    if (CURRENT_ALPHABET === ALPHABET_RU && char === 'ё') char = 'е';
+    const idx = CURRENT_ALPHABET.indexOf(char);
+    return idx === -1 ? null : idx;
+}
+
+function getBitmask(word) {
+    let mask = 0;
+    for (let char of word) {
+        const idx = getBitIndex(char);
+        if (idx !== null) {
+            mask |= (1 << idx);
+        }
+    }
+    return mask;
+}
+
+function parseWords(input) {
+    const raw = input.split(/[\n,]+/)
+        .map(w => w.trim().toUpperCase().replace(/Ё/g, 'Е'))
+        .filter(w => w.length >= 2);
+    return [...new Set(raw)]; 
+}
+
+// --- PHASE 1: MATCHMAKER (Selection) ---
+
+function findBestPairs(words, weights) {
+    const masks = words.map(getBitmask);
+    const pairs = [];
+
+    for (let i = 0; i < words.length; i++) {
+        for (let j = i + 1; j < words.length; j++) {
+            let bridgePotentials = 0;
+            
+            for (let k = 0; k < words.length; k++) {
+                if (k === i || k === j) continue;
+                if ((masks[k] & masks[i]) !== 0 && (masks[k] & masks[j]) !== 0) {
+                    bridgePotentials++;
+                }
+            }
+
+            const lenScore = (words[i].length + words[j].length);
+            const score = (bridgePotentials * weights.bridge) + (lenScore * weights.lengthBonus);
+
+            pairs.push({
+                wordA: words[i],
+                wordB: words[j],
+                matchScore: score, 
+                bridges: bridgePotentials
+            });
+        }
+    }
+    return pairs.sort((a, b) => b.matchScore - a.matchScore);
+}
+
+// --- PHASE 2: TOPOLOGICAL FINGERPRINTING & BACKBONE GENERATION ---
+
+function getTopologicalFingerprint(wordA, wordB, shift, bridges) {
+    const connections = [];
+    const makeConnStr = (w1, i1, w2, i2) => {
+        const s1 = `${w1}:${i1}`;
+        const s2 = `${w2}:${i2}`;
+        return (s1 < s2) ? `${s1}-${s2}` : `${s2}-${s1}`;
+    };
+
+    bridges.forEach(b => {
+        connections.push(makeConnStr(b.word, b.intersectA, wordA, b.x));
+        connections.push(makeConnStr(b.word, b.intersectB, wordB, b.x - shift));
+    });
+    connections.sort();
+    return connections.join('|');
+}
+
+
+function generateBackbones(topPairs, allWords, scoreParams) {
+    const validBackbones = [];
+    const uniqueTopologies = new Set(); 
+    
+    const sortedWords = [...allWords].sort((a,b) => b.length - a.length);
+    let maxGap = 0;
+    if (sortedWords.length >= 3) {
+        const thirdLongest = sortedWords[2];
+        maxGap = Math.max(0, thirdLongest.length - 2);
+    }
+
+    const candidates = topPairs.slice(0, 30); 
+
+    for (const pair of candidates) {
+        const { wordA, wordB } = pair;
+        const availableWords = allWords.filter(w => w !== wordA && w !== wordB);
+
+        tryConfiguration(wordA, wordB, availableWords, maxGap, validBackbones, uniqueTopologies, "below", scoreParams, allWords);
+        tryConfiguration(wordA, wordB, availableWords, maxGap, validBackbones, uniqueTopologies, "above", scoreParams, allWords);
+        
+        if (validBackbones.length > 200) break;
+    }
+
+    // Sort by INTERMEDIATE score (Backbone Score)
+    return validBackbones.sort((a, b) => b.intermediateScore - a.intermediateScore);
+}
+
+function calculateIntermediateScore(backbone, allWords, params) {
+    const { wordA, wordB, bridges, minX, maxX, minY, maxY } = backbone;
+    let score = 0;
+    
+    // Intersection Logic
+    const numBridges = bridges.length;
+    const intWeights = params.intWeights;
+    const getW = (n) => {
+        if (n <= 0) return 0;
+        if (n === 1) return intWeights[0];
+        if (n === 2) return intWeights[1];
+        if (n === 3) return intWeights[2];
+        if (n === 4) return intWeights[3];
+        return intWeights[4];
+    };
+
+    const scoreA = numBridges * getW(numBridges);
+    const scoreB = numBridges * getW(numBridges);
+    let scoreBridges = 0;
+    bridges.forEach(() => {
+        scoreBridges += (2 * getW(2));
+    });
+    score += (scoreA + scoreB + scoreBridges);
+
+    // Squareness
+    const width = maxX - minX;
+    const height = maxY - minY;
+    const diff = Math.abs(width - height);
+    score -= (diff * params.squarenessWeight);
+
+    // Unused (Light penalty for backbone phase)
+    const usedWords = new Set([wordA, wordB, ...bridges.map(b => b.word)]);
+    let unusedLettersCount = 0;
+    allWords.forEach(w => {
+        if (!usedWords.has(w)) unusedLettersCount += w.length;
+    });
+    score -= (unusedLettersCount * params.unusedWeight);
+    
+    return score;
+}
+
+function tryConfiguration(wordA, wordB, pool, maxGap, results, uniqueTopologies, direction, scoreParams, allWords) {
+    for (let gap = 1; gap <= maxGap; gap++) {
+        const dist = gap + 1; 
+        const minShift = -(wordB.length - 1);
+        const maxShift = wordA.length - 1;
+
+        for (let shift = minShift; shift <= maxShift; shift++) {
+            
+            const bridges = [];
+            const usedBridgeWords = new Set();
+            
+            const startX = Math.max(0, shift);
+            const endX = Math.min(wordA.length, shift + wordB.length);
+
+            if (endX <= startX) continue; 
+
+            for (let x = startX; x < endX; x++) {
+                const charA = wordA[x];
+                const charB = wordB[x - shift];
+                
+                for (const candidate of pool) {
+                    if (usedBridgeWords.has(candidate)) continue;
+                    if (candidate.length < dist + 1) continue;
+                    
+                    for (let cIdx = 0; cIdx < candidate.length; cIdx++) {
+                        const intersectB_Idx = (direction === "below") ? cIdx + dist : cIdx - dist;
+                        
+                        if (intersectB_Idx >= 0 && intersectB_Idx < candidate.length) {
+                            if (candidate[cIdx] === charA && candidate[intersectB_Idx] === charB) {
+                                const neighborConflict = bridges.some(b => Math.abs(b.x - x) <= 1);
+                                if (!neighborConflict) {
+                                    usedBridgeWords.add(candidate);
+                                    bridges.push({
+                                        word: candidate,
+                                        x: x,
+                                        yStart: -cIdx, 
+                                        intersectA: cIdx,
+                                        intersectB: intersectB_Idx
+                                    });
+                                    break; 
+                                }
+                            }
+                        }
+                    }
+                    if (bridges.length > 0 && bridges[bridges.length-1].x === x) break;
+                }
+            }
+
+            if (bridges.length > 0) {
+                const fingerprint = getTopologicalFingerprint(wordA, wordB, shift, bridges);
+
+                if (!uniqueTopologies.has(fingerprint)) {
+                    uniqueTopologies.add(fingerprint);
+                    
+                    let minX = 0, maxX = wordA.length;
+                    let minY = 0, maxY = 1; 
+                    
+                    const yB = direction === 'below' ? dist : -dist;
+                    minX = Math.min(minX, shift);
+                    maxX = Math.max(maxX, shift + wordB.length);
+                    minY = Math.min(minY, yB);
+                    maxY = Math.max(maxY, yB + 1);
+                    
+                    bridges.forEach(b => {
+                        minY = Math.min(minY, b.yStart);
+                        maxY = Math.max(maxY, b.yStart + b.word.length);
+                    });
+
+                    const backboneObj = {
+                        wordA, wordB, direction, gap, shift, bridges,
+                        minX, maxX, minY, maxY
+                    };
+
+                    backboneObj.intermediateScore = calculateIntermediateScore(backboneObj, allWords, scoreParams);
+                    results.push(backboneObj);
+                }
+            }
+        }
+    }
+}
+
+// --- PHASE 3: ITERATIVE BEST-FIT EXPANSION (BEAM SEARCH) ---
+
+function solveRemainingWords(backbone, allWords, fillParams, scoreParams, intWeights) {
+    // 1. Initialize Grid State
+    const placed = [];
+    const used = new Set();
+
+    // Add Backbone Words
+    placed.push({ word: backbone.wordA, x: 0, y: 0, dir: 'hor' });
+    const yB = backbone.direction === 'below' ? (backbone.gap + 1) : -(backbone.gap + 1);
+    placed.push({ word: backbone.wordB, x: backbone.shift, y: yB, dir: 'hor' });
+    used.add(backbone.wordA);
+    used.add(backbone.wordB);
+
+    // Add Bridge Words
+    backbone.bridges.forEach(b => {
+        placed.push({ word: b.word, x: b.x, y: b.yStart, dir: 'ver' });
+        used.add(b.word);
+    });
+
+    // Beam State
+    let beam = [{ placed, used }];
+
+    // 2. Iterative Fill
+    let changed = true;
+    while (changed) {
+        changed = false;
+        let nextBeamCandidates = [];
+
+        // For each state in current beam
+        for (const state of beam) {
+            const currentMap = buildGridMap(state.placed);
+            const remaining = allWords.filter(w => !state.used.has(w));
+            
+            if (remaining.length === 0) continue;
+
+            const candidatesForState = [];
+
+            // Identify Anchors (all cells in grid)
+            for (const [key, cell] of currentMap.entries()) {
+                const [ax, ay] = key.split(',').map(Number);
+                
+                // Try to fit every remaining word at this anchor
+                for (const word of remaining) {
+                    // Try crossing vertically (if word is horizontal) or horizontally (if word is ver)
+                    // Simplified: Try both directions for every anchor, filtering by match
+                    
+                    // Try Horizontal at this anchor
+                    // anchor char must match word char at index k
+                    for (let k = 0; k < word.length; k++) {
+                        if (word[k] === cell.char) {
+                            // Try Hor placement: (ax - k, ay)
+                            const attemptH = { word, x: ax - k, y: ay, dir: 'hor' };
+                            if (canPlace(attemptH, currentMap)) {
+                                candidatesForState.push(createNextState(state, attemptH));
+                            }
+                            // Try Ver placement: (ax, ay - k)
+                            const attemptV = { word, x: ax, y: ay - k, dir: 'ver' };
+                            if (canPlace(attemptV, currentMap)) {
+                                candidatesForState.push(createNextState(state, attemptV));
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Score candidates for this step (Heuristic: Density)
+            candidatesForState.forEach(cand => {
+                cand.heuristicScore = cand.placed.length * 100; // Prefer more words
+            });
+
+            nextBeamCandidates.push(...candidatesForState);
+        }
+
+        if (nextBeamCandidates.length > 0) {
+            // Sort by heuristic and take top K
+            nextBeamCandidates.sort((a, b) => b.heuristicScore - a.heuristicScore);
+            
+            // Deduplicate logic could go here (by unique set of words)
+            
+            beam = nextBeamCandidates.slice(0, fillParams.beamWidth);
+            changed = true;
+        }
+    }
+
+    // 3. Final Score Calculation for Best Result in Beam
+    const bestState = beam[0];
+    const finalGridMap = buildGridMap(bestState.placed);
+    
+    // Compute Bounds
+    let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+    bestState.placed.forEach(p => {
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x + (p.dir === 'hor' ? p.word.length : 1));
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y + (p.dir === 'ver' ? p.word.length : 1));
+    });
+
+    // Score Details
+    const width = maxX - minX;
+    const height = maxY - minY;
+    
+    // Calculate Intersections
+    // Iterate grid, check crossings
+    let totalIntersections = 0;
+    // Map coordinate -> count
+    const cellCounts = new Map();
+    bestState.placed.forEach(p => {
+        for(let i=0; i<p.word.length; i++) {
+            const x = p.dir==='hor' ? p.x+i : p.x;
+            const y = p.dir==='ver' ? p.y+i : p.y;
+            const key = `${x},${y}`;
+            cellCounts.set(key, (cellCounts.get(key) || 0) + 1);
+        }
+    });
+
+    let intersectionScore = 0;
+    
+    // We need intersection count PER WORD to apply the user's non-linear bonuses
+    bestState.placed.forEach(p => {
+        let wordIntersects = 0;
+        for(let i=0; i<p.word.length; i++) {
+            const x = p.dir==='hor' ? p.x+i : p.x;
+            const y = p.dir==='ver' ? p.y+i : p.y;
+            if (cellCounts.get(`${x},${y}`) > 1) {
+                wordIntersects++;
+            }
+        }
+        
+        // Lookup Bonus
+        const getW = (n) => {
+            if (n <= 0) return 0;
+            if (n === 1) return intWeights[0];
+            if (n === 2) return intWeights[1];
+            if (n === 3) return intWeights[2];
+            if (n === 4) return intWeights[3];
+            return intWeights[4];
+        };
+        intersectionScore += getW(wordIntersects);
+    });
+
+    // Unused Penalty (Big)
+    let unusedLetters = 0;
+    let unusedCount = 0;
+    allWords.forEach(w => {
+        if (!bestState.used.has(w)) {
+            unusedLetters += w.length;
+            unusedCount++;
+        }
+    });
+
+    const unusedPenalty = unusedLetters * scoreParams.unusedWeight; // Uses new massive weight
+    
+    // --- UPDATED LOGIC: COMPACTNESS (AREA) PENALTY ---
+    // Instead of abs(width - height), we penalize width * height.
+    const area = width * height;
+    const compactnessPenalty = area * scoreParams.areaWeight;
+
+    const totalScore = intersectionScore - unusedPenalty - compactnessPenalty;
+
+    return {
+        placed: bestState.placed,
+        minX, maxX, minY, maxY,
+        finalScore: {
+            total: totalScore,
+            intersectionBonus: intersectionScore,
+            unusedPenalty: unusedPenalty,
+            compactnessPenalty: compactnessPenalty, // Store for UI
+            stats: {
+                width, height,
+                usedCount: bestState.used.size,
+                unusedCount: unusedCount
+            }
+        }
+    };
+}
+
+function buildGridMap(placedWords) {
+    const map = new Map();
+    placedWords.forEach(p => {
+        for(let i=0; i<p.word.length; i++) {
+            const x = p.dir==='hor' ? p.x+i : p.x;
+            const y = p.dir==='ver' ? p.y+i : p.y;
+            map.set(`${x},${y}`, { char: p.word[i] });
+        }
+    });
+    return map;
+}
+
+function canPlace(attempt, map) {
+    for(let i=0; i<attempt.word.length; i++) {
+        const x = attempt.dir==='hor' ? attempt.x+i : attempt.x;
+        const y = attempt.dir==='ver' ? attempt.y+i : attempt.y;
+        const key = `${x},${y}`;
+        const existing = map.get(key);
+        
+        if (existing) {
+            if (existing.char !== attempt.word[i]) return false; // Clash
+        } else {
+            // Check immediate neighbors (classic crossword rule: no adjacent words unless crossing)
+            // If cell is empty, check N/S/E/W. 
+            // If we are horizontal, check N/S. If vertical, check E/W.
+            // Simplified check: Just ensure we don't touch a parallel word.
+            if (attempt.dir === 'hor') {
+                if (map.has(`${x},${y-1}`) || map.has(`${x},${y+1}`)) return false;
+            } else {
+                if (map.has(`${x-1},${y}`) || map.has(`${x+1},${y}`)) return false;
+            }
+            // Check ends (cannot extend existing word)
+        }
+    }
+    
+    // Check start/end boundary conditions
+    const beforeX = attempt.dir==='hor' ? attempt.x-1 : attempt.x;
+    const beforeY = attempt.dir==='ver' ? attempt.y-1 : attempt.y;
+    if (map.has(`${beforeX},${beforeY}`)) return false;
+
+    const afterX = attempt.dir==='hor' ? attempt.x+attempt.word.length : attempt.x;
+    const afterY = attempt.dir==='ver' ? attempt.y+attempt.word.length : attempt.y;
+    if (map.has(`${afterX},${afterY}`)) return false;
+
+    return true;
+}
+
+function createNextState(prevState, newWordObj) {
+    const newPlaced = [...prevState.placed, newWordObj];
+    const newUsed = new Set(prevState.used);
+    newUsed.add(newWordObj.word);
+    return { placed: newPlaced, used: newUsed };
+}
+
+/**
+ * UI & RUNNER
+ */
+
+function runAlgorithm() {
+    const start = performance.now();
+    
+    // Inputs
+    const rawText = document.getElementById('wordInput').value;
+    const words = parseWords(rawText);
+    const detectedLang = detectAndSetLanguage(words);
+    
+    // Params
+    const weightsMatch = {
+        bridge: parseInt(document.getElementById('wBridge').value),
+        lengthBonus: parseInt(document.getElementById('wLength').value)
+    };
+    const tryLimit = parseInt(document.getElementById('wTryLimit').value) || 20;
+
+    const intermediateParams = {
+        squarenessWeight: parseInt(document.getElementById('wSquare').value),
+        unusedWeight: 5, // Keep intermediate penalty low
+        intWeights: [
+            parseInt(document.getElementById('wInt1').value),
+            parseInt(document.getElementById('wInt2').value),
+            parseInt(document.getElementById('wInt3').value),
+            parseInt(document.getElementById('wInt4').value),
+            parseInt(document.getElementById('wInt5').value)
+        ]
+    };
+
+    // Phase 1 & 2
+    const pairs = findBestPairs(words, weightsMatch);
+    const backbones = generateBackbones(pairs, words, intermediateParams);
+
+    // PHASE 3 Params
+    const fillParams = {
+        timeLimit: parseInt(document.getElementById('wTimeLimit').value) || 400,
+        beamWidth: parseInt(document.getElementById('wBeam').value) || 3
+    };
+    const finalScoreParams = {
+        areaWeight: parseFloat(document.getElementById('wFinalCompactness').value), // Changed name & type
+        unusedWeight: parseInt(document.getElementById('wFinalUnused').value),
+        // Reuse int weights
+    };
+    const maxResults = parseInt(document.getElementById('wMaxResults').value) || 15;
+
+    // Run Phase 3
+    const finalResults = [];
+    const candidates = backbones.slice(0, tryLimit);
+
+    for (const bb of candidates) {
+        if (performance.now() - start > fillParams.timeLimit) break;
+        
+        const filled = solveRemainingWords(bb, words, fillParams, finalScoreParams, intermediateParams.intWeights);
+        
+        // Convert to display format (reuse logic)
+        finalResults.push({
+            wordA: bb.wordA, // Keep labels for UI
+            wordB: bb.wordB,
+            finalScore: filled.finalScore,
+            // Custom display data
+            placed: filled.placed,
+            minX: filled.minX, maxX: filled.maxX,
+            minY: filled.minY, maxY: filled.maxY
+        });
+    }
+
+    finalResults.sort((a,b) => b.finalScore.total - a.finalScore.total);
+
+    const end = performance.now();
+    displayMetrics(finalResults.length, (end - start).toFixed(2), detectedLang);
+    displayResults(finalResults, maxResults);
+}
+
+function displayMetrics(count, time, lang) {
+    const el = document.getElementById('metrics');
+    el.style.display = 'block';
+    el.innerHTML = `
+        Language: ${lang} | 
+        Process Time: ${time} ms
+    `;
+}
+
+function displayResults(results, limit = 15) {
+    const container = document.getElementById('results');
+    container.innerHTML = '';
+
+    const top = results.slice(0, limit); 
+
+    if (top.length === 0) {
+        container.innerHTML = '<div style="padding:20px; color:#64748b;">No results generated.</div>';
+        return;
+    }
+
+    top.forEach((b, idx) => {
+        container.appendChild(createGridCard(b, idx));
+    });
+}
+
+function createGridCard(data, idx) {
+    const card = document.createElement('div');
+    card.className = 'result-card';
+    const s = data.finalScore;
+
+    const width = data.maxX - data.minX;
+    const height = data.maxY - data.minY;
+
+    card.innerHTML = `
+        <div class="result-header">
+            <span class="result-title">#${idx + 1}: Score ${s.total.toFixed(0)}</span>
+            <div class="score-breakdown">
+                <div class="score-item"><span>Grid Size:</span> <span>${width}x${height}</span></div>
+                <div class="score-item"><span>Used Words:</span> <span>${s.stats.usedCount}/${s.stats.usedCount + s.stats.unusedCount}</span></div>
+                <div class="score-item" style="color:#16a34a;"><span>Intersection Bonus:</span> <span>+${s.intersectionBonus}</span></div>
+                <div class="score-item" style="color:#dc2626;"><span>Area Penalty:</span> <span>-${s.compactnessPenalty.toFixed(1)}</span></div>
+                <div class="score-item" style="color:#dc2626;"><span>Unused Penalty:</span> <span>-${s.unusedPenalty}</span></div>
+            </div>
+        </div>
+    `;
+
+    // Render Grid
+    const gridEl = document.createElement('div');
+    gridEl.className = 'crossword-grid';
+    gridEl.style.gridTemplateColumns = `repeat(${width}, 20px)`;
+    gridEl.style.gridTemplateRows = `repeat(${height}, 20px)`;
+
+    const map = new Map();
+    data.placed.forEach(p => {
+        for(let i=0; i<p.word.length; i++) {
+            const x = p.dir==='hor' ? p.x+i : p.x;
+            const y = p.dir==='ver' ? p.y+i : p.y;
+            const key = `${x},${y}`;
+            const type = map.has(key) ? 'intersection' : (p.word === data.wordA || p.word === data.wordB ? 'backbone-a' : 'filled');
+            // Check if it was bridge (simple heuristic: if ver and not backbone, it might be bridge, but 'filled' color is fine for all non-backbone)
+            map.set(key, { char: p.word[i], type });
+        }
+    });
+
+    for (let y = data.minY; y < data.maxY; y++) {
+        for (let x = data.minX; x < data.maxX; x++) {
+            const cellDiv = document.createElement('div');
+            const key = `${x},${y}`;
+            const cellData = map.get(key);
+
+            if (cellData) {
+                cellDiv.className = `cell ${cellData.type}`;
+                cellDiv.textContent = cellData.char;
+            } else {
+                cellDiv.className = 'cell empty';
+            }
+            gridEl.appendChild(cellDiv);
+        }
+    }
+
+    const containerDiv = document.createElement('div');
+    containerDiv.className = 'crossword-container';
+    containerDiv.appendChild(gridEl);
+    card.appendChild(containerDiv);
+
+    return card;
+}
+</script>
+
+</body>
+</html>

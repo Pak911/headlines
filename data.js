@@ -14,9 +14,9 @@ const rssLanguageConfig = {
 const headlineScoringConfig = {
     // Word count constraints
     minWords: 4,           // Minimum words required after filtering
-    maxWords: 6,           // Maximum words for optimal score
+    maxWords: 10,           // Maximum words for optimal score
     idealMinWords: 4,      // Ideal minimum word count
-    idealMaxWords: 6,      // Ideal maximum word count
+    idealMaxWords: 8,      // Ideal maximum word count
     
     // Word length filtering
     minWordLength: 4,      // Words with 3 letters or less are filtered out

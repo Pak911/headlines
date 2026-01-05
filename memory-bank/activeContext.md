@@ -9,6 +9,8 @@
 - Enhanced `projectbrief.md` with hint system requirements and success criteria
 - Improved `README.md` with detailed explanation of contextual hints and gameplay flow
 - Documented hint system flow in `systemPatterns.md` and implementation details in `techContext.md`
+- **Documented Headline Scoring and Selection System** in `techContext.md`, detailing the algorithm for word filtering, scoring penalties, and pool-based selection.
+- **Documented Crossword Grid Generation** in `techContext.md`, explaining the stochastic layout algorithm, validation rules, scoring metrics, and the fallback behavior that may result in word loss.
 
 
 ## Session Log

@@ -56,6 +56,54 @@ The hint system is implemented through several key components:
 - **Game Controller**: Integrates description display as contextual hints
 - **Styles**: Provides visual styling for hint presentation in the UI
 
+## Headline Scoring and Selection System
+
+The system ensures high-quality, playable headlines are selected for the crossword through a multi-stage process:
+
+### 1. Scoring Algorithm (`headline-scorer.js`)
+Each headline starts with a base score of **0** and is evaluated against several criteria:
+- **Mandatory Description**: Headlines without descriptions are penalized (**-999**) and marked invalid.
+- **Word Filtering**:
+    - **Stop Words**: Common words (e.g., "the", "and", "with") are removed.
+    - **Short Words**: Words with 3 letters or less are removed.
+    - **Penalty**: **-1 point** for each filtered word.
+- **Word Count Optimization**:
+    - **Ideal Range**: 4 to 6 words (after filtering).
+    - **Penalty**: **-1 point** for each word above or below this range.
+- **Validity Check**: A headline must have at least **4 words** remaining after filtering to be considered valid.
+
+### 2. Pooling and Grouping
+- **Score Groups**: Valid headlines are grouped into "pools" based on their final score.
+- **Sorting**: Pools are sorted in descending order (highest scores first).
+- **Selection**: The system always attempts to pick a random headline from the highest available score pool. If a pool is exhausted, it moves to the next highest score.
+
+### 3. Lifecycle Management (`headline-manager.js`)
+- **Initialization**: Fetches headlines from RSS sources and processes them through the scorer.
+- **Tracking**: Maintains `usedHeadlines` and `rejectedHeadlines` arrays to prevent repetition.
+- **Fallback**: Provides mock headlines if RSS fetching fails or no valid headlines are found.
+
+## Crossword Grid Generation (`crossword-engine.js`)
+
+The engine uses a stochastic, score-based algorithm to arrange selected words into a compact crossword layout.
+
+### 1. Generation Process
+- **Attempts**: Performs up to 50 attempts per headline to find the optimal layout.
+- **Placement**: Starts with a seed word and iteratively places remaining words perpendicularly at shared letter intersections.
+- **Validation**: Each placement must pass strict crossword rules:
+    - **Connectivity**: All words must form a single connected component.
+    - **Single Intersection**: Words can share exactly one letter; multiple intersections are forbidden.
+    - **Spacing**: Parallel words must have a 1-square gap; end-to-end touching is prohibited.
+
+### 2. Scoring and Optimization
+The engine evaluates valid layouts using a "lower is better" score:
+- **Compactness**: Penalizes large grid areas and high aspect ratios (prefers squares).
+- **Intersections**: Rewards layouts with more shared letters and multi-crossing words.
+
+### 3. Fallback and Normalization
+- **Fallback Mechanism**: If the engine fails to find a valid interconnected layout after 50 attempts, it triggers `generateSimpleLayout`.
+- **Word Loss**: The simple layout generator prioritizes grid validity over completeness. If it cannot find valid, non-conflicting spots for all words, it may return a layout containing only a subset of the original headline words (e.g., 3 words instead of 5).
+- **Normalization**: Final coordinates are shifted to a (0,0) origin with padding for UI rendering.
+
 ## Modular Architecture
 
 ### Module Organization
