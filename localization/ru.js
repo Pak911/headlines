@@ -52,13 +52,13 @@ const ru = {
             perfect: "🏆 Идеально! Вы достигли максимального рейтинга в 5 звезд!",
             earned: {
                 one: "🌟 Вы заработали 1 звезду, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезды, завершив за {threshold} {thresholdWord} или меньше",
-                few: "🌟 Вы заработали {stars} звезды, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} {thresholdWord} или меньше",
+                few: "🌟 Вы заработали {stars} звезды, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезды, завершив за {threshold} {thresholdWord} или меньше",
                 many: "🌟 Вы заработали {stars} звезд, завершив за {swaps} {swapsWord}!<br>⭐ Получите {nextStars} звезд, завершив за {threshold} {thresholdWord} или меньше"
             },
             getStars: {
-                one: "⭐ Получите 1 звезду, завершив головоломку за {requiredSwaps} {requiredSwapsWord}",
-                few: "⭐ Получите {starIndex} звезды, завершив головоломку за {requiredSwaps} {requiredSwapsWord}",
-                many: "⭐ Получите {starIndex} звезд, завершив головоломку за {requiredSwaps} {requiredSwapsWord}"
+                one: "⭐ Получите 1 звезду, завершив головоломку за {requiredSwaps} {requiredSwapsWord} или меньше",
+                few: "⭐ Получите {starIndex} звезды, завершив головоломку за {requiredSwaps} {requiredSwapsWord} или меньше",
+                many: "⭐ Получите {starIndex} звезд, завершив головоломку за {requiredSwaps} {requiredSwapsWord} или меньше"
             },
             getOneStar: "⭐ Получите {starIndex} звезду, завершив головоломку"
         }

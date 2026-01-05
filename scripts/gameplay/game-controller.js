@@ -66,30 +66,6 @@ function getStarThresholds(wordCount) {
     return thresholds;
 }
 
-// Helper function to get Russian plural form
-function getRussianPluralForm(number) {
-    const lastDigit = number % 10;
-    const lastTwoDigits = number % 100;
-    
-    // Special cases for 11-19
-    if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-        return 'many';
-    }
-    
-    // 1 - one form
-    if (lastDigit === 1) {
-        return 'one';
-    }
-    
-    // 2, 3, 4 - twoFour form
-    if (lastDigit >= 2 && lastDigit <= 4) {
-        return 'twoFour';
-    }
-    
-    // 5-9, 0 - many form
-    return 'many';
-}
-
 // Generate tooltip content for star hover
 function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
     const thresholds = getStarThresholds(wordCount);
@@ -100,20 +76,9 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
             return t('victory.tooltips.perfect');
         } else {
             const nextStarThreshold = thresholds[currentStars + 1];
-            const earnedTooltips = t('victory.tooltips.earned');
-            let tooltipText;
             
-            // Handle different languages - Russian has plural forms, English has default
-            if (typeof earnedTooltips === 'object' && earnedTooltips !== null) {
-                if (i18n.currentLanguage === 'ru') {
-                    const pluralForm = getRussianPluralForm(currentStars);
-                    tooltipText = earnedTooltips[pluralForm] || earnedTooltips.default || earnedTooltips.one;
-                } else {
-                    tooltipText = earnedTooltips.default || Object.values(earnedTooltips)[0];
-                }
-            } else {
-                tooltipText = earnedTooltips;
-            }
+            // Use t() with count parameter to handle pluralization correctly
+            let tooltipText = t('victory.tooltips.earned', currentStars);
             
             tooltipText = tooltipText.replace('{stars}', currentStars);
             tooltipText = tooltipText.replace('{swaps}', swapCount);
@@ -131,20 +96,8 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
             tooltipText = tooltipText.replace('{starIndex}', starIndex);
             return tooltipText;
         } else {
-            const getStarsTooltips = t('victory.tooltips.getStars');
-            let tooltipText;
-            
-            // Handle different languages - Russian has plural forms, English has default
-            if (typeof getStarsTooltips === 'object' && getStarsTooltips !== null) {
-                if (i18n.currentLanguage === 'ru') {
-                    const pluralForm = getRussianPluralForm(starIndex);
-                    tooltipText = getStarsTooltips[pluralForm] || getStarsTooltips.default || getStarsTooltips.one;
-                } else {
-                    tooltipText = getStarsTooltips.default || Object.values(getStarsTooltips)[0];
-                }
-            } else {
-                tooltipText = getStarsTooltips;
-            }
+            // Use t() with count parameter to handle pluralization correctly
+            let tooltipText = t('victory.tooltips.getStars', starIndex);
             
             tooltipText = tooltipText.replace('{starIndex}', starIndex);
             tooltipText = tooltipText.replace('{requiredSwaps}', requiredSwaps);
@@ -712,5 +665,8 @@ window.initGame = enhancedInitGame;
 window.checkVictory = checkVictory;
 window.showVictory = showVictory;
 window.displayHeadlineDescription = displayHeadlineDescription;
+window.generateTooltipContent = generateTooltipContent;
+window.getStarThresholds = getStarThresholds;
+window.calculateStarRating = calculateStarRating;
 
 })();

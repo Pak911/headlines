@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Pluralization Test</title>
+</head>
+<body>
+    <h1>Pluralization Test</h1>
+    <div id="output"></div>
+
+    <script src="../data.js"></script>
+    <script src="../localization/en.js"></script>
+    <script src="../localization/ru.js"></script>
+    <script src="../localization/i18n.js"></script>
+    <script src="../scripts/gameplay/game-controller.js"></script>
+
+    <script>
+        const output = document.getElementById('output');
+
+        function testPluralization() {
+            output.innerHTML = '<h2>Victory Modal Stat Labels:</h2>';
+            
+            // Mock values for tooltip construction (similar to game)
+            const mockSwapCount = 15; // Example swap count
+            const mockWordCount = 4; // Example word count
+            
+            i18n.currentLanguage = 'en';
+            output.innerHTML += '<p>English 1 swap: ' + t('victory.stats.swaps', 1) + '</p>';
+            output.innerHTML += '<p>English 2 swaps: ' + t('victory.stats.swaps', 2) + '</p>';
+            output.innerHTML += '<p>English 5 swaps: ' + t('victory.stats.swaps', 5) + '</p>';
+            
+            i18n.currentLanguage = 'ru';
+            output.innerHTML += '<p>Russian 1 ход: ' + t('victory.stats.swaps', 1) + '</p>';
+            output.innerHTML += '<p>Russian 2 хода: ' + t('victory.stats.swaps', 2) + '</p>';
+            output.innerHTML += '<p>Russian 5 ходов: ' + t('victory.stats.swaps', 5) + '</p>';
+            output.innerHTML += '<p>Russian 21 ход: ' + t('victory.stats.swaps', 21) + '</p>';
+
+            output.innerHTML += '<h2>Star Tooltip Templates (Using Real Game Functions):</h2>';
+            
+            // Test with realistic game scenarios
+            const scenarios = [
+                { currentStars: 3, swapCount: 15, wordCount: 4, label: "3-Star Game (15 swaps, 4 words)" },
+                { currentStars: 5, swapCount: 8, wordCount: 4, label: "5-Star Perfect Game (8 swaps, 4 words)" },
+                { currentStars: 2, swapCount: 25, wordCount: 4, label: "2-Star Game (25 swaps, 4 words)" }
+            ];
+            
+            scenarios.forEach(scenario => {
+                output.innerHTML += `<h3>${scenario.label}:</h3>`;
+                
+                i18n.currentLanguage = 'en';
+                output.innerHTML += '<h4>English:</h4>';
+                for (let starIndex = 1; starIndex <= 5; starIndex++) {
+                    const tooltip = generateTooltipContent(starIndex, scenario.currentStars, scenario.swapCount, scenario.wordCount);
+                    const status = starIndex <= scenario.currentStars ? 'achieved' : 'unachieved';
+                    output.innerHTML += `<p>Star ${starIndex} (${status}): ${tooltip}</p>`;
+                }
+                
+                i18n.currentLanguage = 'ru';
+                output.innerHTML += '<h4>Russian:</h4>';
+                for (let starIndex = 1; starIndex <= 5; starIndex++) {
+                    const tooltip = generateTooltipContent(starIndex, scenario.currentStars, scenario.swapCount, scenario.wordCount);
+                    const status = starIndex <= scenario.currentStars ? 'достигнута' : 'не достигнута';
+                    const starWord = starIndex === 1 ? 'звезда' : (starIndex >= 2 && starIndex <= 4 ? 'звезды' : 'звезд');
+                    output.innerHTML += `<p>${starIndex} ${starWord} (${status}): ${tooltip}</p>`;
+                }
+            });
+
+            output.innerHTML += '<h2>Moves Pluralization:</h2>';
+            
+            i18n.currentLanguage = 'en';
+            output.innerHTML += '<p>English 0 moves: ' + t('ui.moves', 0) + '</p>';
+            output.innerHTML += '<p>English 1 move: ' + t('ui.moves', 1) + '</p>';
+            output.innerHTML += '<p>English 2 moves: ' + t('ui.moves', 2) + '</p>';
+            output.innerHTML += '<p>English 5 moves: ' + t('ui.moves', 5) + '</p>';
+
+            i18n.currentLanguage = 'ru';
+            output.innerHTML += '<p>Russian 0 ходов: ' + t('ui.moves', 0) + '</p>';
+            output.innerHTML += '<p>Russian 1 ход: ' + t('ui.moves', 1) + '</p>';
+            output.innerHTML += '<p>Russian 2 хода: ' + t('ui.moves', 2) + '</p>';
+            output.innerHTML += '<p>Russian 5 ходов: ' + t('ui.moves', 5) + '</p>';
+            output.innerHTML += '<p>Russian 21 ход: ' + t('ui.moves', 21) + '</p>';
+            // Test edge cases
+            output.innerHTML += '<h2>Edge Cases:</h2>';
+            output.innerHTML += '<p>Russian 11 (many): ' + t('ui.moves', 11) + '</p>';
+            output.innerHTML += '<p>Russian 12 (many): ' + t('ui.moves', 12) + '</p>';
+            output.innerHTML += '<p>Russian 14 (many): ' + t('ui.moves', 14) + '</p>';
+            output.innerHTML += '<p>Russian 15 (many): ' + t('ui.moves', 15) + '</p>';
+        }
+
+        // Wait for scripts to load
+        setTimeout(testPluralization, 100);
+    </script>
+</body>
+</html>
