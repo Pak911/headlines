@@ -14,7 +14,7 @@ const ru = {
             few: "хода",
             many: "ходов"
         },
-        nextHeadline: "Следующий заголовок",
+        nextHeadline: "Сдаться",
         replay: "Играть снова",
         readFullArticle: "Читать статью полностью",
         newHeadline: "Дальше"
@@ -23,7 +23,7 @@ const ru = {
     // Color legend
     legend: {
         correct: "Верная позиция",
-        wrongPosition: "Неверная позиции",
+        wrongPosition: "Неверная позиция",
         connectedWord: "В соседнем слове",
         otherWord: "В другом слове"
     },
