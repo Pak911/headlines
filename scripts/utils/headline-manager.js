@@ -1,6 +1,9 @@
 // Enhanced Headline Manager - Advanced headline selection with scoring and pool management
 // Integrates with HeadlineScorer and AsyncRSSFetcher for intelligent headline management
 
+(function() {
+'use strict';
+
 // Helper function to use flog from debug.js
 function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
@@ -284,8 +287,14 @@ if (typeof window !== 'undefined') {
         getDetailedPoolInfo
     };
     
-    // Also export individual functions to global scope for debug panel
+    // Also export individual functions to global scope for debug panel and other files
+    window.initializeHeadlineManagement = initializeHeadlineManagement;
+    window.getNextHeadline = getNextHeadline;
+    window.markHeadlineAsUsed = markHeadlineAsUsed;
+    window.markHeadlineAsRejected = markHeadlineAsRejected;
     window.getPoolStatistics = getPoolStatistics;
     window.getDetailedPoolInfo = getDetailedPoolInfo;
     window.refreshHeadlinePools = refreshHeadlinePools;
 }
+
+})();

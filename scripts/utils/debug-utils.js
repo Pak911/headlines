@@ -1,6 +1,9 @@
 // Debug Utils - Debug Panel and Development Tools
 // Handles debug information display, grid state analysis, and development utilities
 
+(function() {
+'use strict';
+
 // Debug state
 let debugInfo = {
     layoutAttempts: 0,
@@ -19,9 +22,14 @@ let debugInfo = {
 };
 let debugPanelVisible = false;
 
+// Expose debugInfo globally so other files can access it
+window.debugInfo = debugInfo;
+window.debugPanelVisible = debugPanelVisible;
+
 // Debug Functions
 function toggleDebugPanel() {
     debugPanelVisible = !debugPanelVisible;
+    window.debugPanelVisible = debugPanelVisible; // Keep global in sync
     const panel = document.getElementById('debugPanel');
     panel.style.display = debugPanelVisible ? 'block' : 'none';
     
@@ -45,9 +53,7 @@ function updateDebugInfo() {
     document.getElementById('debugLayoutInfo').innerHTML = `
         <strong>Generation Time:</strong> ${debugInfo.generationTime}ms<br>
         <strong>Layout Attempts:</strong> ${debugInfo.layoutAttempts}<br>
-        <strong>Words Placed:</strong> ${crosswordLayout ? crosswordLayout.words.length : 0}/${currentHeadline.words.length}<br>
-        <strong>Connected:</strong> <span class="${crosswordLayout && isLayoutConnected(crosswordLayout, currentHeadline.words) ? 'success' : 'error'}">${crosswordLayout && isLayoutConnected(crosswordLayout, currentHeadline.words) ? 'Yes' : 'No'}</span><br>
-        <strong>Proper Spacing:</strong> <span class="${crosswordLayout && hasProperParallelSpacing(crosswordLayout, currentHeadline.words) ? 'success' : 'error'}">${crosswordLayout && hasProperParallelSpacing(crosswordLayout, currentHeadline.words) ? 'Yes' : 'No'}</span>
+        <strong>Words Placed:</strong> ${crosswordLayout ? crosswordLayout.words.length : 0}/${currentHeadline.words.length}
     `;
     
     // Update shuffle/difficulty info
@@ -567,3 +573,9 @@ window.__cosic.flog = function(prefix, messageOrArgs, opts) {
         }
     } catch (e) { /* noop */ }
 };
+
+// Expose debug functions globally
+window.toggleDebugPanel = toggleDebugPanel;
+window.updateDebugInfo = updateDebugInfo;
+
+})();

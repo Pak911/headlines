@@ -1,6 +1,19 @@
 // Color Logic - Letter Color Determination
 // Handles Wordle-style color coding for letters in crossword cells
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('color-logic', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[color-logic]', message);
+    }
+}
+
 // Universal color determination functions that work with any compatible grid structure
 function getLetterColorClass(row, col, gridData = null, connectionsData = null) {
     const targetGrid = gridData || grid;
@@ -185,3 +198,9 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
     // STEP 4: Letter doesn't belong to target word or connected words
     return 'wrong-word';
 }
+
+// Expose functions globally
+window.getLetterColorClass = getLetterColorClass;
+window.getLetterColorClassAdvanced = getLetterColorClassAdvanced;
+
+})();

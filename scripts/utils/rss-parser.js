@@ -3,6 +3,9 @@
  * Fetches and processes RSS feeds to extract headlines suitable for the game
  */
 
+(function() {
+'use strict';
+
 // Helper function to use flog from debug.js
 function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
@@ -341,3 +344,5 @@ if (typeof window !== 'undefined') {
         processCommersantHeadline
     };
 }
+
+})();

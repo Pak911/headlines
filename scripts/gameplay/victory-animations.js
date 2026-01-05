@@ -1,6 +1,19 @@
 // Victory Animations - Game Field Animations for Victory Moment
 // Plays animations on the crossword grid when all letters are correctly placed
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('victory-animations', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[victory-animations]', message);
+    }
+}
+
 /**
  * Play victory animation on the crossword grid
  * Called when all letters turn green but before victory modal appears
@@ -228,3 +241,5 @@ function playShakeAnimation(filledCells) {
 
 // Make function globally available
 window.playVictoryAnimation = playVictoryAnimation;
+
+})();

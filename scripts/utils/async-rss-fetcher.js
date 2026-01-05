@@ -3,6 +3,9 @@
  * Implements smart loading strategies and graceful degradation
  */
 
+(function() {
+'use strict';
+
 // Helper function to use flog from debug.js
 function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
@@ -437,3 +440,5 @@ if (typeof window !== 'undefined') {
         CACHE_DURATION
     };
 }
+
+})();

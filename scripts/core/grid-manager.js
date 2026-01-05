@@ -1,6 +1,19 @@
 // Grid Manager - Grid Creation and Word Placement
 // Handles grid data structure and word placement logic
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('grid-manager', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[grid-manager]', message);
+    }
+}
+
 function createGrid() {
     const newGrid = [];
     for (let r = 0; r < gridSize.rows; r++) {
@@ -126,3 +139,11 @@ function countCorrectCells() {
     
     return { totalCells, correctCells, percentage: totalCells > 0 ? (correctCells / totalCells) * 100 : 0 };
 }
+
+// Expose functions globally
+window.placeWordsInGrid = placeWordsInGrid;
+window.findWordConnections = findWordConnections;
+window.getIntersectionCells = getIntersectionCells;
+window.countCorrectCells = countCorrectCells;
+
+})();

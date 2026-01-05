@@ -1,6 +1,19 @@
 // Difficulty System - Letter Scrambling and Difficulty Management
 // Handles strategic letter scrambling with configurable difficulty constraints
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('difficulty-system', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[difficulty-system]', message);
+    }
+}
+
 // Perform a strategic swap between two positions
 function performStrategicSwap(pos1, pos2, swapLog) {
     const temp = grid[pos1.row][pos1.col].currentLetter;
@@ -64,8 +77,8 @@ function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
     
     // Get initial stats for logging
     const initialStats = countCorrectCells();
-    console.log(`Starting scramble - Initial: ${initialStats.correctCells}/${initialStats.totalCells} correct (${initialStats.percentage.toFixed(1)}% green)`);
-    console.log(`Target: ${targetGreenPercentage}% green letters for ${settings.name} difficulty`);
+    _log(`Starting scramble - Initial: ${initialStats.correctCells}/${initialStats.totalCells} correct (${initialStats.percentage.toFixed(1)}% green)`);
+    _log(`Target: ${targetGreenPercentage}% green letters for ${settings.name} difficulty`);
     
     switch (difficulty) {
         case 'easy':
@@ -83,8 +96,8 @@ function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
     
     // Get final stats for logging
     const finalStats = countCorrectCells();
-    console.log(`Scramble complete - Final: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}% green)`);
-    console.log(`Performed ${swapsPerformed} swaps to achieve target difficulty`);
+    _log(`Scramble complete - Final: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}% green)`);
+    _log(`Performed ${swapsPerformed} swaps to achieve target difficulty`);
     
     // Update debug info
     debugInfo.shuffleInfo.swapsPerformed = swapsPerformed;
@@ -190,7 +203,7 @@ function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage,
     // Check if target was achieved, if not restore best state
     const finalStats = countCorrectCells();
     if (finalStats.percentage > maxGreenPercentage && bestPercentage < finalStats.percentage) {
-        console.log(`Target ${maxGreenPercentage}% not achieved (current: ${finalStats.percentage.toFixed(1)}%). Restoring best state with ${bestPercentage.toFixed(1)}% green.`);
+        _log(`Target ${maxGreenPercentage}% not achieved (current: ${finalStats.percentage.toFixed(1)}%). Restoring best state with ${bestPercentage.toFixed(1)}% green.`);
         restoreGridState(bestState);
         // Clear and restore the swap log to match the best state
         swapLog.length = 0;
@@ -351,3 +364,11 @@ function updateDifficultyDisplay() {
         `;
     }
 }
+
+// Expose functions globally
+window.scrambleLetters = scrambleLetters;
+window.scrambleLettersByDifficulty = scrambleLettersByDifficulty;
+window.changeDifficulty = changeDifficulty;
+window.updateDifficultyDisplay = updateDifficultyDisplay;
+
+})();

@@ -1,6 +1,19 @@
 // Game Controller - Main Game Flow and State Management
 // Handles game initialization, victory conditions, and overall game state
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('game-controller', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[game-controller]', message);
+    }
+}
+
 // Normalize Russian Ё to Е for crossword algorithm (32-letter alphabet)
 function normalizeRussianWords(words) {
     return words.map(word => word.replace(/Ё/g, 'Е').replace(/ё/g, 'е'));
@@ -322,7 +335,7 @@ function replayGame() {
     // Re-render the crossword
     renderCrossword();
     
-    console.log('🔄 Replaying the same puzzle');
+    _log('🔄 Replaying the same puzzle');
 }
 
 // Make functions globally available
@@ -398,7 +411,7 @@ async function enhancedInitGame() {
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
     
-    console.log('🎮 Starting enhanced game initialization...');
+    _log('🎮 Starting enhanced game initialization...');
     
     try {
         // Initialize the enhanced headline management system
@@ -423,7 +436,7 @@ async function enhancedInitGame() {
             // Normalize Russian Ё → Е for crossword algorithm
             const normalizedWords = normalizeRussianWords(wordsToUse);
             
-            console.log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${normalizedWords.length} words)`);
+            _log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${normalizedWords.length} words)`);
             
             // Generate crossword layout
             crosswordLayout = generateCrosswordLayout(normalizedWords);
@@ -433,7 +446,7 @@ async function enhancedInitGame() {
             if (crosswordLayout !== null) {
                 debugInfo.layoutScore = 'Generated';
                 markHeadlineAsUsed(currentHeadline);
-                console.log(`✅ Successfully generated layout for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                _log(`✅ Successfully generated layout for: "${currentHeadline.filteredText || currentHeadline.text}"`);
                 
                 // Update currentHeadline to use normalized filtered words for the game
                 if (currentHeadline.filteredWords) {
@@ -449,7 +462,7 @@ async function enhancedInitGame() {
                 // Mark as rejected and try next headline
                 markHeadlineAsRejected(currentHeadline);
                 debugInfo.rejectedHeadlines.push(currentHeadline.filteredText || currentHeadline.text);
-                console.log(`❌ Layout generation failed for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                _log(`❌ Layout generation failed for: "${currentHeadline.filteredText || currentHeadline.text}"`);
             }
             
             captionAttempts++;
@@ -457,7 +470,7 @@ async function enhancedInitGame() {
         
         // If we still don't have a valid layout after trying multiple headlines
         if (crosswordLayout === null) {
-            console.log(`⚠️ Failed to generate valid layout after ${captionAttempts} attempts. Trying simple layout...`);
+            _log(`⚠️ Failed to generate valid layout after ${captionAttempts} attempts. Trying simple layout...`);
             
             if (currentHeadline) {
                 const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
@@ -468,7 +481,7 @@ async function enhancedInitGame() {
                     normalizeLayout(crosswordLayout, normalizedWords);
                     debugInfo.layoutScore = 'Simple layout';
                     markHeadlineAsUsed(currentHeadline);
-                    console.log(`✅ Simple layout succeeded for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                    _log(`✅ Simple layout succeeded for: "${currentHeadline.filteredText || currentHeadline.text}"`);
                     
                     // Update currentHeadline to use normalized words
                     if (currentHeadline.filteredWords) {
@@ -501,7 +514,7 @@ async function enhancedInitGame() {
         console.error('❌ Error in enhanced game initialization:', error);
         
         // Emergency fallback to old system
-        console.log('🔄 Falling back to legacy headline system');
+        _log('🔄 Falling back to legacy headline system');
         currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
         const normalizedWords = normalizeRussianWords(currentHeadline.words);
         crosswordLayout = generateCrosswordLayout(normalizedWords);
@@ -536,7 +549,7 @@ async function enhancedInitGame() {
     // Calculate generation time
     debugInfo.generationTime = Math.round(performance.now() - startTime);
     
-    console.log(`🎮 Game initialization completed in ${debugInfo.generationTime}ms`);
+    _log(`🎮 Game initialization completed in ${debugInfo.generationTime}ms`);
     
     // Update debug panel if visible
     if (debugPanelVisible) {
@@ -572,9 +585,9 @@ function displayHeadlineDescription() {
         if (typeof window !== 'undefined' && window.HTMLProcessor) {
             // Check if description contains HTML
             if (window.HTMLProcessor.detectHTML(currentHeadline.description)) {
-                console.log('🔧 Processing HTML in description:', currentHeadline.description.substring(0, 100) + '...');
+                _log('🔧 Processing HTML in description:', currentHeadline.description.substring(0, 100) + '...');
                 cleanDescription = window.HTMLProcessor.stripHTML(currentHeadline.description);
-                console.log('✅ Clean description:', cleanDescription.substring(0, 100) + '...');
+                _log('✅ Clean description:', cleanDescription.substring(0, 100) + '...');
             }
         }
         
@@ -621,11 +634,11 @@ function displayHeadlineDescription() {
 // Auto-win function for debug purposes
 function autoWinGame() {
     if (!currentHeadline || !grid) {
-        console.log('❌ No active game to auto-win');
+        _log('❌ No active game to auto-win');
         return;
     }
     
-    console.log('🏆 Auto-winning game...');
+    _log('🏆 Auto-winning game...');
     
     // Set all letters to their correct positions
     for (let r = 0; r < grid.length; r++) {
@@ -642,7 +655,7 @@ function autoWinGame() {
     // Show victory
     showVictory();
     
-    console.log('✅ Auto-win completed!');
+    _log('✅ Auto-win completed!');
 }
 
 // Make auto-win function globally available
@@ -650,3 +663,10 @@ window.autoWinGame = autoWinGame;
 
 // Replace the original initGame with enhanced version
 window.initGame = enhancedInitGame;
+
+// Expose functions needed by other files
+window.checkVictory = checkVictory;
+window.showVictory = showVictory;
+window.displayHeadlineDescription = displayHeadlineDescription;
+
+})();

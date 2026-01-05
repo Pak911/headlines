@@ -1,6 +1,19 @@
 // UI Interactions - Cell Selection, Swapping, and Rendering
 // Handles user interface interactions and visual feedback
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('ui-interactions', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[ui-interactions]', message);
+    }
+}
+
 // Store the last swap positions for victory animation
 let lastSwapPositions = null;
 
@@ -273,5 +286,8 @@ function resetCompletedWords() {
     completedWords.clear();
 }
 
-// Make function globally available
+// Make functions globally available
+window.renderCrossword = renderCrossword;
 window.resetCompletedWords = resetCompletedWords;
+
+})();

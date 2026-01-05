@@ -2,6 +2,19 @@
 // Three-phase algorithm: Matchmaker → Backbone → Beam Search Fill
 // Ported from crossword-generator_1.html
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('crossword-engine', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[crossword-engine]', message);
+    }
+}
+
 // Get configuration from data.js
 function getCrosswordConfig() {
     if (typeof crosswordEngineConfig !== 'undefined') {
@@ -462,14 +475,14 @@ function generateCrosswordLayout(words) {
     // Phase 1: Find best pairs
     const pairs = findBestPairs(words, config);
     if (pairs.length === 0) {
-        console.log('No valid word pairs found');
+        _log('No valid word pairs found');
         return null;
     }
     
     // Phase 2: Generate backbones
     const backbones = generateBackbones(pairs, words, config);
     if (backbones.length === 0) {
-        console.log('No valid backbones generated');
+        _log('No valid backbones generated');
         return null;
     }
     
@@ -485,7 +498,7 @@ function generateCrosswordLayout(words) {
     }
     
     if (finalResults.length === 0) {
-        console.log('No complete crosswords generated');
+        _log('No complete crosswords generated');
         return null;
     }
     
@@ -495,7 +508,7 @@ function generateCrosswordLayout(words) {
     
     // Check if all words were used
     if (bestResult.usedCount < words.length) {
-        console.log(`Only ${bestResult.usedCount}/${words.length} words used - layout incomplete`);
+        _log(`Only ${bestResult.usedCount}/${words.length} words used - layout incomplete`);
         return null;
     }
     
@@ -518,19 +531,19 @@ function generateCrosswordLayout(words) {
     }
     
     const elapsedTime = Math.round(performance.now() - startTime);
-    console.log(`✅ Crossword generated in ${elapsedTime}ms (${bestResult.usedCount}/${words.length} words, score: ${Math.round(bestResult.finalScore)})`);
+    _log(`✅ Crossword generated in ${elapsedTime}ms (${bestResult.usedCount}/${words.length} words, score: ${Math.round(bestResult.finalScore)})`);
     
     return layout;
 }
 
 // Fallback function for compatibility
 function generateSimpleLayout(words) {
-    console.log('generateSimpleLayout called - using main algorithm instead');
+    _log('generateSimpleLayout called - using main algorithm instead');
     const result = generateCrosswordLayout(words);
     
     // If main algorithm fails, create minimal valid layout
     if (!result && words.length > 0) {
-        console.log('⚠️ Main algorithm failed, creating minimal layout');
+        _log('⚠️ Main algorithm failed, creating minimal layout');
         const layout = {
             words: words.map((word, idx) => ({
                 word: idx,
@@ -560,3 +573,10 @@ function normalizeLayout(layout, words) {
     // Already normalized in the new algorithm
     return layout;
 }
+
+// Expose functions globally
+window.generateCrosswordLayout = generateCrosswordLayout;
+window.generateSimpleLayout = generateSimpleLayout;
+window.normalizeLayout = normalizeLayout;
+
+})();

@@ -1,6 +1,19 @@
 // Localization Manager
 // Handles language detection, storage, and translation
 
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('i18n', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[i18n]', message);
+    }
+}
+
 class LocalizationManager {
     constructor() {
         this.languages = {
@@ -91,7 +104,7 @@ class LocalizationManager {
             // Refresh headline management system if RSS language is set to auto
             if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'auto') {
                 if (typeof window !== 'undefined' && window.HeadlineManager) {
-                    console.log(`🔄 Refreshing headlines for language change to: ${lang}`);
+                    _log(`🔄 Refreshing headlines for language change to: ${lang}`);
                     // Clear headline cache and reinitialize
                     if (typeof headlineCache !== 'undefined') {
                         headlineCache.clear();
@@ -155,3 +168,5 @@ if (typeof window !== 'undefined') {
     window.t = t;
     window.setLanguage = setLanguage;
 }
+
+})();

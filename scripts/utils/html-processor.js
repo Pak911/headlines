@@ -3,6 +3,9 @@
  * Enhanced HTML detection, stripping, and text extraction utilities
  */
 
+(function() {
+'use strict';
+
 // Helper function to use flog from debug.js
 function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
@@ -278,3 +281,5 @@ if (typeof window !== 'undefined') {
     window.processRSSContent = processRSSContent;
     window.testHTMLProcessor = testWithExample;
 }
+
+})();
