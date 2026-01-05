@@ -57,6 +57,110 @@ function restoreGridState(state) {
     }
 }
 
+// Get all cells that belong to a specific word
+function getWordCells(wordIndex) {
+    const cells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                cells.push({row: r, col: c});
+            }
+        }
+    }
+    return cells;
+}
+
+// Adjust intersection letters to match target green percentage
+function adjustIntersectionGreenPercentage(intersections, targetPercentage) {
+    if (intersections.length === 0) return;
+    
+    // Count current green intersections
+    let greenIntersections = [];
+    let wrongIntersections = [];
+    
+    for (let intersection of intersections) {
+        const cell = grid[intersection.row][intersection.col];
+        if (cell.letter === cell.currentLetter) {
+            greenIntersections.push(intersection);
+        } else {
+            wrongIntersections.push(intersection);
+        }
+    }
+    
+    const currentGreenCount = greenIntersections.length;
+    const targetGreenCount = Math.round(intersections.length * targetPercentage / 100);
+    
+    _log(`Intersection adjustment: ${currentGreenCount}/${intersections.length} green (${(currentGreenCount/intersections.length*100).toFixed(1)}%), target: ${targetGreenCount} (${targetPercentage}%)`);
+    
+    // If we need MORE green intersections
+    if (currentGreenCount < targetGreenCount) {
+        const needed = targetGreenCount - currentGreenCount;
+        _log(`Need to correct ${needed} intersections`);
+        
+        // Get all non-intersection wrong cells to swap with
+        const nonIntersectionWrongCells = [];
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                const cell = grid[r][c];
+                if (cell.letter && cell.letter !== cell.currentLetter && cell.wordIndices.length === 1) {
+                    nonIntersectionWrongCells.push({row: r, col: c});
+                }
+            }
+        }
+        
+        // Fix wrong intersections by swapping with non-intersection cells that have their correct letter
+        for (let i = 0; i < Math.min(needed, wrongIntersections.length); i++) {
+            const intersection = wrongIntersections[i];
+            const correctLetter = grid[intersection.row][intersection.col].letter;
+            
+            // Find a non-intersection cell that currently has this correct letter
+            const swapCandidate = nonIntersectionWrongCells.find(pos => 
+                grid[pos.row][pos.col].currentLetter === correctLetter
+            );
+            
+            if (swapCandidate) {
+                // Swap the intersection's wrong letter with the non-intersection's correct letter
+                const temp = grid[intersection.row][intersection.col].currentLetter;
+                grid[intersection.row][intersection.col].currentLetter = grid[swapCandidate.row][swapCandidate.col].currentLetter;
+                grid[swapCandidate.row][swapCandidate.col].currentLetter = temp;
+                _log(`  ✓ Corrected intersection at (${intersection.row},${intersection.col})`);
+            }
+        }
+    }
+    // If we need FEWER green intersections
+    else if (currentGreenCount > targetGreenCount) {
+        const excess = currentGreenCount - targetGreenCount;
+        _log(`Need to scramble ${excess} intersections`);
+        
+        // Get all non-intersection cells
+        const nonIntersectionCells = [];
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                const cell = grid[r][c];
+                if (cell.letter && cell.wordIndices.length === 1) {
+                    nonIntersectionCells.push({row: r, col: c});
+                }
+            }
+        }
+        
+        // Scramble some green intersections by swapping with non-intersection cells
+        for (let i = 0; i < Math.min(excess, greenIntersections.length); i++) {
+            const intersection = greenIntersections[i];
+            const swapCandidate = nonIntersectionCells[Math.floor(Math.random() * nonIntersectionCells.length)];
+            
+            if (swapCandidate) {
+                // Swap to make intersection wrong
+                const temp = grid[intersection.row][intersection.col].currentLetter;
+                grid[intersection.row][intersection.col].currentLetter = grid[swapCandidate.row][swapCandidate.col].currentLetter;
+                grid[swapCandidate.row][swapCandidate.col].currentLetter = temp;
+                _log(`  ✓ Scrambled intersection at (${intersection.row},${intersection.col})`);
+            }
+        }
+    } else {
+        _log(`Intersections already at target percentage`);
+    }
+}
+
 // Difficulty-based scrambling function with green letter percentage constraints
 function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
     const intersections = getIntersectionCells();
@@ -71,6 +175,12 @@ function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
         intersectionsPreserved: 0,
         totalIntersections: intersections.length
     };
+    
+    // Validate difficulty setting exists
+    if (!difficultySettings || !difficultySettings[difficulty]) {
+        _log(`⚠️ Invalid difficulty "${difficulty}", falling back to "hard"`, {error: true});
+        difficulty = 'hard';
+    }
     
     const settings = difficultySettings[difficulty];
     const targetGreenPercentage = settings.maxGreenPercentage;
@@ -98,6 +208,11 @@ function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
     const finalStats = countCorrectCells();
     _log(`Scramble complete - Final: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}% green)`);
     _log(`Performed ${swapsPerformed} swaps to achieve target difficulty`);
+    
+    // Adjust intersections to match target percentage (except for Easy mode which handles its own)
+    if (difficulty !== 'easy' && settings.intersectionGreenPercentage !== undefined) {
+        adjustIntersectionGreenPercentage(intersections, settings.intersectionGreenPercentage);
+    }
     
     // Update debug info
     debugInfo.shuffleInfo.swapsPerformed = swapsPerformed;

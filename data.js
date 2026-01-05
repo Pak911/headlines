@@ -92,38 +92,48 @@ const headlineScoringConfig = {
 };
 
 // Difficulty system configuration
-let currentDifficulty = 'hard'; // Default difficulty - hardest level with big hint (description)
+let currentDifficulty = 'medium'; // Default difficulty - hardest level with big hint (description)
 
+// Difficulty Settings:
+// - minSwaps: Minimum number of swaps to ensure puzzle complexity
+// - maxSwaps: Hard limit (60) - algorithm stops here even if maxGreenPercentage not reached, but usually stops earlier when target is achieved
+// - maxGreenPercentage: Target percentage of correct (green) letters after scrambling
+// - intersectionGreenPercentage: Target percentage of crossroad/intersection letters that should remain correct (green)
 const difficultySettings = {
     easy: { 
         name: 'Easy - Word Shuffle Only', 
         minSwaps: 2, 
-        maxSwaps: 6, 
-        maxGreenPercentage: 100 // No constraint for easy
+        maxSwaps: 60, 
+        maxGreenPercentage: 100, // No constraint for easy
+        intersectionGreenPercentage: 100 // All intersections stay correct
     },
     mediumEasy: { 
         name: 'Medium-Easy - 40% Green Max', 
         minSwaps: 3, 
-        maxSwaps: 8, 
-        maxGreenPercentage: 40 
+        maxSwaps: 60, 
+        maxGreenPercentage: 40,
+        intersectionGreenPercentage: 75 // Most intersections stay correct
     },
     medium: { 
         name: 'Medium - 30% Green Max', 
         minSwaps: 6, 
-        maxSwaps: 12, 
-        maxGreenPercentage: 30 
+        maxSwaps: 60, 
+        maxGreenPercentage: 30,
+        intersectionGreenPercentage: 50 // Half of intersections stay correct
     },
     mediumHard: { 
         name: 'Medium-Hard - 20% Green Max', 
         minSwaps: 8, 
-        maxSwaps: 16, 
-        maxGreenPercentage: 20 
+        maxSwaps: 60, 
+        maxGreenPercentage: 20,
+        intersectionGreenPercentage: 25 // Few intersections stay correct
     },
     hard: { 
         name: 'Hard - 15% Green Max', 
         minSwaps: 12, 
-        maxSwaps: 24, 
-        maxGreenPercentage: 15 
+        maxSwaps: 60, 
+        maxGreenPercentage: 15,
+        intersectionGreenPercentage: 0 // No intersections stay correct
     }
 };
 

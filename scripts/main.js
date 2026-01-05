@@ -105,10 +105,21 @@ function updateLocalizedText() {
     }
 }
 
+// Initialize difficulty selector with current difficulty from data.js
+function initDifficultySelector() {
+    if (typeof currentDifficulty !== 'undefined' && document.getElementById('difficultySelect')) {
+        const difficultySelect = document.getElementById('difficultySelect');
+        difficultySelect.value = currentDifficulty;
+    }
+}
+
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize language selector
     initLanguageSelector();
+    
+    // Initialize difficulty selector
+    initDifficultySelector();
     
     // Only initialize if we're on the main game page (not test page)
     if (document.getElementById('crosswordGrid')) {
