@@ -201,6 +201,6 @@ function getLetterColorForWord(row, col, targetWordIndex, gridData = null, conne
 
 // Expose functions globally
 window.getLetterColorClass = getLetterColorClass;
-window.getLetterColorClassAdvanced = getLetterColorClassAdvanced;
+window.getLetterColorForWord = getLetterColorForWord;
 
 })();

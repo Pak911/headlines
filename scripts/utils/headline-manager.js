@@ -275,6 +275,26 @@ function countCommonLetters(words1, words2) {
     return common;
 }
 
+// Helper function to find common letters between two words
+function findCommonLetters(word1, word2) {
+    const letters1 = word1.split('');
+    const letters2 = word2.split('');
+    const common = [];
+    
+    const used = new Set();
+    for (let i = 0; i < letters1.length; i++) {
+        for (let j = 0; j < letters2.length; j++) {
+            if (letters1[i] === letters2[j] && !used.has(j)) {
+                common.push(letters1[i]);
+                used.add(j);
+                break;
+            }
+        }
+    }
+    
+    return common;
+}
+
 // Export functions for use in other modules
 if (typeof window !== 'undefined') {
     window.HeadlineManager = {
@@ -295,6 +315,7 @@ if (typeof window !== 'undefined') {
     window.getPoolStatistics = getPoolStatistics;
     window.getDetailedPoolInfo = getDetailedPoolInfo;
     window.refreshHeadlinePools = refreshHeadlinePools;
+    window.generateAlternativeHeadlines = generateAlternativeHeadlines;
 }
 
 })();
