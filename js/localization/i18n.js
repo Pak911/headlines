@@ -22,7 +22,6 @@ class LocalizationManager {
         };
         this.defaultLanguage = 'en';
         this.currentLanguage = this.detectLanguage();
-        this.init();
     }
 
     // Detect browser language and map to supported languages
@@ -57,7 +56,7 @@ class LocalizationManager {
     // Initialize localization system
     async init() {
         // Check platform storage for saved language
-        if (typeof Platform !== 'undefined' && Platform.loadGameLanguage) {
+        if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.loadGameLanguage) {
             const savedLanguage = await Platform.loadGameLanguage();
             if (savedLanguage && this.languages[savedLanguage]) {
                 this.currentLanguage = savedLanguage;
