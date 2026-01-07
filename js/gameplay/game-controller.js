@@ -258,6 +258,18 @@ function showVictory() {
     // Add hover listeners for tooltips
     addStarHoverListeners(starCount, swapCount, wordCount);
     
+    // Save seen headline data (solved)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: true,
+            movesUsed: swapCount,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+    }
+    
     document.getElementById('victoryModal').style.display = 'flex';
 }
 
@@ -685,7 +697,35 @@ function giveUp() {
     // Re-render the grid
     renderCrossword();
     
+    // Save seen headline data (gave up)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: false,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+    }
+    
     _log('✅ Solution revealed!');
+}
+
+// Skip to next headline function - saves as not solved
+function skipToNextHeadline() {
+    // Save seen headline data (skipped)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: false,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+    }
+    
+    // Start new game
+    initGame();
 }
 
 // Make auto-win function globally available
@@ -702,5 +742,6 @@ window.displayHeadlineDescription = displayHeadlineDescription;
 window.generateTooltipContent = generateTooltipContent;
 window.getStarThresholds = getStarThresholds;
 window.calculateStarRating = calculateStarRating;
+window.skipToNextHeadline = skipToNextHeadline;
 
 })();

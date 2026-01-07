@@ -335,6 +335,90 @@
         }
 
         /**
+         * Save seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSeenHeadline(hash, data) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save seen headline - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.saveSeenHeadline) {
+                console.warn('[Platform] saveSeenHeadline not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.saveSeenHeadline(hash, data);
+                if (result.success) {
+                    this._log(`Saved seen headline data for hash: ${hash}`);
+                }
+                return result;
+            } catch (err) {
+                console.error(`[Platform] saveSeenHeadline failed for hash "${hash}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @returns {Promise<Object|null>} Seen headline data or null if not found
+         */
+        async loadSeenHeadline(hash) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load seen headline - platform not initialized');
+                return null;
+            }
+
+            if (!this.currentPlatform.loadSeenHeadline) {
+                this._log(`loadSeenHeadline not supported on current platform for hash: ${hash}`);
+                return null;
+            }
+
+            try {
+                const data = await this.currentPlatform.loadSeenHeadline(hash);
+                if (data) {
+                    this._log(`Loaded seen headline data for hash: ${hash}`);
+                } else {
+                    this._log(`No seen headline data found for hash: ${hash}`);
+                }
+                return data;
+            } catch (err) {
+                console.error(`[Platform] loadSeenHeadline failed for hash "${hash}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Load all seen headlines data
+         * @returns {Promise<Object>} Object with all seen headlines data (hash -> data mapping)
+         */
+        async loadAllSeenHeadlines() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load seen headlines - platform not initialized');
+                return {};
+            }
+
+            if (!this.currentPlatform.loadAllSeenHeadlines) {
+                this._log('loadAllSeenHeadlines not supported on current platform');
+                return {};
+            }
+
+            try {
+                const data = await this.currentPlatform.loadAllSeenHeadlines();
+                this._log(`Loaded ${Object.keys(data).length} seen headlines`);
+                return data;
+            } catch (err) {
+                console.error('[Platform] loadAllSeenHeadlines failed:', err);
+                return {};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

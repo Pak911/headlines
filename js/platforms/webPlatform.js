@@ -187,6 +187,82 @@
         }
 
         /**
+         * Save seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSeenHeadline(hash, data) {
+            try {
+                // Load existing seen headlines
+                const allSeen = await this.loadAllSeenHeadlines();
+
+                // Update with new data
+                allSeen[hash] = {
+                    ...data,
+                    timestamp: data.timestamp || Date.now()
+                };
+
+                // Save back to localStorage
+                const json = JSON.stringify(allSeen);
+                localStorage.setItem('seenHeadlines', json);
+
+                this._log(`Saved seen headline data for hash: ${hash}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveSeenHeadline failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load seen headline data for a specific hash
+         * @param {string} hash - djb2 hash of the headline
+         * @returns {Promise<Object|null>} Seen headline data or null if not found
+         */
+        async loadSeenHeadline(hash) {
+            try {
+                const allSeen = await this.loadAllSeenHeadlines();
+                const data = allSeen[hash] || null;
+
+                if (data) {
+                    this._log(`Loaded seen headline data for hash: ${hash}`);
+                } else {
+                    this._log(`No seen headline data found for hash: ${hash}`);
+                }
+
+                return data;
+
+            } catch (err) {
+                console.error('[Web Platform] loadSeenHeadline failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Load all seen headlines data
+         * @returns {Promise<Object>} Object with all seen headlines data (hash -> data mapping)
+         */
+        async loadAllSeenHeadlines() {
+            try {
+                const json = localStorage.getItem('seenHeadlines');
+                if (!json) {
+                    this._log('No seen headlines data found');
+                    return {};
+                }
+
+                const data = JSON.parse(json);
+                this._log(`Loaded ${Object.keys(data).length} seen headlines`);
+                return data;
+
+            } catch (err) {
+                console.error('[Web Platform] loadAllSeenHeadlines failed:', err);
+                return {};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

@@ -33,30 +33,6 @@ const getRSSConfig = () => {
 };
 
 /**
- * Creates a djb2 hash for news content identification
- * @param {string} headline - The headline text
- * @param {string} description - The description text
- * @returns {string} Base36 encoded hash string
- */
-function createDjb2Hash(headline, description = '') {
-    // Normalize content: lowercase, remove punctuation, normalize whitespace
-    // Include Cyrillic characters in the allowed character set
-    const content = (headline + ' ' + description).toLowerCase()
-        .replace(/[^a-zа-яё0-9\s]/g, '') // Remove punctuation but keep letters and numbers
-        .replace(/\s+/g, ' ')   // Normalize whitespace
-        .trim();
-    
-    // djb2 hash algorithm
-    let hash = 5381;
-    for (let i = 0; i < content.length; i++) {
-        hash = ((hash << 5) + hash) + content.charCodeAt(i); // hash * 33 + char
-    }
-    
-    // Return positive hash as base36 string for shorter representation
-    return (hash >>> 0).toString(36);
-}
-
-/**
  * Fetches headlines from a single RSS source
  * @param {string} rssUrl - The RSS feed URL
  * @param {number} count - Number of articles to fetch (default: 10)
@@ -136,7 +112,7 @@ function processRSSItems(items, language = 'en') {
                 pubDate: item.pubDate || new Date().toISOString(),
                 originalTitle: item.title,
                 description: item.description || item.content || '',
-                djb2Hash: createDjb2Hash(cleanTitle, item.description || item.content || '')
+                djb2Hash: Utils.createDjb2Hash(cleanTitle, item.description || item.content || '')
             };
             
             processedHeadlines.push(headline);
