@@ -93,7 +93,7 @@ const headlineScoringConfig = {
 };
 
 // Difficulty system configuration
-let currentDifficulty = 'medium'; // Default difficulty - hardest level with big hint (description)
+let currentDifficulty = 'mediumHard'; // Default difficulty - hardest level with big hint (description)
 
 // Difficulty Settings:
 // - minSwaps: Minimum number of swaps to ensure puzzle complexity

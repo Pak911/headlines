@@ -268,6 +268,14 @@ function showVictory() {
         }).catch(err => {
             console.error('Failed to save seen headline data:', err);
         });
+
+        // Dispatch puzzle solved event
+        window.dispatchEvent(new CustomEvent('headlines:puzzle:solved', {
+            detail: {
+                puzzleHash: currentHeadline.djb2Hash,
+                puzzleLink: currentHeadline.link
+            }
+        }));
     }
     
     document.getElementById('victoryModal').style.display = 'flex';
@@ -622,7 +630,7 @@ function autoWinGame() {
 }
 
 // Give up function - reveals solution without victory modal
-function giveUp() {
+async function giveUp() {
     if (!currentHeadline || !grid) {
         _log('❌ No active game to give up');
         return;
@@ -644,6 +652,9 @@ function giveUp() {
     
     // Save seen headline data (gave up)
     if (currentHeadline && currentHeadline.djb2Hash) {
+        // Check if headline was already seen before saving
+        const wasAlreadySeen = await Platform.loadSeenHeadline(currentHeadline.djb2Hash);
+        
         Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
             isSolved: false,
             link: currentHeadline.link,
@@ -651,6 +662,16 @@ function giveUp() {
         }).catch(err => {
             console.error('Failed to save seen headline data:', err);
         });
+
+        // Dispatch puzzle skipped event only if not previously seen
+        if (!wasAlreadySeen) {
+            window.dispatchEvent(new CustomEvent('headlines:puzzle:skipped', {
+                detail: {
+                    puzzleHash: currentHeadline.djb2Hash,
+                    puzzleLink: currentHeadline.link
+                }
+            }));
+        }
     }
     
     _log('✅ Solution revealed!');
@@ -667,6 +688,9 @@ window.enhancedInitGame = enhancedInitGame;
 async function skipToNextHeadline() {
     // Save seen headline data (skipped)
     if (currentHeadline && currentHeadline.djb2Hash) {
+        // Check if headline was already seen before saving
+        const wasAlreadySeen = await Platform.loadSeenHeadline(currentHeadline.djb2Hash);
+        
         await Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
             isSolved: false,
             link: currentHeadline.link,
@@ -674,6 +698,16 @@ async function skipToNextHeadline() {
         }).catch(err => {
             console.error('Failed to save seen headline data:', err);
         });
+
+        // Dispatch puzzle skipped event only if not previously seen
+        if (!wasAlreadySeen) {
+            window.dispatchEvent(new CustomEvent('headlines:puzzle:skipped', {
+                detail: {
+                    puzzleHash: currentHeadline.djb2Hash,
+                    puzzleLink: currentHeadline.link
+                }
+            }));
+        }
     }
     
     // Start new game and wait for completion - call enhanced version directly

@@ -139,9 +139,9 @@
                     this._log('Initialized undoUsed counter to 0');
                 }
 
-                this._log('Dispatching cosmic:platform:ready event');
+                this._log('Dispatching headlines:platform:ready event');
                 // Dispatch event so other systems can wait for platform readiness
-                window.dispatchEvent(new CustomEvent('cosmic:platform:ready', {
+                window.dispatchEvent(new CustomEvent('headlines:platform:ready', {
                     detail: { platformType: this.platformType }
                 }));
                 this._log('Event dispatched');
@@ -265,31 +265,16 @@
             try {
                 await this.currentPlatform.save(key, data, immediate);
 
-                // Dispatch success event
-                window.dispatchEvent(new CustomEvent('cosmic:data:saved:success', {
-                    detail: { key, platform: this.platformType }
-                }));
-
                 return { success: true };
             } catch (err) {
                 // Check for specific network error
                 const errorType = err.message === 'NO_INTERNET_CONNECTION' ? 'no_internet_connection' : 'general_error';
-
-                // Dispatch error event
-                window.dispatchEvent(new CustomEvent('cosmic:data:saved:error', {
-                    detail: { key, error: err.message, errorType, platform: this.platformType }
-                }));
 
                 if (err.message === 'NO_INTERNET_CONNECTION') {
                     this._log(`[Platform] Save failed due to no internet connection for key "${key}"`);
                 } else {
                     console.error(`[Platform] Save failed for key "${key}":`, err);
                 }
-
-                // Dispatch event for future UI indicators
-                window.dispatchEvent(new CustomEvent('cosmic:save:failed', {
-                    detail: { key, error: err.message, platform: this.platformType }
-                }));
 
                 return { success: false, error: err };
             }
@@ -415,6 +400,110 @@
             } catch (err) {
                 console.error('[Platform] loadAllSeenHeadlines failed:', err);
                 return {};
+            }
+        }
+
+        /**
+         * Increment puzzle solved stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSolvedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment solved stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementPuzzleSolvedStat) {
+                console.warn('[Platform] incrementPuzzleSolvedStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementPuzzleSolvedStat();
+                if (result.success) {
+                    this._log('Puzzle solved stat incremented');
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementPuzzleSolvedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Increment puzzle skipped stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSkippedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment skipped stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementPuzzleSkippedStat) {
+                console.warn('[Platform] incrementPuzzleSkippedStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementPuzzleSkippedStat();
+                if (result.success) {
+                    this._log('Puzzle skipped stat incremented');
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementPuzzleSkippedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get puzzle solved stat
+         * @returns {Promise<number>} Current solved count (0 if not found)
+         */
+        async getPuzzleSolvedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get solved stat - platform not initialized');
+                return 0;
+            }
+
+            if (!this.currentPlatform.getPuzzleSolvedStat) {
+                this._log('getPuzzleSolvedStat not supported on current platform');
+                return 0;
+            }
+
+            try {
+                const count = await this.currentPlatform.getPuzzleSolvedStat();
+                this._log(`Retrieved puzzle solved stat: ${count}`);
+                return count || 0;
+            } catch (err) {
+                console.error('[Platform] getPuzzleSolvedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Get puzzle skipped stat
+         * @returns {Promise<number>} Current skipped count (0 if not found)
+         */
+        async getPuzzleSkippedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get skipped stat - platform not initialized');
+                return 0;
+            }
+
+            if (!this.currentPlatform.getPuzzleSkippedStat) {
+                this._log('getPuzzleSkippedStat not supported on current platform');
+                return 0;
+            }
+
+            try {
+                const count = await this.currentPlatform.getPuzzleSkippedStat();
+                this._log(`Retrieved puzzle skipped stat: ${count}`);
+                return count || 0;
+            } catch (err) {
+                console.error('[Platform] getPuzzleSkippedStat failed:', err);
+                return 0;
             }
         }
 

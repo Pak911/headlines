@@ -263,6 +263,80 @@
         }
 
         /**
+         * Increment puzzle solved stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSolvedStat() {
+            try {
+                const currentCount = await this.getPuzzleSolvedStat();
+                const newCount = currentCount + 1;
+                localStorage.setItem('headline_puzzleSolvedCount', newCount.toString());
+                this._log(`Incremented puzzle solved count to: ${newCount}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementPuzzleSolvedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Increment puzzle skipped stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSkippedStat() {
+            try {
+                const currentCount = await this.getPuzzleSkippedStat();
+                const newCount = currentCount + 1;
+                localStorage.setItem('headline_puzzleSkippedCount', newCount.toString());
+                this._log(`Incremented puzzle skipped count to: ${newCount}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementPuzzleSkippedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get puzzle solved stat
+         * @returns {Promise<number>} Current solved count (0 if not found)
+         */
+        async getPuzzleSolvedStat() {
+            try {
+                const stored = localStorage.getItem('headline_puzzleSolvedCount');
+                if (stored !== null) {
+                    const count = parseInt(stored, 10);
+                    if (!isNaN(count) && count >= 0) {
+                        return count;
+                    }
+                }
+                return 0;
+            } catch (err) {
+                console.error('[Web Platform] getPuzzleSolvedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Get puzzle skipped stat
+         * @returns {Promise<number>} Current skipped count (0 if not found)
+         */
+        async getPuzzleSkippedStat() {
+            try {
+                const stored = localStorage.getItem('headline_puzzleSkippedCount');
+                if (stored !== null) {
+                    const count = parseInt(stored, 10);
+                    if (!isNaN(count) && count >= 0) {
+                        return count;
+                    }
+                }
+                return 0;
+            } catch (err) {
+                console.error('[Web Platform] getPuzzleSkippedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */
