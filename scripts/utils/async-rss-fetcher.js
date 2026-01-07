@@ -208,7 +208,7 @@ async function fetchFromRSSSourcesSequentially() {
             _log(`📡 Starting fetch from source ${globalIndex + 1}/${currentRSSSources.length}: ${source.name}`);
 
             try {
-                const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource);
+                const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource, isRussian ? 'ru' : 'en');
 
                 if (headlines && headlines.length > 0) {
                     headlines.forEach(headline => {

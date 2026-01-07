@@ -36,13 +36,14 @@ const getRSSConfig = () => {
  * Fetches headlines from a single RSS source
  * @param {string} rssUrl - The RSS feed URL
  * @param {number} count - Number of articles to fetch (default: 10)
+ * @param {string} language - Language code ('en' or 'ru') for character validation
  * @returns {Promise<Array>} Array of processed headlines
  */
-async function fetchLatestHeadlines(rssUrl, count) {
+async function fetchLatestHeadlines(rssUrl, count, language = 'en') {
     const config = getRSSConfig();
     const defaultCount = count || config.defaultCount;
     try {
-        _log(`🔄 Fetching headlines from: ${rssUrl}`);
+        _log(`🔄 Fetching headlines from: ${rssUrl} (language: ${language})`);
         
         // Construct RSS2JSON API URL (without count parameter for better compatibility)
         const apiUrl = `${RSS_API_BASE}?rss_url=${encodeURIComponent(rssUrl)}`;
@@ -63,7 +64,7 @@ async function fetchLatestHeadlines(rssUrl, count) {
         _log(`✅ Successfully fetched ${data.items.length} items from RSS`);
         
         // Process and filter headlines
-        const processedHeadlines = processRSSItems(data.items);
+        const processedHeadlines = processRSSItems(data.items, language);
         
         _log(`📰 Processed ${processedHeadlines.length} valid headlines (4+ words)`);
         
@@ -80,7 +81,7 @@ async function fetchLatestHeadlines(rssUrl, count) {
  * @param {Array} items - Raw RSS items from API
  * @returns {Array} Processed headlines in game format
  */
-function processRSSItems(items) {
+function processRSSItems(items, language = 'en') {
     const processedHeadlines = [];
     
     for (const item of items) {
@@ -93,8 +94,8 @@ function processRSSItems(items) {
                 continue;
             }
             
-            // Split into words and filter
-            const words = extractWords(cleanTitle);
+            // Split into words and filter with language-specific validation
+            const words = extractWords(cleanTitle, language);
             
             // Only include headlines with 4+ words (game requirement)
             if (words.length < 4) {
@@ -181,12 +182,21 @@ function cleanHeadlineText(title) {
 
 /**
  * Extracts valid words from headline text
- * Supports both English and Russian text
+ * Supports both English and Russian text with language-specific validation
  * @param {string} text - Cleaned headline text
+ * @param {string} language - Language code ('en' or 'ru') for character validation
  * @returns {Array} Array of valid words
  */
-function extractWords(text) {
+function extractWords(text, language = 'en') {
     const config = getRSSConfig();
+    
+    // Define language-specific regex patterns
+    const regexPatterns = {
+        'en': /^[A-Z]+$/i,  // English letters only (case insensitive)
+        'ru': /^[А-ЯЁ]+$/i  // Russian letters only (case insensitive)
+    };
+    
+    const charRegex = regexPatterns[language] || regexPatterns['en']; // Default to English
     
     return text
         // Split on whitespace and common separators
@@ -196,17 +206,19 @@ function extractWords(text) {
             // Must be non-empty
             if (!word || word.length === 0) return false;
             
-            // Must contain only letters (allow both English and Russian)
-            if (!/^[A-ZА-ЯЁ]+$/.test(word)) return false;
+            // Must contain only letters for the specified language
+            if (!charRegex.test(word)) return false;
             
             // Must be at least minWordLengthForParsing characters
             if (word.length < config.minWordLengthForParsing) return false;
             
             // Avoid common non-content words that don't work well in crosswords
-            if (config.skipWordsInParsing.includes(word)) return false;
+            if (config.skipWordsInParsing.includes(word.toUpperCase())) return false;
             
             return true;
-        });
+        })
+        // Convert to uppercase for consistency
+        .map(word => word.toUpperCase());
 }
 
 /**
@@ -215,13 +227,13 @@ function extractWords(text) {
  * @param {number} countPerSource - Headlines to fetch per source
  * @returns {Promise<Array>} Combined array of headlines from all sources
  */
-async function fetchFromMultipleSources(sources, countPerSource = 5) {
-    _log(`🔄 Fetching from ${sources.length} RSS sources...`);
+async function fetchFromMultipleSources(sources, countPerSource = 5, language = 'en') {
+    _log(`🔄 Fetching from ${sources.length} RSS sources... (language: ${language})`);
     
     const allHeadlines = [];
     const fetchPromises = sources.map(async (source) => {
         try {
-            const headlines = await fetchLatestHeadlines(source.url, countPerSource);
+            const headlines = await fetchLatestHeadlines(source.url, countPerSource, language);
             // Add source information to each headline
             headlines.forEach(headline => {
                 headline.sourceName = source.name;
@@ -288,7 +300,7 @@ async function testSingleSource(sourceName) {
     }
     
     _log(`🧪 Testing source: ${source.name}`);
-    return await fetchLatestHeadlines(source.url);
+    return await fetchLatestHeadlines(source.url, 10, 'en');
 }
 
 /**
@@ -297,7 +309,7 @@ async function testSingleSource(sourceName) {
  */
 async function testAllSources() {
     _log(`🧪 Testing all ${rssNewsSources.length} RSS sources...`);
-    return await fetchFromMultipleSources(rssNewsSources, 3);
+    return await fetchFromMultipleSources(rssNewsSources, 3, 'en');
 }
 
 /**
