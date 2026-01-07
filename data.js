@@ -59,6 +59,7 @@ const headlineScoringConfig = {
     filteredWordPenalty: -1,    // Penalty for each filtered word (stop words, short words)
     wordCountPenalty: -1,       // Penalty for each word above/below ideal range
     noDescriptionPenalty: -999, // Severe penalty for headlines without description
+    alreadySeenPenalty: -500,   // Penalty for headlines already seen by the player
     
     // Stop words and trash words to exclude
     stopWords: [

@@ -44,9 +44,9 @@ const getStopWordsSet = () => {
 /**
  * Filters and scores a single headline based on crossword suitability
  * @param {Object} headline - Headline object with text and words properties
- * @returns {Object} Scored headline with filtering details
+ * @returns {Promise<Object>} Scored headline with filtering details
  */
-function scoreHeadline(headline) {
+async function scoreHeadline(headline) {
     const config = getConfig();
     const STOP_WORDS = getStopWordsSet();
     
@@ -93,6 +93,25 @@ function scoreHeadline(headline) {
     const filteredWords = [];
     const filterReasons = [];
     let score = 0;
+    
+    // Third check: Check if headline has been seen by the player
+    if (headline.djb2Hash && typeof Platform !== 'undefined' && Platform.loadSeenHeadline) {
+        try {
+            const seenData = await Platform.loadSeenHeadline(headline.djb2Hash);
+            if (seenData) {
+                filterReasons.push({
+                    word: null,
+                    reason: 'already_seen',
+                    description: 'Already seen by player'
+                });
+                score += config.alreadySeenPenalty; // Heavy penalty for seen headlines
+                _log(`Applied already-seen penalty (${config.alreadySeenPenalty}) to headline: "${headline.text}"`);
+            }
+        } catch (error) {
+            console.warn('[headline-scorer] Failed to check if headline was seen:', error);
+            // Continue without penalty if check fails
+        }
+    }
     
     // Filter words and track reasons
     for (const word of originalWords) {
@@ -152,12 +171,12 @@ function scoreHeadline(headline) {
 /**
  * Processes multiple headlines and groups them by score
  * @param {Array} headlines - Array of headline objects
- * @returns {Object} Grouped headlines by score with metadata
+ * @returns {Promise<Object>} Grouped headlines by score with metadata
  */
-function processAndGroupHeadlines(headlines) {
+async function processAndGroupHeadlines(headlines) {
     _log(`🔄 Processing ${headlines.length} headlines for scoring...`);
     
-    const scoredHeadlines = headlines.map(scoreHeadline);
+    const scoredHeadlines = await Promise.all(headlines.map(scoreHeadline));
     const validHeadlines = scoredHeadlines.filter(h => h.isValid);
     
     _log(`✅ ${validHeadlines.length}/${headlines.length} headlines passed filtering`);

@@ -44,7 +44,7 @@ function toggleDebugPanel() {
     }
 }
 
-function updateDebugInfo() {
+async function updateDebugInfo() {
     // Update current headline info
     document.getElementById('debugCurrentHeadline').innerHTML = `
         <strong>Text:</strong> ${currentHeadline.text}<br>
@@ -73,7 +73,7 @@ function updateDebugInfo() {
     `;
     
     // Update enhanced headline management info with pools
-    updateHeadlinePoolsDebugInfo();
+    await updateHeadlinePoolsDebugInfo();
     
     // Generate alternative headlines
     generateAlternativeHeadlines();
@@ -345,7 +345,7 @@ function copyGridStateJS() {
  * Updates the headline pools debug information
  * Shows detailed information about scoring, pools, and filtering
  */
-function updateHeadlinePoolsDebugInfo() {
+async function updateHeadlinePoolsDebugInfo() {
     const debugElement = document.getElementById('debugHeadlineManagement');
     if (!debugElement) {
         console.log('Debug headline management element not found');
@@ -467,7 +467,7 @@ function updateHeadlinePoolsDebugInfo() {
         
         // Current headline filtering details
         if (currentHeadline && typeof HeadlineScorer !== 'undefined') {
-            const scoredHeadline = HeadlineScorer.scoreHeadline(currentHeadline);
+            const scoredHeadline = await HeadlineScorer.scoreHeadline(currentHeadline);
             html += `
                 <div style="margin-bottom: 15px; padding: 8px; background: #e8f5e8; border: 1px solid #ddd; border-radius: 3px;">
                     <strong>🎯 Current Headline Analysis:</strong><br>

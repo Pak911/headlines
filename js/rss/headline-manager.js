@@ -37,7 +37,7 @@ async function initializeHeadlineManagement() {
         const rawHeadlines = await AsyncRSSFetcher.fetchHeadlinesWithFallback();
         
         // Process and score headlines
-        headlinePools = HeadlineScorer.processAndGroupHeadlines(rawHeadlines);
+        headlinePools = await HeadlineScorer.processAndGroupHeadlines(rawHeadlines);
         
         // Clear tracking arrays when starting fresh
         usedHeadlines = [];
@@ -65,7 +65,7 @@ async function initializeHeadlineManagement() {
             pubDate: new Date().toISOString()
         }));
         
-        headlinePools = HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+        headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
         isInitialized = true;
     }
 }
@@ -100,7 +100,7 @@ async function getNextHeadline() {
                     category: 'fallback',
                     pubDate: new Date().toISOString()
                 }));
-                headlinePools = HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+                headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
             } else {
                 return null;
             }
