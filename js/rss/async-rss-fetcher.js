@@ -88,9 +88,20 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
             return rssHeadlines;
         }
         
+        console.warn('⚠️ FALLBACK TO MOCK: RSS sources returned 0 headlines. Possible causes:');
+        console.warn('  - All RSS feeds are currently unreachable or returning empty responses');
+        console.warn('  - RSS feeds may be rate-limiting or blocking requests');
+        console.warn('  - Network connectivity issues preventing RSS access');
+        console.warn('  - All headlines were filtered out during processing');
         _log('⚠️ RSS fetch returned no headlines, falling back to mock data');
         
     } catch (error) {
+        console.warn('⚠️ FALLBACK TO MOCK: RSS fetch failed with error:', error.message);
+        console.warn('  Possible causes:');
+        console.warn('  - Network timeout after', FETCH_TIMEOUT, 'ms');
+        console.warn('  - CORS restrictions blocking RSS API access');
+        console.warn('  - RSS2JSON API service unavailable');
+        console.warn('  - All RSS sources failed to respond');
         console.error('❌ RSS fetch failed:', error);
         _log('🔄 Falling back to mock data');
     }

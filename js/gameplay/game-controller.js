@@ -712,10 +712,10 @@ function giveUp() {
 }
 
 // Skip to next headline function - saves as not solved
-function skipToNextHeadline() {
+async function skipToNextHeadline() {
     // Save seen headline data (skipped)
     if (currentHeadline && currentHeadline.djb2Hash) {
-        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+        await Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
             isSolved: false,
             link: currentHeadline.link,
             timestamp: Date.now()
@@ -724,16 +724,33 @@ function skipToNextHeadline() {
         });
     }
     
-    // Start new game
-    initGame();
+    // Start new game and wait for completion
+    await initGame();
 }
 
 // Make auto-win function globally available
 window.autoWinGame = autoWinGame;
 window.giveUp = giveUp;
 
-// Replace the original initGame with enhanced version
+// Replace the original initGame with enhanced version BEFORE defining skipToNextHeadline
 window.initGame = enhancedInitGame;
+
+// Skip to next headline function - saves as not solved
+async function skipToNextHeadline() {
+    // Save seen headline data (skipped)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        await Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: false,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+    }
+    
+    // Start new game and wait for completion
+    await initGame();
+}
 
 // Expose functions needed by other files
 window.checkVictory = checkVictory;

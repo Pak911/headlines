@@ -50,7 +50,12 @@ async function initializeHeadlineManagement() {
     } catch (error) {
         console.error('❌ Failed to initialize headline management:', error);
         
-        // Emergency fallback to mock headlines
+        console.warn('⚠️ EMERGENCY FALLBACK: RSS initialization failed, using mock headlines');
+        console.warn('  Possible causes:');
+        console.warn('  - RSS fetch completely failed (network/API issues)');
+        console.warn('  - All headlines were filtered out during scoring');
+        console.warn('  - Headline processing pipeline error');
+        console.warn('  - No valid headlines met crossword requirements');
         _log('🔄 Using emergency fallback to mock headlines');
         const mockHeadlinesWithMetadata = mockHeadlines.map(headline => ({
             ...headline,
@@ -79,6 +84,12 @@ async function getNextHeadline() {
         
         if (!headlinePools || headlinePools.totalValid === 0) {
             console.error('❌ Failed to get any headlines after reinitialization');
+            console.warn('⚠️ RUSSIAN FALLBACK: No headlines available, using Russian mock headlines');
+            console.warn('  Possible causes:');
+            console.warn('  - RSS language set to Russian but no Russian sources available');
+            console.warn('  - All Russian RSS feeds failed or returned no content');
+            console.warn('  - Russian headlines were filtered out during processing');
+            console.warn('  - Network issues specific to Russian RSS sources');
             // Use Russian fallback headlines if RSS language is Russian
             if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'ru') {
                 _log('🇷🇺 Using Russian fallback headlines...');

@@ -162,6 +162,18 @@ function processAndGroupHeadlines(headlines) {
     
     _log(`✅ ${validHeadlines.length}/${headlines.length} headlines passed filtering`);
     
+    // Warn if all headlines were filtered out
+    if (validHeadlines.length === 0 && headlines.length > 0) {
+        console.warn('⚠️ ALL HEADLINES FILTERED: No headlines passed crossword suitability filtering');
+        console.warn('  Possible causes:');
+        console.warn('  - Headlines too short (less than 4 words after filtering)');
+        console.warn('  - Too many stop words or short words filtered out');
+        console.warn('  - Headlines missing descriptions');
+        console.warn('  - Description too short (less than 2x headline length)');
+        console.warn('  - All headlines contained only filtered words');
+        console.warn(`  Filtering stats: ${scoredHeadlines.length} processed, 0 valid`);
+    }
+    
     // Group by score
     const scoreGroups = {};
     validHeadlines.forEach(headline => {

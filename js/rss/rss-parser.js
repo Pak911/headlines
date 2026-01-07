@@ -255,6 +255,17 @@ async function fetchFromMultipleSources(sources, countPerSource = 5, language = 
         allHeadlines.push(...headlines);
     });
     
+    // Check if we got any headlines at all
+    if (allHeadlines.length === 0) {
+        console.warn('⚠️ NO HEADLINES FETCHED: All RSS sources failed to return headlines');
+        console.warn('  Possible causes:');
+        console.warn('  - All RSS feeds are currently unreachable');
+        console.warn('  - Network connectivity issues');
+        console.warn('  - CORS or API restrictions');
+        console.warn('  - All sources returned empty or malformed RSS');
+        console.warn('  - Rate limiting by RSS providers');
+    }
+    
     // Remove duplicates based on text content
     const uniqueHeadlines = removeDuplicateHeadlines(allHeadlines);
     
