@@ -541,6 +541,15 @@ async function enhancedInitGame() {
     // Display headline description as hint
     displayHeadlineDescription();
     
+    // Match hint section width to crossword container width
+    setTimeout(() => {
+        const crosswordContainer = document.querySelector('.crossword-container');
+        const hintSection = document.querySelector('.hint-section');
+        if (crosswordContainer && hintSection) {
+            hintSection.style.width = crosswordContainer.offsetWidth + 'px';
+        }
+    }, 50);
+    
     // Update difficulty display
     updateDifficultyDisplay();
     
