@@ -184,36 +184,81 @@ const rssNewsSources = [
 // Russian RSS News Sources
 const russianRssNewsSources = [
     {
-        name: "Kommersant",
+        name: "Коммерсант",
         url: "https://www.kommersant.ru/rss/main.xml",
         category: "general"
     },
     {
-        name: "RIA",
+        name: "РИА",
         url: "https://ria.ru/export/rss2/index.xml",
         category: "general"
     },
     {
-        name: "RBC",
+        name: "РБК",
         url: "https://rssexport.rbc.ru/rbcnews/news/30/full.rss",
         category: "general"
     },
     {
-        name: "TASS",
+        name: "ТАСС",
         url: "https://tass.ru/rss/v2.xml",
         category: "general"
     },
     {
-        name: "Lenta",
+        name: "Лента",
         url: "https://lenta.ru/rss/news",
         category: "general"
+    },
+    {
+        name: "Известия",
+        url: "https://iz.ru/xml/rss/all.xml",
+        category: "general"
+    },
+    {
+        name: "RT",
+        url: "https://russian.rt.com/rss",
+        category: "general"
+    },
+    {
+        name: "Ведомости",
+        url: "https://vedomosti.ru/rss/articles",
+        category: "general"
+    },
+    {
+        name: "News Info",
+        url: "https://www.newsinfo.ru/rss",
+        category: "general"
+    },
+    {
+        name: "Манитаймс",
+        url: "https://www.moneytimes.ru/rss",
+        category: "general"
+    },
+    {
+        name: "3DNews",
+        url: "https://3dnews.ru/breaking/rss",
+        category: "technology"
+    },
+    {
+        name: "iXBT.com",
+        url: "https://www.ixbt.com/live/rss",
+        category: "technology"
+    },
+    {
+        name: "Чемпионат",
+        url: "https://www.championat.com/rss/news",
+        category: "sports"
+    },
+    {
+        name: "Спортс",
+        url: "https://www.sports.ru/rss/topnews.xml",
+        category: "sports"
     }
 ];
 
 // Star rating system configuration
 const starRatingConfig = {
     // Base multiplier for minimum possible swaps
-    baseMultiplier: 1,
+    baseMultiplier: 1.3,
     
     // Star threshold multipliers (applied to base threshold)
     starThresholds: {
