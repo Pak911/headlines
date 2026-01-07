@@ -97,7 +97,6 @@
 
 body {
     font-family: 'Comfortaa', sans-serif;
-    background-image: url('../images/editorial_bg.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -196,7 +195,7 @@ h1 {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(255, 255, 255, 0.93); /* Adjustable opacity - increase for more dimming */
+    background: rgba(255, 255, 255, 1.0); /* Adjustable opacity - increase for more dimming */
     z-index: -1;
     pointer-events: none;
 }
