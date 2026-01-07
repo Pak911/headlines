@@ -14,7 +14,8 @@ const ru = {
             few: "хода",
             many: "ходов"
         },
-        nextHeadline: "Сдаться",
+        giveUp: "Сдаться",
+        nextHeadline: "Дальше",
         replay: "Играть снова",
         readFullArticle: "Читать статью полностью",
         newHeadline: "Дальше"

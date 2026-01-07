@@ -93,6 +93,12 @@ function updateLocalizedText() {
             nextHeadlineBtn.textContent = t('ui.nextHeadline');
         }
         
+        // Update give up button
+        const giveUpBtn = document.querySelector('.give-up-btn');
+        if (giveUpBtn) {
+            giveUpBtn.textContent = t('ui.giveUp');
+        }
+        
         // Update old button location for compatibility
         const oldNextHeadlineBtn = document.querySelector('.new-game-btn-header');
         if (oldNextHeadlineBtn) {

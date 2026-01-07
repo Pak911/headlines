@@ -52,7 +52,7 @@
 }
 
 /* Next Headline Button */
-.next-headline-btn {
+.next-headline-btn, .give-up-btn {
     padding: 12px 20px;
     background: #3b82f6;
     color: white;
@@ -64,18 +64,26 @@
     transition: all 0.2s ease;
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
     white-space: nowrap;
-    width: 100%;
 }
 
-.next-headline-btn:hover {
+.next-headline-btn:hover, .give-up-btn:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 10px rgba(59, 130, 246, 0.4);
     background: #2563eb;
 }
 
-.next-headline-btn:active {
+.next-headline-btn:active, .give-up-btn:active {
     transform: translateY(0);
     box-shadow: 0 2px 6px rgba(59, 130, 246, 0.3);
+}
+
+.hint-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+.hint-buttons button {
+    flex: 1;
 }
 
 /* Source link styling within hint text */

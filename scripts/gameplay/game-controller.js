@@ -655,8 +655,33 @@ function autoWinGame() {
     _log('✅ Auto-win completed!');
 }
 
+// Give up function - reveals solution without victory modal
+function giveUp() {
+    if (!currentHeadline || !grid) {
+        _log('❌ No active game to give up');
+        return;
+    }
+    
+    _log('🏳️ Giving up - revealing solution...');
+    
+    // Set all letters to their correct positions
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                grid[r][c].currentLetter = grid[r][c].letter;
+            }
+        }
+    }
+    
+    // Re-render the grid
+    renderCrossword();
+    
+    _log('✅ Solution revealed!');
+}
+
 // Make auto-win function globally available
 window.autoWinGame = autoWinGame;
+window.giveUp = giveUp;
 
 // Replace the original initGame with enhanced version
 window.initGame = enhancedInitGame;

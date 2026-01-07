@@ -13,7 +13,8 @@ const en = {
             one: "move",
             other: "moves"
         },
-        nextHeadline: "Give Up",
+        giveUp: "Give Up",
+        nextHeadline: "Next",
         replay: "Replay",
         readFullArticle: "Read Full Article",
         newHeadline: "Next Headline"
