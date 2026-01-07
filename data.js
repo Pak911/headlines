@@ -295,97 +295,113 @@ const mockHeadlines = [
         text: "CLIMATE SUMMIT BEGINS TODAY",
         words: ["CLIMATE", "SUMMIT", "BEGINS", "TODAY"],
         link: "https://example.com/climate-summit",
-        description: "World leaders gather for crucial climate negotiations to address global warming and environmental challenges."
+        description: "World leaders gather for crucial climate negotiations to address global warming and environmental challenges.",
+        djb2Hash: "qgyrrq"
     },
     {
         text: "TECH GIANTS ANNOUNCE MERGER",
         words: ["TECH", "GIANTS", "ANNOUNCE", "MERGER"],
         link: "https://example.com/tech-merger",
-        description: "Major technology companies join forces in a groundbreaking merger that will reshape the industry landscape."
+        description: "Major technology companies join forces in a groundbreaking merger that will reshape the industry landscape.",
+        djb2Hash: "185zvfd"
     },
     {
         text: "MARKET HITS NEW RECORD",
         words: ["MARKET", "HITS", "NEW", "RECORD"],
         link: "https://example.com/market-record",
-        description: "Stock market reaches unprecedented heights as investor confidence soars amid positive economic indicators."
+        description: "Stock market reaches unprecedented heights as investor confidence soars amid positive economic indicators.",
+        djb2Hash: "1gw5yz2"
     },
     {
         text: "VACCINE TRIAL SHOWS SUCCESS",
         words: ["VACCINE", "TRIAL", "SHOWS", "SUCCESS"],
         link: "https://example.com/vaccine-success",
-        description: "Clinical trials demonstrate promising results for new vaccine with high efficacy rates and minimal side effects."
+        description: "Clinical trials demonstrate promising results for new vaccine with high efficacy rates and minimal side effects.",
+        djb2Hash: "coj6xv"
     },
     {
         text: "MAJOR STORM APPROACHES COAST",
         words: ["MAJOR", "STORM", "APPROACHES", "COAST"],
         link: "https://example.com/storm-coast",
-        description: "Powerful hurricane system moves toward populated coastal areas, prompting widespread evacuation orders."
+        description: "Powerful hurricane system moves toward populated coastal areas, prompting widespread evacuation orders.",
+        djb2Hash: "v52cof"
     },
     {
         text: "PEACE TALKS RESUME MONDAY",
         words: ["PEACE", "TALKS", "RESUME", "MONDAY"],
         link: "https://example.com/peace-talks",
-        description: "Diplomatic negotiations restart after temporary suspension, with hopes for breakthrough in long-standing conflict."
+        description: "Diplomatic negotiations restart after temporary suspension, with hopes for breakthrough in long-standing conflict.",
+        djb2Hash: "lvi2ov"
     },
     {
         text: "BUDGET CRISIS DEEPENS FURTHER",
         words: ["BUDGET", "CRISIS", "DEEPENS", "FURTHER"],
         link: "https://example.com/budget-crisis",
-        description: "Government faces mounting fiscal challenges as spending cuts and revenue shortfalls create political tensions."
+        description: "Government faces mounting fiscal challenges as spending cuts and revenue shortfalls create political tensions.",
+        djb2Hash: "nz5oab"
     },
     {
         text: "SPORTS LEGEND ANNOUNCES RETIREMENT",
         words: ["SPORTS", "LEGEND", "ANNOUNCES", "RETIREMENT"],
         link: "https://example.com/sports-retires",
-        description: "Celebrated athlete ends illustrious career after decades of championship victories and record-breaking performances."
+        description: "Celebrated athlete ends illustrious career after decades of championship victories and record-breaking performances.",
+        djb2Hash: "19n1wp6"
     },
     {
         text: "NEW POLICY TAKES EFFECT",
         words: ["NEW", "POLICY", "TAKES", "EFFECT"],
         link: "https://example.com/new-policy",
-        description: "Comprehensive legislation becomes law, introducing significant changes to healthcare and social services."
+        description: "Comprehensive legislation becomes law, introducing significant changes to healthcare and social services.",
+        djb2Hash: "va18st"
     },
     {
         text: "STOCK PRICES SURGE TODAY",
         words: ["STOCK", "PRICES", "SURGE", "TODAY"],
         link: "https://example.com/stock-surge",
-        description: "Financial markets experience dramatic gains as investors respond positively to economic recovery signals."
+        description: "Financial markets experience dramatic gains as investors respond positively to economic recovery signals.",
+        djb2Hash: "1tte9v9"
     },
     {
         text: "BREAKING NEWS ALERT NOW",
         words: ["BREAKING", "NEWS", "ALERT", "NOW"],
         link: "https://example.com/breaking-news",
-        description: "Urgent developments unfold in major international incident requiring immediate public attention and response."
+        description: "Urgent developments unfold in major international incident requiring immediate public attention and response.",
+        djb2Hash: "2up1zq"
     },
     {
         text: "WEATHER UPDATE ISSUED NOW",
         words: ["WEATHER", "UPDATE", "ISSUED", "NOW"],
         link: "https://example.com/weather-update",
-        description: "Meteorological services release critical forecast information about severe weather conditions affecting the region."
+        description: "Meteorological services release critical forecast information about severe weather conditions affecting the region.",
+        djb2Hash: "2ljhvb"
     },
     {
         text: "TRAFFIC DELAYS EXPECTED TODAY",
         words: ["TRAFFIC", "DELAYS", "EXPECTED", "TODAY"],
         link: "https://example.com/traffic-delays",
-        description: "Major roadwork and construction projects cause significant transportation disruptions during peak hours."
+        description: "Major roadwork and construction projects cause significant transportation disruptions during peak hours.",
+        djb2Hash: "j6rxze"
     },
     {
         text: "FIRE STATION RESPONDS QUICKLY",
         words: ["FIRE", "STATION", "RESPONDS", "QUICKLY"],
         link: "https://example.com/fire-response",
-        description: "Emergency services demonstrate rapid response capabilities in containing dangerous blaze threatening residential areas."
+        description: "Emergency services demonstrate rapid response capabilities in containing dangerous blaze threatening residential areas.",
+        djb2Hash: "jzihr"
     },
     {
         text: "SCHOOL HOLIDAY ANNOUNCED TODAY",
         words: ["SCHOOL", "HOLIDAY", "ANNOUNCED", "TODAY"],
         link: "https://example.com/school-holiday",
-        description: "Educational authorities declare unexpected closure due to severe weather conditions affecting student safety."
+        description: "Educational authorities declare unexpected closure due to severe weather conditions affecting student safety.",
+        djb2Hash: "vrb9mm"
     },
     {
         text: "POWER OUTAGE REPORTED WIDELY",
         words: ["POWER", "OUTAGE", "REPORTED", "WIDELY"],
         link: "https://example.com/power-outage",
-        description: "Electrical grid failures affect thousands of households as utility companies work to restore service."
+        description: "Electrical grid failures affect thousands of households as utility companies work to restore service.",
+        djb2Hash: "1g443ru"
     }
 ];
 
@@ -395,96 +411,112 @@ const mockRussianHeadlines = [
         text: "ЭКОНОМИКА СТРАНЫ РАСТЁТ БЫСТРО",
         words: ["ЭКОНОМИКА", "СТРАНЫ", "РАСТЁТ", "БЫСТРО"],
         link: "https://example.com/russian-economy",
-        description: "Национальная экономика показывает значительный рост благодаря успешной промышленной политике правительства."
+        description: "Национальная экономика показывает значительный рост благодаря успешной промышленной политике правительства.",
+        djb2Hash: "1v34jw3"
     },
     {
         text: "НОВЫЕ ТЕХНОЛОГИИ ВНЕДРЯЮТСЯ АКТИВНО",
         words: ["НОВЫЕ", "ТЕХНОЛОГИИ", "ВНЕДРЯЮТСЯ", "АКТИВНО"],
         link: "https://example.com/russian-tech",
-        description: "Российские компании активно внедряют передовые технологии в производственные процессы для повышения эффективности."
+        description: "Российские компании активно внедряют передовые технологии в производственные процессы для повышения эффективности.",
+        djb2Hash: "1278azc"
     },
     {
         text: "КЛИМАТ ПЛАНЕТЫ МЕНЯЕТСЯ СИЛЬНО",
         words: ["КЛИМАТ", "ПЛАНЕТЫ", "МЕНЯЕТСЯ", "СИЛЬНО"],
         link: "https://example.com/russian-climate",
-        description: "Глобальные климатические изменения оказывают значительное влияние на экосистемы и погодные условия по всему миру."
+        description: "Глобальные климатические изменения оказывают значительное влияние на экосистемы и погодные условия по всему миру.",
+        djb2Hash: "axf75v"
     },
     {
         text: "МЕДИЦИНА РАЗВИВАЕТСЯ УСПЕШНО",
         words: ["МЕДИЦИНА", "РАЗВИВАЕТСЯ", "УСПЕШНО"],
         link: "https://example.com/russian-medicine",
-        description: "Современные медицинские технологии и препараты позволяют эффективно бороться с ранее неизлечимыми заболеваниями."
+        description: "Современные медицинские технологии и препараты позволяют эффективно бороться с ранее неизлечимыми заболеваниями.",
+        djb2Hash: "15r9rg5"
     },
     {
         text: "ОБРАЗОВАНИЕ СТАНОВИТСЯ ЛУЧШЕ",
         words: ["ОБРАЗОВАНИЕ", "СТАНОВИТСЯ", "ЛУЧШЕ"],
         link: "https://example.com/russian-education",
-        description: "Новые образовательные программы и методики обучения обеспечивают высокое качество подготовки специалистов."
+        description: "Новые образовательные программы и методики обучения обеспечивают высокое качество подготовки специалистов.",
+        djb2Hash: "9bohc6"
     },
     {
         text: "ТРАНСПОРТНАЯ СИСТЕМА МОДЕРНИЗИРУЕТСЯ",
         words: ["ТРАНСПОРТНАЯ", "СИСТЕМА", "МОДЕРНИЗИРУЕТСЯ"],
         link: "https://example.com/russian-transport",
-        description: "Масштабные инвестиции в развитие транспортной инфраструктуры улучшают доступность и качество перевозок."
+        description: "Масштабные инвестиции в развитие транспортной инфраструктуры улучшают доступность и качество перевозок.",
+        djb2Hash: "xntfug"
     },
     {
         text: "ЭНЕРГЕТИКА ПЕРЕХОДИТ НА ЗЕЛЁНУЮ",
         words: ["ЭНЕРГЕТИКА", "ПЕРЕХОДИТ", "НА", "ЗЕЛЁНУЮ"],
         link: "https://example.com/russian-energy",
-        description: "Переход на возобновляемые источники энергии снижает углеродный след и обеспечивает энергетическую независимость."
+        description: "Переход на возобновляемые источники энергии снижает углеродный след и обеспечивает энергетическую независимость.",
+        djb2Hash: "157i4d5"
     },
     {
         text: "КУЛЬТУРА РАСЦВЕТАЕТ ПОВСЕМЕСТНО",
         words: ["КУЛЬТУРА", "РАСЦВЕТАЕТ", "ПОВСЕМЕСТНО"],
         link: "https://example.com/russian-culture",
-        description: "Государственная поддержка культурных инициатив способствует сохранению наследия и развитию творческих индустрий."
+        description: "Государственная поддержка культурных инициатив способствует сохранению наследия и развитию творческих индустрий.",
+        djb2Hash: "1e4cxnm"
     },
     {
         text: "СПОРТ ДОСТИГАЕТ НОВЫХ ВЫСОТ",
         words: ["СПОРТ", "ДОСТИГАЕТ", "НОВЫХ", "ВЫСОТ"],
         link: "https://example.com/russian-sport",
-        description: "Российские спортсмены показывают выдающиеся результаты на международных соревнованиях и чемпионатах мира."
+        description: "Российские спортсмены показывают выдающиеся результаты на международных соревнованиях и чемпионатах мира.",
+        djb2Hash: "eh8lwv"
     },
     {
         text: "НАУКА ОТКРЫВАЕТ НОВЫЕ ГОРИЗОНТЫ",
         words: ["НАУКА", "ОТКРЫВАЕТ", "НОВЫЕ", "ГОРИЗОНТЫ"],
         link: "https://example.com/russian-science",
-        description: "Фундаментальные научные исследования открывают новые возможности для технологического прогресса и развития."
+        description: "Фундаментальные научные исследования открывают новые возможности для технологического прогресса и развития.",
+        djb2Hash: "1w1y1u5"
     },
     {
         text: "ЭКОЛОГИЯ ТРЕБУЕТ ВНИМАНИЯ СРОЧНО",
         words: ["ЭКОЛОГИЯ", "ТРЕБУЕТ", "ВНИМАНИЯ", "СРОЧНО"],
         link: "https://example.com/russian-ecology",
-        description: "Экологическая ситуация требует немедленных мер по защите окружающей среды и сохранению природных ресурсов."
+        description: "Экологическая ситуация требует немедленных мер по защите окружающей среды и сохранению природных ресурсов.",
+        djb2Hash: "153zgp9"
     },
     {
         text: "ПОЛИТИКА СТРЕМИТСЯ К СТАБИЛЬНОСТИ",
         words: ["ПОЛИТИКА", "СТРЕМИТСЯ", "К", "СТАБИЛЬНОСТИ"],
         link: "https://example.com/russian-politics",
-        description: "Государственная политика направлена на обеспечение стабильности и благополучия граждан страны."
+        description: "Государственная политика направлена на обеспечение стабильности и благополучия граждан страны.",
+        djb2Hash: "hx95f1"
     },
     {
         text: "БИЗНЕС РАЗВИВАЕТСЯ ДИНАМИЧНО",
         words: ["БИЗНЕС", "РАЗВИВАЕТСЯ", "ДИНАМИЧНО"],
         link: "https://example.com/russian-business",
-        description: "Предпринимательская деятельность получает поддержку государства и показывает высокие темпы роста."
+        description: "Предпринимательская деятельность получает поддержку государства и показывает высокие темпы роста.",
+        djb2Hash: "yi6zyw"
     },
     {
         text: "ТЕХНИКА СОВЕРШЕНСТВУЕТСЯ ПОСТОЯННО",
         words: ["ТЕХНИКА", "СОВЕРШЕНСТВУЕТСЯ", "ПОСТОЯННО"],
         link: "https://example.com/russian-engineering",
-        description: "Инженерные разработки и технические новшества обеспечивают прогресс во всех отраслях промышленности."
+        description: "Инженерные разработки и технические новшества обеспечивают прогресс во всех отраслях промышленности.",
+        djb2Hash: "eq2q7a"
     },
     {
         text: "ОБЩЕСТВО СТАНОВИТСЯ СПЛОЧЕННЕЕ",
         words: ["ОБЩЕСТВО", "СТАНОВИТСЯ", "СПЛОЧЕННЕЕ"],
         link: "https://example.com/russian-society",
-        description: "Социальная сплоченность и взаимопомощь становятся основой стабильного развития гражданского общества."
+        description: "Социальная сплоченность и взаимопомощь становятся основой стабильного развития гражданского общества.",
+        djb2Hash: "1ndyzpi"
     },
     {
         text: "ИННОВАЦИИ МЕНЯЮТ МИР БЫСТРО",
         words: ["ИННОВАЦИИ", "МЕНЯЮТ", "МИР", "БЫСТРО"],
         link: "https://example.com/russian-innovation",
-        description: "Инновационные разработки и передовые технологии кардинально изменяют привычные способы жизни."
+        description: "Инновационные разработки и передовые технологии кардинально изменяют привычные способы жизни.",
+        djb2Hash: "1gm4x4h"
     }
 ];
