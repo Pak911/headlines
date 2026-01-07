@@ -31,9 +31,9 @@ function checkVictory() {
     return true;
 }
 
-// Calculate star rating based on swap count and word count
-function calculateStarRating(swapCount, wordCount) {
-    const minPossibleSwaps = Math.floor(wordCount * starRatingConfig.baseMultiplier);
+// Calculate star rating based on swap count and letter count
+function calculateStarRating(swapCount, letterCount) {
+    const minPossibleSwaps = Math.floor(letterCount * starRatingConfig.baseMultiplier);
     
     let rating = '';
     let starCount = 0;
@@ -54,8 +54,8 @@ function calculateStarRating(swapCount, wordCount) {
 }
 
 // Get swap thresholds for each star level
-function getStarThresholds(wordCount) {
-    const minPossibleSwaps = Math.floor(wordCount * starRatingConfig.baseMultiplier);
+function getStarThresholds(letterCount) {
+    const minPossibleSwaps = Math.floor(letterCount * starRatingConfig.baseMultiplier);
     
     const thresholds = {};
     for (let stars = 5; stars >= 1; stars--) {
@@ -67,8 +67,8 @@ function getStarThresholds(wordCount) {
 }
 
 // Generate tooltip content for star hover
-function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
-    const thresholds = getStarThresholds(wordCount);
+function generateTooltipContent(starIndex, currentStars, swapCount, letterCount) {
+    const thresholds = getStarThresholds(letterCount);
     
     if (starIndex <= currentStars) {
         // Player achieved this star level
@@ -108,14 +108,14 @@ function generateTooltipContent(starIndex, currentStars, swapCount, wordCount) {
 }
 
 // Add hover listeners to stars for tooltips
-function addStarHoverListeners(currentStars, swapCount, wordCount) {
+function addStarHoverListeners(currentStars, swapCount, letterCount) {
     const stars = document.querySelectorAll('.victory-star');
     
     stars.forEach((star, index) => {
         const starIndex = index + 1;
         
         star.addEventListener('mouseenter', function(e) {
-            showStarTooltip(e.target, starIndex, currentStars, swapCount, wordCount);
+            showStarTooltip(e.target, starIndex, currentStars, swapCount, letterCount);
         });
         
         star.addEventListener('mouseleave', function() {
@@ -125,13 +125,13 @@ function addStarHoverListeners(currentStars, swapCount, wordCount) {
 }
 
 // Show tooltip for star
-function showStarTooltip(starElement, starIndex, currentStars, swapCount, wordCount) {
+function showStarTooltip(starElement, starIndex, currentStars, swapCount, letterCount) {
     // Remove existing tooltip
     hideStarTooltip();
     
     const tooltip = document.createElement('div');
     tooltip.className = 'star-tooltip';
-    tooltip.innerHTML = generateTooltipContent(starIndex, currentStars, swapCount, wordCount);
+    tooltip.innerHTML = generateTooltipContent(starIndex, currentStars, swapCount, letterCount);
     
     // Position tooltip
     const starRect = starElement.getBoundingClientRect();
@@ -209,8 +209,8 @@ function showVictory() {
     document.getElementById('finalSwaps').textContent = swapCount;
     
     // Calculate performance rating using new function
-    const wordCount = currentHeadline.words.length;
-    const { rating, starCount } = calculateStarRating(swapCount, wordCount);
+    const letterCount = currentHeadline.words.reduce((sum, word) => sum + word.length, 0);
+    const { rating, starCount } = calculateStarRating(swapCount, letterCount);
     
     // Get localized rating text
     let localizedRating = rating;
@@ -256,7 +256,7 @@ function showVictory() {
     }
     
     // Add hover listeners for tooltips
-    addStarHoverListeners(starCount, swapCount, wordCount);
+    addStarHoverListeners(starCount, swapCount, letterCount);
     
     // Save seen headline data (solved)
     if (currentHeadline && currentHeadline.djb2Hash) {

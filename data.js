@@ -93,7 +93,7 @@ const headlineScoringConfig = {
 };
 
 // Difficulty system configuration
-let currentDifficulty = 'mediumHard'; // Default difficulty - hardest level with big hint (description)
+let currentDifficulty = 'medium'; // Default difficulty - hardest level with big hint (description)
 
 // Difficulty Settings:
 // - minSwaps: Minimum number of swaps to ensure puzzle complexity
@@ -140,15 +140,15 @@ const difficultySettings = {
 
 // Star rating system configuration
 const starRatingConfig = {
-    // Base multiplier for minimum possible swaps
-    baseMultiplier: 1.3,
+    // Base multiplier for minimum possible swaps (0.5 since each move swaps two letters)
+    baseMultiplier: 0.5,
     
     // Star threshold multipliers (applied to base threshold)
     starThresholds: {
-        5: 3.0,    // 5 stars: ≤ wordCount × 3 (base)
-        4: 5.0,    // 4 stars: ≤ wordCount × 4.5 (base × 1.5)
-        3: 7.0,    // 3 stars: ≤ wordCount × 6 (base × 2.0)
-        2: 12.0,    // 2 stars: ≤ wordCount × 9 (base × 3.0)
+        5: 1.2,   // 5 stars: ≤ letterCount × 0.5 × 0.8
+        4: 1.7,   // 4 stars: ≤ letterCount × 0.5 × 1.0
+        3: 2.0,   // 3 stars: ≤ letterCount × 0.5 × 1.5
+        2: 3.0,    // 2 stars: ≤ letterCount × 0.5 × 2.0
         1: Infinity // 1 star: any number of swaps
     },
     
