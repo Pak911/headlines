@@ -88,7 +88,7 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 ### Modular Design
 
 ```
-scripts/
+js/
                     # Modular JavaScript architecture
 ├── main.js                      # Entry point & global state
 ├── core/                        # Foundation algorithms
@@ -100,17 +100,23 @@ scripts/
 │   ├── game-controller.js       # Game flow control
 │   ├── ui-interactions.js       # User interface
 │   └── victory-animations.js    # Victory celebration animations
+├── localization/                # Localization system
+│   ├── en.js                    # English translations
+│   ├── ru.js                    # Russian translations
+│   └── i18n.js                  # Localization manager
+├── platforms/                   # Platform abstraction layer
+│   ├── platformAdapter.js       # Platform interface
+│   └── webPlatform.js           # Web platform implementation
+├── rss/                         # RSS processing modules
+│   ├── headline-manager.js      # Headline lifecycle
+│   ├── headline-scorer.js       # Scoring algorithms
+│   ├── async-rss-fetcher.js     # RSS feed processing
+│   ├── rss-parser.js            # RSS parsing utilities
+│   └── html-processor.js        # HTML content processing
 └── utils/                       # Supporting functionality
-    ├── headline-manager.js      # Headline lifecycle
-    ├── headline-scorer.js       # Scoring algorithms
-    ├── async-rss-fetcher.js     # RSS feed processing
-    ├── rss-parser.js            # RSS parsing utilities
-    ├── html-processor.js        # HTML content processing
-    └── debug-utils.js           # Development tools
-localization/                    # Localization system
-    ├── en.js                    # English translations
-    ├── ru.js                    # Russian translations
-    └── i18n.js                  # Localization manager
+    ├── debug-utils.js           # Development tools
+    ├── gamestats.js             # Game statistics tracking
+    └── utils.js                 # General utilities
 ```
 
 ## 📁 Project Structure
@@ -118,16 +124,29 @@ localization/                    # Localization system
 ```
 headlines/
 ├── index.html                   # Main game interface
-├── styles.css                   # Game styling and animations
 ├── data.js                      # Headlines data and configuration
-├── scripts/                     # See Modular Design section above
-├── localization/                # See Modular Design section above
-├── test/                        # Test files directory
-│   ├── test.html                # Main testing interface
-│   ├── test-html-processor.html # HTML processor tests
-│   ├── test-rss-parser.html     # RSS parser tests
-│   └── test-russian-rss.html    # Russian RSS testing interface
+├── news-fetching-config.js      # RSS feed configuration
+├── css/                         # Stylesheets
+│   ├── base.css                 # Base styling and layout
+│   ├── game-board.css           # Game board styling
+│   ├── debug-panel.css          # Debug panel styling
+│   ├── hint-section.css         # Hint section styling
+│   ├── moves-counter.css        # Moves counter styling
+│   ├── responsive.css           # Responsive design
+│   └── victory-modal.css        # Victory modal styling
+├── fonts/                       # Font files
+├── js/                          # See Modular Design section above
+├── test/                        # Test files and utilities
+│   └── [various test files]     # Test interfaces and utilities
 └── memory-bank/                 # Project documentation & guidelines
+    ├── activeContext.md         # Current development context
+    ├── custom-events.md         # Custom events documentation
+    ├── designGuidelines.md      # Design guidelines
+    ├── productContext.md        # Product specifications
+    ├── projectOverview.md       # Project overview
+    ├── systemPatterns.md        # System architecture patterns
+    └── techContext.md           # Technical documentation
+```
     ├── projectbrief.md          # Project scope and requirements
     ├── productContext.md        # User experience and goals
     ├── systemPatterns.md        # Architecture and design patterns

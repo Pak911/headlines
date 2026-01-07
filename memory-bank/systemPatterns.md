@@ -53,32 +53,48 @@ Single-page application (SPA) with all logic contained in index.html:
 ## Modular Architecture
 
 ### Module Organization
-**Location**: `scripts/` directory with clean separation of concerns.
+**Location**: `js/` directory with clean separation of concerns.
 
 ### Core Engine Modules
-**Location**: `scripts/core/`
+**Location**: `js/core/`
 - **`crossword-engine.js`**: Layout generation algorithms (`generateCrosswordLayout()`, validation functions)
 - **`grid-manager.js`**: Grid data structure creation (`createGrid()`, `placeWordsInGrid()`)
 - **`color-logic.js`**: Color determination logic (`getLetterColorClass()`)
 
 ### Gameplay Modules
-**Location**: `scripts/gameplay/`
+**Location**: `js/gameplay/`
 - **`difficulty-system.js`**: Letter scrambling algorithms (`scrambleLettersByDifficulty()`)
 - **`game-controller.js`**: Game flow control (`initGame()`, `checkVictory()`)
 - **`ui-interactions.js`**: User interface interactions (`renderCrossword()`, `selectCell()`)
 - **`victory-animations.js`**: Victory celebration animations (`playVictoryAnimation()`)
 
-### Utility Modules
-**Location**: `scripts/utils/`
+### Localization Modules
+**Location**: `js/localization/`
+- **`en.js`**: English translations
+- **`ru.js`**: Russian translations
+- **`i18n.js`**: Localization manager and utilities
+
+### Platform Modules
+**Location**: `js/platforms/`
+- **`platformAdapter.js`**: Platform abstraction layer interface
+- **`webPlatform.js`**: Web platform implementation for local storage
+
+### RSS Processing Modules
+**Location**: `js/rss/`
 - **`headline-manager.js`**: Headline lifecycle management (`getNextHeadline()`)
 - **`async-rss-fetcher.js`**: Parallel RSS fetching system (`fetchHeadlinesFromAllSources()`)
 - **`headline-scorer.js`**: Headline scoring and filtering (`scoreHeadline()`)
 - **`rss-parser.js`**: RSS feed parsing (`fetchLatestHeadlines()`)
 - **`html-processor.js`**: HTML processing utilities (`stripHTML()`)
+
+### Utility Modules
+**Location**: `js/utils/`
 - **`debug-utils.js`**: Debug panel and development tools (`toggleDebugPanel()`)
+- **`gamestats.js`**: Game statistics tracking and persistence
+- **`utils.js`**: General utility functions
 
 ### Main Entry Point
-**Location**: `scripts/main.js`
+**Location**: `js/main.js`
 - Global state variable declarations
 - Module coordination and initialization
 

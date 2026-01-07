@@ -18,14 +18,19 @@
 ```
 headlines/
 ├── index.html                          # Main game interface
-├── styles.css                          # Game styling and animations
 ├── data.js                             # Configuration and data
+├── news-fetching-config.js             # RSS feed configuration
 ├── README.md                           # Project documentation
-├── localization/                       # Localization system
-│   ├── en.js                           # English translations
-│   ├── ru.js                           # Russian translations
-│   └── i18n.js                         # Localization manager
-├── scripts/                            # Modular JavaScript architecture
+├── css/                                # Stylesheets
+│   ├── base.css                        # Base styling and layout
+│   ├── game-board.css                  # Game board styling
+│   ├── debug-panel.css                 # Debug panel styling
+│   ├── hint-section.css                # Hint section styling
+│   ├── moves-counter.css               # Moves counter styling
+│   ├── responsive.css                  # Responsive design
+│   └── victory-modal.css               # Victory modal styling
+├── fonts/                              # Font files
+├── js/                                 # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
 │   ├── core/                           # Core engine modules
 │   │   ├── crossword-engine.js         # Smart backbone-first layout generation
@@ -36,24 +41,33 @@ headlines/
 │   │   ├── game-controller.js          # Game flow control
 │   │   ├── ui-interactions.js          # User interface & rendering
 │   │   └── victory-animations.js       # Victory animations
+│   ├── localization/                   # Localization system
+│   │   ├── en.js                       # English translations
+│   │   ├── ru.js                       # Russian translations
+│   │   └── i18n.js                     # Localization manager
+│   ├── platforms/                      # Platform abstraction layer
+│   │   ├── platformAdapter.js          # Platform adapter interface
+│   │   └── webPlatform.js              # Web platform implementation
+│   ├── rss/                            # RSS and headline processing
+│   │   ├── async-rss-fetcher.js        # Parallel RSS fetching
+│   │   ├── headline-manager.js         # Headline pool management
+│   │   ├── headline-scorer.js          # Headline filtering & scoring
+│   │   ├── rss-parser.js               # RSS feed parsing
+│   │   └── html-processor.js           # HTML cleaning
 │   └── utils/                          # Utilities
-│       ├── headline-manager.js         # Headline pool management
-│       ├── async-rss-fetcher.js        # Parallel RSS fetching
-│       ├── headline-scorer.js          # Headline filtering & scoring
-│       ├── rss-parser.js               # RSS feed parsing
-│       ├── html-processor.js           # HTML cleaning
-│       └── debug-utils.js              # Debug panel tools
-├── test/                               # Test framework
-│   ├── test.html                       # Main test interface
-│   ├── crossword-generator_1.html      # Algorithm prototype/demo
-│   └── other test files...             # Various test utilities
+│       ├── debug-utils.js              # Debug panel tools
+│       ├── gamestats.js                # Game statistics tracking
+│       └── utils.js                    # General utilities
+├── test/                               # Test framework and utilities
+│   └── [various test files]            # Test interfaces and utilities
 └── memory-bank/                        # Project documentation
-    ├── projectbrief.md                 # Project requirements
-    ├── techContext.md                  # Technical documentation
-    ├── systemPatterns.md               # System architecture
-    ├── productContext.md               # Product specifications
+    ├── activeContext.md                # Current development context
+    ├── custom-events.md                # Custom events documentation
     ├── designGuidelines.md             # Design guidelines
-    └── activeContext.md                # Current development context
+    ├── productContext.md               # Product specifications
+    ├── projectOverview.md              # Project overview
+    ├── systemPatterns.md               # System architecture patterns
+    └── techContext.md                  # Technical documentation (this file)
 ```
 
 ## Hint System Implementation
@@ -153,38 +167,54 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 ## Modular Architecture
 
 ### Module Organization
-**Location**: `scripts/` directory with clean separation of concerns.
+**Location**: `js/` directory with clean separation of concerns.
 
-### Core Engine Modules (`scripts/core/`)
+### Core Engine Modules (`js/core/`)
 - **`crossword-engine.js`**: Layout generation and validation algorithms
 - **`grid-manager.js`**: Grid data structure creation and management
 - **`color-logic.js`**: Wordle-style color determination logic
 
-### Gameplay Modules (`scripts/gameplay/`)
+### Gameplay Modules (`js/gameplay/`)
 - **`difficulty-system.js`**: Strategic letter scrambling with constraints
 - **`game-controller.js`**: Game flow control and initialization
 - **`ui-interactions.js`**: User interface interactions and rendering
 - **`victory-animations.js`**: Victory celebration animations
 
-### Utility Modules (`scripts/utils/`)
-- **`headline-manager.js`**: Headline selection and lifecycle tracking
+### Localization Modules (`js/localization/`)
+- **`en.js`**: English translations
+- **`ru.js`**: Russian translations
+- **`i18n.js`**: Localization manager and utilities
+
+### Platform Modules (`js/platforms/`)
+- **`platformAdapter.js`**: Platform abstraction layer interface
+- **`webPlatform.js`**: Web platform implementation for local storage
+
+### RSS Processing Modules (`js/rss/`)
 - **`async-rss-fetcher.js`**: Parallel RSS fetching with caching
+- **`headline-manager.js`**: Headline selection and lifecycle tracking
 - **`headline-scorer.js`**: Headline scoring and filtering
 - **`rss-parser.js`**: RSS feed parsing and extraction
 - **`html-processor.js`**: HTML detection and stripping
-- **`debug-utils.js`**: Debug panel and development tools
 
-### Main Entry Point (`scripts/main.js`)
+### Utility Modules (`js/utils/`)
+- **`debug-utils.js`**: Debug panel and development tools
+- **`gamestats.js`**: Game statistics tracking and persistence
+- **`utils.js`**: General utility functions
+
+### Main Entry Point (`js/main.js`)
 - Global state variable declarations
 - Module coordination and initialization
 
 ## Module Loading Strategy
 **Critical Dependency Order** (defined in index.html):
-1. **Data Layer**: `data.js` (configuration)
-2. **Core Engine**: Foundation algorithms
-3. **Gameplay**: User-facing features
-4. **Utilities**: Supporting functions
-5. **Main**: Entry point coordination
+1. **Data Layer**: `data.js`, `news-fetching-config.js` (configuration)
+2. **Localization**: Translation system initialization
+3. **Core Engine**: Foundation algorithms
+4. **RSS Processing**: Headline fetching and processing
+5. **Platforms**: Platform abstraction layer
+6. **Gameplay**: User-facing features
+7. **Utilities**: Supporting functions
+8. **Main**: Entry point coordination
 
 ## Test Framework
 - **Purpose**: Validate color logic and intersection handling
