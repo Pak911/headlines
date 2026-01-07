@@ -7,7 +7,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {}) {
+function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('rss-fetcher', message, options);
     } else {
@@ -19,7 +19,7 @@ function _log(message, options = {}) {
 // Configuration
 const FETCH_TIMEOUT = 10000; // 10 seconds - increased for rate limiting
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
-const MAX_CONCURRENT_REQUESTS = 1; // Only 1 concurrent request to avoid rate limiting
+const MAX_CONCURRENT_REQUESTS = 3; // Maximum concurrent requests to avoid rate limiting
 
 // Cache for headlines to avoid repeated API calls
 let headlineCache = {
@@ -124,7 +124,7 @@ async function fetchFromRSSWithTimeout() {
         }, FETCH_TIMEOUT);
         
         try {
-            // Fetch from RSS sources with limited concurrency
+            // Fetch from RSS sources with controlled concurrency
             const headlines = await fetchFromRSSSourcesSequentially();
             clearTimeout(timeoutId);
             resolve(headlines);
@@ -170,7 +170,7 @@ function getRSSSourcesForCurrentLanguage() {
 }
 
 /**
- * Fetches from all RSS sources simultaneously (async/parallel)
+ * Fetches from all RSS sources with controlled concurrency
  * @returns {Promise<Array>} Combined headlines from working sources
  */
 async function fetchFromRSSSourcesSequentially() {
@@ -180,73 +180,78 @@ async function fetchFromRSSSourcesSequentially() {
         _log(`⏳ Waiting ${fetchDelay}ms before starting RSS fetch (debug delay)`);
         await new Promise(resolve => setTimeout(resolve, fetchDelay));
     }
-    
+
     // Get appropriate RSS sources based on current language
     const currentRSSSources = getRSSSourcesForCurrentLanguage();
-    
+
     // For Russian language, fetch 3x more articles to compensate for shorter descriptions
     const isRussian = currentRSSSources === russianRssNewsSources;
     const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
-    
-    _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources simultaneously...`);
+
+    _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources with max ${MAX_CONCURRENT_REQUESTS} concurrent requests...`);
     if (isRussian) {
         _log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
     }
-    
+
     const workingSources = [];
     const failedSources = [];
-    
-    // Create promises for all sources simultaneously
-    const sourcePromises = currentRSSSources.map(async (source, index) => {
-        _log(`📡 Starting fetch from source ${index + 1}/${currentRSSSources.length}: ${source.name}`);
-        
-        try {
-            const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource);
-            
-            if (headlines && headlines.length > 0) {
-                headlines.forEach(headline => {
-                    headline.sourceName = source.name;
-                    headline.category = source.category;
-                });
-                
-                workingSources.push(source.name);
-                _log(`✅ ${source.name}: Successfully fetched ${headlines.length} headlines`);
-                return headlines;
-            } else {
+    const allHeadlines = [];
+
+    // Process sources in batches to respect concurrency limit
+    for (let i = 0; i < currentRSSSources.length; i += MAX_CONCURRENT_REQUESTS) {
+        const batch = currentRSSSources.slice(i, i + MAX_CONCURRENT_REQUESTS);
+        _log(`📦 Processing batch ${Math.floor(i / MAX_CONCURRENT_REQUESTS) + 1}/${Math.ceil(currentRSSSources.length / MAX_CONCURRENT_REQUESTS)} (${batch.length} sources)`);
+
+        // Create promises for this batch
+        const batchPromises = batch.map(async (source, batchIndex) => {
+            const globalIndex = i + batchIndex;
+            _log(`📡 Starting fetch from source ${globalIndex + 1}/${currentRSSSources.length}: ${source.name}`);
+
+            try {
+                const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource);
+
+                if (headlines && headlines.length > 0) {
+                    headlines.forEach(headline => {
+                        headline.sourceName = source.name;
+                        headline.category = source.category;
+                    });
+
+                    workingSources.push(source.name);
+                    _log(`✅ ${source.name}: Successfully fetched ${headlines.length} headlines`);
+                    return headlines;
+                } else {
+                    failedSources.push(source.name);
+                    _log(`⚠️ ${source.name}: No headlines returned`);
+                    return [];
+                }
+
+            } catch (error) {
                 failedSources.push(source.name);
-                _log(`⚠️ ${source.name}: No headlines returned`);
+                console.error(`❌ ${source.name}: Failed with error:`, error.message || error);
                 return [];
             }
-            
-        } catch (error) {
-            failedSources.push(source.name);
-            console.error(`❌ ${source.name}: Failed with error:`, error.message || error);
-            return [];
-        }
-    });
-    
-    // Wait for all sources to complete simultaneously
-    _log(`⏳ Waiting for all ${currentRSSSources.length} sources to complete...`);
-    const results = await Promise.all(sourcePromises);
-    
-    // Combine all results
-    const allHeadlines = [];
-    results.forEach(headlines => {
-        allHeadlines.push(...headlines);
-    });
-    
+        });
+
+        // Wait for this batch to complete before starting the next
+        _log(`⏳ Waiting for batch to complete...`);
+        const batchResults = await Promise.all(batchPromises);
+        batchResults.forEach(headlines => {
+            allHeadlines.push(...headlines);
+        });
+    }
+
     // Summary
     _log(`📊 RSS Fetch Summary:`);
     _log(`✅ Working sources (${workingSources.length}): ${workingSources.join(', ')}`);
     _log(`❌ Failed sources (${failedSources.length}): ${failedSources.join(', ')}`);
-    
+
     // Remove duplicates
     const uniqueHeadlines = RSSParser.removeDuplicateHeadlines(allHeadlines);
     _log(`📰 Total unique headlines from RSS: ${uniqueHeadlines.length}`);
-    
+
     // If we got at least some headlines, consider it a success
     if (uniqueHeadlines.length > 0) {
-        _log(`🎉 Successfully fetched headlines from ${workingSources.length}/${currentRSSSources.length} sources in parallel`);
+        _log(`🎉 Successfully fetched headlines from ${workingSources.length}/${currentRSSSources.length} sources with controlled concurrency`);
     }
     
     return uniqueHeadlines;
