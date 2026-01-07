@@ -19,7 +19,7 @@ All events use the `headlines:` prefix for game-specific events.
     platformType: string  // 'y', 'web', or 'unknown'
   }
   ```
-- **Listeners**: None currently implemented
+- **Listeners**: `js/utils/gamestats.js` - GameStats module waits for platform initialization before loading stats
 
 ## Game Events
 
@@ -69,7 +69,8 @@ All events use the `headlines:` prefix for game-specific events.
 ## Event Consumption
 
 ### GameStats Module (`js/utils/gamestats.js`)
-- Listens to both `headlines:puzzle:solved` and `headlines:puzzle:skipped` events
+- Listens to `headlines:platform:ready`, `headlines:puzzle:solved`, and `headlines:puzzle:skipped` events
+- Waits for platform initialization before loading existing stats from storage
 - Maintains running counters for solved and skipped puzzles
 - Persists stats using platform storage functions
 - Provides `getCurrentStats()` for retrieving current statistics

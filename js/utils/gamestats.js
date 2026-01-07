@@ -159,12 +159,15 @@ if (typeof window !== 'undefined') {
         refreshStats: refreshStats
     };
 
-    // Auto-initialize when DOM is ready
+    // Auto-initialize when platform is ready
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initializeGameStats);
+        document.addEventListener('DOMContentLoaded', () => {
+            // Wait for platform to be ready
+            window.addEventListener('headlines:platform:ready', initializeGameStats);
+        });
     } else {
-        // DOM already loaded
-        initializeGameStats();
+        // DOM already loaded, wait for platform
+        window.addEventListener('headlines:platform:ready', initializeGameStats);
     }
 }
 

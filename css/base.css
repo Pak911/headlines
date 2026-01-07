@@ -97,7 +97,11 @@
 
 body {
     font-family: 'Comfortaa', sans-serif;
-    background-color: #f5f7fa;
+    background-image: url('../images/editorial_bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -183,4 +187,16 @@ h1 {
     background: #2563eb;
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4), 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Background overlay to tone down the background image */
+.background-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.93); /* Adjustable opacity - increase for more dimming */
+    z-index: -1;
+    pointer-events: none;
 }
