@@ -37,11 +37,9 @@ async function enhancedInitGameWithReset() {
         resetCompletedWords();
     }
     
-    // Call the original enhanced init game
+    // Call the enhanced init game
     if (typeof enhancedInitGame === 'function') {
         await enhancedInitGame();
-    } else if (typeof initGame === 'function') {
-        initGame();
     }
 }
 

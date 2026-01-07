@@ -191,8 +191,8 @@ class LocalizationManager {
                         window.HeadlineManager.refreshHeadlinePools();
                     }
                     // Reinitialize game to fetch new headlines
-                    if (typeof initGame === 'function') {
-                        initGame();
+                    if (typeof enhancedInitGame === 'function') {
+                        enhancedInitGame();
                     }
                 }
             }

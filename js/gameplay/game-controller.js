@@ -315,62 +315,7 @@ function replayGame() {
 window.closeVictoryModal = closeVictoryModal;
 window.replayGame = replayGame;
 
-function initGame() {
-    // Reset game state
-    swapCount = 0;
-    selectedCell = null;
-    document.getElementById('swapCount').textContent = '0';
-    document.getElementById('victoryModal').style.display = 'none';
-    
-    // Update moves label with proper pluralization
-    const movesLabel = document.querySelector('.moves-label');
-    if (movesLabel && typeof t !== 'undefined') {
-        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
-    }
-    
-    // Try to generate a valid layout with different captions
-    const maxCaptionAttempts = 10;
-    let captionAttempts = 0;
-    
-    while (captionAttempts < maxCaptionAttempts) {
-        // Select random headline
-        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
-        
-        // Normalize Russian Ё → Е for crossword algorithm
-        const normalizedWords = normalizeRussianWords(currentHeadline.words);
-        
-        // Generate crossword layout
-        crosswordLayout = generateCrosswordLayout(normalizedWords);
-        
-        // If layout generation succeeded, break out of loop
-        if (crosswordLayout !== null) {
-            break;
-        }
-        
-        captionAttempts++;
-    }
-    
-    // If we still don't have a valid layout, use the last attempt (even if invalid)
-    if (crosswordLayout === null) {
-        // Generate a simple layout as final fallback
-        crosswordLayout = generateSimpleLayout(currentHeadline.words);
-        normalizeLayout(crosswordLayout, currentHeadline.words);
-    }
-    
-    // Place words in grid
-    grid = placeWordsInGrid(currentHeadline.words, crosswordLayout);
-    correctGrid = JSON.parse(JSON.stringify(grid));
-    
-    // Find word connections
-    findWordConnections();
-    
-    // Scramble letters
-    scrambleLetters();
-    
-    // Render the crossword
-    renderCrossword();
-}
-
+// Enhanced game initialization with RSS headline fetching
 async function enhancedInitGame() {
     const startTime = performance.now();
     
@@ -711,29 +656,12 @@ function giveUp() {
     _log('✅ Solution revealed!');
 }
 
-// Skip to next headline function - saves as not solved
-async function skipToNextHeadline() {
-    // Save seen headline data (skipped)
-    if (currentHeadline && currentHeadline.djb2Hash) {
-        await Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
-            isSolved: false,
-            link: currentHeadline.link,
-            timestamp: Date.now()
-        }).catch(err => {
-            console.error('Failed to save seen headline data:', err);
-        });
-    }
-    
-    // Start new game and wait for completion
-    await initGame();
-}
-
 // Make auto-win function globally available
 window.autoWinGame = autoWinGame;
 window.giveUp = giveUp;
 
-// Replace the original initGame with enhanced version BEFORE defining skipToNextHeadline
-window.initGame = enhancedInitGame;
+// Expose enhancedInitGame globally
+window.enhancedInitGame = enhancedInitGame;
 
 // Skip to next headline function - saves as not solved
 async function skipToNextHeadline() {
@@ -748,8 +676,8 @@ async function skipToNextHeadline() {
         });
     }
     
-    // Start new game and wait for completion
-    await initGame();
+    // Start new game and wait for completion - call enhanced version directly
+    await enhancedInitGame();
 }
 
 // Expose functions needed by other files
