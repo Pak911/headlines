@@ -66,13 +66,11 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     
     // Check cache first (unless forced refresh)
     if (!forceRefresh) {
-        const cachedHeadlines = headlineCache.get();
-        if (cachedHeadlines) {
-            _log(`🎯 Returning ${cachedHeadlines.length} cached headlines`);
-            return cachedHeadlines;
-        }
+        // For now, we'll check cache per source later in the fetch process
+        // The global cache concept is replaced by per-source caching
+        _log('Cache check will be performed per source during fetch');
     } else {
-        _log('🔄 Force refresh requested, bypassing cache');
+        _log('🔄 Force refresh requested');
     }
     
     // Start loading process
@@ -85,7 +83,7 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
         
         if (rssHeadlines && rssHeadlines.length > 0) {
             _log(`✅ Successfully fetched ${rssHeadlines.length} headlines from RSS`);
-            headlineCache.set(rssHeadlines);
+            // Headlines are now cached per source in fetchFromRSSSourcesSequentially
             stopLoadingProcess();
             return rssHeadlines;
         }
@@ -208,6 +206,25 @@ async function fetchFromRSSSourcesSequentially() {
             _log(`📡 Starting fetch from source ${globalIndex + 1}/${currentRSSSources.length}: ${source.name}`);
 
             try {
+                // Check if we have valid cached headlines for this source
+                if (typeof Platform !== 'undefined' && Platform.isCacheExpired) {
+                    const isExpired = await Platform.isCacheExpired(source.name);
+                    if (!isExpired) {
+                        _log(`🎯 Using cached headlines for ${source.name}`);
+                        const cachedHeadlines = await Platform.loadCachedHeadlines(source.name);
+                        if (cachedHeadlines && cachedHeadlines.length > 0) {
+                            cachedHeadlines.forEach(headline => {
+                                headline.sourceName = source.name;
+                                headline.category = source.category;
+                            });
+                            workingSources.push(source.name);
+                            _log(`✅ ${source.name}: Loaded ${cachedHeadlines.length} headlines from cache`);
+                            return cachedHeadlines;
+                        }
+                    }
+                }
+
+                // No valid cache, fetch from RSS
                 const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource, isRussian ? 'ru' : 'en');
 
                 if (headlines && headlines.length > 0) {
@@ -215,6 +232,12 @@ async function fetchFromRSSSourcesSequentially() {
                         headline.sourceName = source.name;
                         headline.category = source.category;
                     });
+
+                    // Cache the headlines for this source
+                    if (typeof Platform !== 'undefined' && Platform.cacheHeadlines) {
+                        await Platform.cacheHeadlines(source.name, headlines);
+                        _log(`💾 Cached ${headlines.length} headlines for ${source.name}`);
+                    }
 
                     workingSources.push(source.name);
                     _log(`✅ ${source.name}: Successfully fetched ${headlines.length} headlines`);

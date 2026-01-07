@@ -149,7 +149,20 @@ function initDifficultySelector() {
 }
 
 // Initialize the game when DOM is loaded
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+    // Initialize platform first
+    if (typeof Platform !== 'undefined') {
+        const platformResult = await Platform.init();
+        if (!platformResult.success) {
+            console.error('Platform initialization failed:', platformResult.error);
+        }
+    }
+    
+    // Initialize localization
+    if (typeof i18n !== 'undefined' && typeof i18n.init === 'function') {
+        await i18n.init();
+    }
+    
     // Initialize language selector
     initLanguageSelector();
     

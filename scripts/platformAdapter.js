@@ -1,0 +1,351 @@
+/**
+ * Platform Adapter - Strategy Pattern for Cross-Platform Support
+ *
+ * Provides unified API for platform-specific operations (init, save, load, cache).
+ * Automatically detects the current platform and routes calls to appropriate
+ * implementation (Y Games, local web, etc.).
+ *
+ * Usage:
+ *   await Platform.init();
+ *   await Platform.save('seamless_standard', gameData);
+ *   const data = await Platform.load('seamless_standard');
+ *   await Platform.cacheHeadlines('BBC News', headlines);
+ */
+
+(function() {
+    'use strict';
+
+    /**
+     * Platform detection and routing coordinator
+     */
+    class PlatformAdapter {
+        constructor() {
+            this.currentPlatform = null;
+            this.platformType = 'unknown';
+            this.initialized = false;
+
+            // Listen for game ready event to signal platform
+            this._setupGameReadyListener();
+        }
+
+        /**
+         * Helper method for logging with debug system support
+         * @private
+         * @param {...any} args - Arguments to log
+         */
+        _log(...args) {
+            // Use formatted logging from debug.js if available
+            if (window.__cosic && typeof window.__cosic.flog === 'function') {
+                // Join strings, but keep objects separate for proper logging
+                const message = args.map(arg =>
+                    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                ).join(' ');
+                window.__cosic.flog('platform-adapter', message);
+            } else {
+                console.log('[platform-adapter]', ...args);
+            }
+        }
+
+        /**
+         * Setup listener for cosmic:platform:gameReady event
+         * @private
+         */
+        _setupGameReadyListener() {
+            window.addEventListener('cosmic:platform:gameReady', async (event) => {
+                if (!this.initialized) {
+                    console.warn('[Platform] Cannot signal game ready - platform not initialized');
+                    return;
+                }
+
+                if (!this.currentPlatform.signalGameReady) {
+                    // Platform doesn't support game ready signaling (e.g., web platform)
+                    return;
+                }
+
+                try {
+                    this._log('Signaling game ready to platform');
+                    await this.currentPlatform.signalGameReady();
+                } catch (err) {
+                    console.error(`[Platform] signalGameReady failed:`, err);
+                }
+            });
+        }
+
+        /**
+         * Detect which platform we're running on
+         * @returns {string} Platform type: 'y' or 'web'
+         */
+        detectPlatform() {
+            this._log('Detecting platform...');
+
+            // Check if Y Games integration is available
+            if (window.__cosmic_platform &&
+                typeof window.__cosmic_platform.isAvailable === 'function') {
+                this._log('Detected: y');
+                return 'y';
+            }
+
+            // Check if web platform implementation is available
+            if (typeof WebPlatform !== 'undefined') {
+                this._log('Detected: web');
+                return 'web';
+            }
+
+            console.warn('[Platform Adapter] No platform detected!');
+            return 'unknown';
+        }
+
+        /**
+         * Initialize the platform adapter and underlying platform
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async init() {
+            this._log('init() called');
+            try {
+                // Detect platform
+                this.platformType = this.detectPlatform();
+                this._log(['Platform type:', this.platformType]);
+
+                if (this.platformType === 'unknown') {
+                    throw new Error('No platform implementation found');
+                }
+
+                // Get platform implementation
+                if (this.platformType === 'y') {
+                    this.currentPlatform = window.__cosmic_platform;
+                    this._log('Using Y platform implementation');
+                } else if (this.platformType === 'web') {
+                    this.currentPlatform = new WebPlatform();
+                    this._log('Using Web platform implementation');
+                }
+
+                this._log(`Detected platform: ${this.platformType}`);
+
+                // Initialize the platform
+                this._log('Calling platform.init()...');
+                const result = await this.currentPlatform.init();
+                this._log(['platform.init() result:', result]);
+
+                if (!result.success) {
+                    throw new Error(result.reason || 'Platform initialization failed');
+                }
+
+                this.initialized = true;
+                this._log('Platform adapter initialized successfully');
+
+                // Initialize global game state variables
+                if (typeof window.__cosmic_undoUsed !== 'number') {
+                    window.__cosmic_undoUsed = 0;
+                    this._log('Initialized undoUsed counter to 0');
+                }
+
+                this._log('Dispatching cosmic:platform:ready event');
+                // Dispatch event so other systems can wait for platform readiness
+                window.dispatchEvent(new CustomEvent('cosmic:platform:ready', {
+                    detail: { platformType: this.platformType }
+                }));
+                this._log('Event dispatched');
+
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Platform] Initialization failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Cache headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @param {Array} headlines - Array of headline objects
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async cacheHeadlines(sourceName, headlines) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot cache headlines - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.cacheHeadlines(sourceName, headlines);
+            } catch (err) {
+                console.error(`[Platform] cacheHeadlines failed for "${sourceName}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load cached headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<Array|null>} Array of headlines or null
+         */
+        async loadCachedHeadlines(sourceName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load cached headlines - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadCachedHeadlines(sourceName);
+            } catch (err) {
+                console.error(`[Platform] loadCachedHeadlines failed for "${sourceName}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Check if cache is expired for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<boolean>} True if expired
+         */
+        async isCacheExpired(sourceName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot check cache expiration - platform not initialized');
+                return true;
+            }
+
+            try {
+                return await this.currentPlatform.isCacheExpired(sourceName);
+            } catch (err) {
+                console.error(`[Platform] isCacheExpired failed for "${sourceName}":`, err);
+                return true;
+            }
+        }
+
+        /**
+         * Save game language setting
+         * @param {string} language - Language code ('en' or 'ru')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameLanguage(language) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save game language - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveGameLanguage(language);
+            } catch (err) {
+                console.error(`[Platform] saveGameLanguage failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game language setting
+         * @returns {Promise<string|null>} Language code or null
+         */
+        async loadGameLanguage() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load game language - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadGameLanguage();
+            } catch (err) {
+                console.error(`[Platform] loadGameLanguage failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save data to platform storage
+         * @param {string} key - Storage key
+         * @param {any} data - Data to save
+         * @param {boolean} immediate - If true, bypasses rate limiting
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async save(key, data, immediate = false) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                await this.currentPlatform.save(key, data, immediate);
+
+                // Dispatch success event
+                window.dispatchEvent(new CustomEvent('cosmic:data:saved:success', {
+                    detail: { key, platform: this.platformType }
+                }));
+
+                return { success: true };
+            } catch (err) {
+                // Check for specific network error
+                const errorType = err.message === 'NO_INTERNET_CONNECTION' ? 'no_internet_connection' : 'general_error';
+
+                // Dispatch error event
+                window.dispatchEvent(new CustomEvent('cosmic:data:saved:error', {
+                    detail: { key, error: err.message, errorType, platform: this.platformType }
+                }));
+
+                if (err.message === 'NO_INTERNET_CONNECTION') {
+                    this._log(`[Platform] Save failed due to no internet connection for key "${key}"`);
+                } else {
+                    console.error(`[Platform] Save failed for key "${key}":`, err);
+                }
+
+                // Dispatch event for future UI indicators
+                window.dispatchEvent(new CustomEvent('cosmic:save:failed', {
+                    detail: { key, error: err.message, platform: this.platformType }
+                }));
+
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load data from platform storage
+         * @param {string} key - Storage key
+         * @returns {Promise<any|null>} Loaded data or null
+         */
+        async load(key) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.load(key);
+            } catch (err) {
+                console.error(`[Platform] Load failed for key "${key}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Delete data from platform storage
+         * @param {string} key - Storage key to delete
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async delete(key) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot delete - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                await this.currentPlatform.delete(key);
+                return { success: true };
+            } catch (err) {
+                console.error(`[Platform] Delete failed for key "${key}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Check if platform is available and initialized
+         * @returns {boolean}
+         */
+        isAvailable() {
+            return this.initialized && this.currentPlatform && this.currentPlatform.isAvailable();
+        }
+    }
+
+    // Create global instance
+    if (typeof window !== 'undefined') {
+        window.Platform = new PlatformAdapter();
+    }
+
+})();

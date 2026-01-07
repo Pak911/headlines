@@ -55,11 +55,13 @@ class LocalizationManager {
     }
 
     // Initialize localization system
-    init() {
-        // Check if user has previously selected a language
-        const savedLanguage = localStorage.getItem('preferredLanguage');
-        if (savedLanguage && this.languages[savedLanguage]) {
-            this.currentLanguage = savedLanguage;
+    async init() {
+        // Check platform storage for saved language
+        if (typeof Platform !== 'undefined' && Platform.loadGameLanguage) {
+            const savedLanguage = await Platform.loadGameLanguage();
+            if (savedLanguage && this.languages[savedLanguage]) {
+                this.currentLanguage = savedLanguage;
+            }
         }
         
         // Set HTML lang attribute
@@ -169,10 +171,15 @@ class LocalizationManager {
     }
 
     // Change language
-    setLanguage(lang) {
+    async setLanguage(lang) {
         if (this.languages[lang]) {
             this.currentLanguage = lang;
-            localStorage.setItem('preferredLanguage', lang);
+            
+            // Save to platform system
+            if (typeof Platform !== 'undefined' && Platform.saveGameLanguage) {
+                await Platform.saveGameLanguage(lang);
+            }
+            
             document.documentElement.lang = lang;
             this.updateUI();
             
@@ -180,10 +187,6 @@ class LocalizationManager {
             if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'auto') {
                 if (typeof window !== 'undefined' && window.HeadlineManager) {
                     _log(`🔄 Refreshing headlines for language change to: ${lang}`);
-                    // Clear headline cache and reinitialize
-                    if (typeof headlineCache !== 'undefined') {
-                        headlineCache.clear();
-                    }
                     // Reset headline management system
                     if (typeof window.HeadlineManager.refreshHeadlinePools === 'function') {
                         window.HeadlineManager.refreshHeadlinePools();
@@ -233,8 +236,8 @@ function t(key, count = null) {
 }
 
 // Make setLanguage function globally available
-function setLanguage(lang) {
-    return i18n.setLanguage(lang);
+async function setLanguage(lang) {
+    return await i18n.setLanguage(lang);
 }
 
 // Make i18n globally available
