@@ -22,16 +22,16 @@ const crosswordEngineConfig = {
     lengthBonus: 10,            // Bonus for longer word pairs
     
     // Phase 2: Backbone Generation
-    variantsToTry: 100,         // How many backbones to try filling (affects quality vs speed)
+    variantsToTry: 70,         // How many backbones to try filling (affects quality vs speed)
     
     // Phase 3: Beam Search Fill
-    beamWidth: 10,              // Number of states to keep in beam search (higher = better but slower)
+    beamWidth: 30,              // Number of states to keep in beam search (higher = better but slower)
     timeLimit: 300,             // Maximum time to spend generating layout (ms)
     
     // Final Scoring
     finalCompactness: 0.4,      // Penalty per unit of area (width × height) - lower values prefer compact grids
     finalUnusedWeight: 30,     // Penalty per unused letter (total unused letters × 300) - ensures all words are placed
-    ratioWeight: 100,           // Penalty for aspect ratio deviation from screen (1/5 used in Phase 2 intermediate scoring)
+    ratioWeight: 400,           // Penalty for aspect ratio deviation from screen (1/5 used in Phase 2 intermediate scoring)
     cycleBonus: 100,            // Bonus for each closed loop/cycle of words (graph connectivity)
     
     // Final Selection - Weighted Random from Top Variants
