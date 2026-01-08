@@ -23,7 +23,6 @@ const crosswordEngineConfig = {
     
     // Phase 2: Backbone Generation
     variantsToTry: 100,         // How many backbones to try filling (affects quality vs speed)
-    squarenessWeight: 2,        // Penalty for non-square grids (difference between width/height)
     
     // Phase 3: Beam Search Fill
     beamWidth: 10,              // Number of states to keep in beam search (higher = better but slower)
@@ -31,17 +30,19 @@ const crosswordEngineConfig = {
     
     // Final Scoring
     finalCompactness: 0.4,      // Penalty per unit of area (width × height) - lower values prefer compact grids
-    finalUnusedWeight: 300,     // Heavy penalty for unused words (ensures all words are placed)
+    finalUnusedWeight: 30,     // Penalty per unused letter (total unused letters × 300) - ensures all words are placed
+    ratioWeight: 100,           // Penalty for aspect ratio deviation from screen (1/5 used in Phase 2 intermediate scoring)
+    cycleBonus: 100,            // Bonus for each closed loop/cycle of words (graph connectivity)
     
     // Final Selection - Weighted Random from Top Variants
-    finalVariantCount: 5,       // Number of top-scoring variants to choose from using weighted probability
+    finalVariantCount: 3,       // Number of top-scoring variants to choose from using weighted probability
                                 // Higher scores have higher chance, but adds variety to grid layouts
                                 // Set to 1 to always pick the best variant (deterministic)
                                 // Different users will likely get different grids from same word bag
     
     // Intersection Bonuses (non-linear rewards for well-connected words)
     // [1 intersection, 2 intersections, 3 intersections, 4 intersections, 5+ intersections]
-    intersectionWeights: [10, 20, 40, 80, 150]
+    intersectionWeights: [10, 60, 100, 160, 160]
 };
 
 // Headline Scoring Configuration

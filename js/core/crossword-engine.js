@@ -1,6 +1,20 @@
-// Crossword Engine - Smart Backbone-First Layout Generation
-// Three-phase algorithm: Matchmaker → Backbone → Beam Search Fill
-// Ported from crossword-generator_1.html
+// Crossword Engine - Orientation-Aware Layout Generator
+// 
+// Generates optimal crossword grids that adapt to screen aspect ratio (portrait/landscape).
+// 
+// Algorithm Overview:
+//   1. Screen Detection: Detect orientation and calculate target aspect ratio (as landscape)
+//   2. Matchmaker: Find best word pairs by analyzing shared letters with remaining words
+//   3. Backbone Generation: Create H-shaped structures (2 parallel words + vertical bridges)
+//      - Score with intersection bonuses + light ratio penalty (1/5 weight)
+//      - Select top backbones for expansion
+//   4. Beam Search Fill: Iteratively place remaining words using constrained search
+//      - Keep top N states (beamWidth) at each step to limit exploration
+//   5. Final Scoring: Rank completed grids by intersections + cycles + area + ratio match
+//   6. Variant Selection: Weighted random from top candidates (adds variety)
+//   7. Transpose: If portrait mode, swap rows↔cols and horizontal↔vertical
+// 
+// Result: Device-optimized crossword that maximizes word connectivity and screen fit
 
 (function() {
 'use strict';
@@ -21,17 +35,19 @@ function getCrosswordConfig() {
         return crosswordEngineConfig;
     }
     // Fallback defaults
+    console.warn('[crossword-engine] crosswordEngineConfig not found in data.js, using fallback defaults');
     return {
         bridgeWeight: 50,
         lengthBonus: 10,
         variantsToTry: 100,
-        squarenessWeight: 2,
         beamWidth: 10,
         timeLimit: 300,
         maxResults: 15,
         finalCompactness: 0.4,
         finalUnusedWeight: 300,
-        intersectionWeights: [10, 20, 40, 80, 150]
+        ratioWeight: 100,
+        cycleBonus: 100,
+        intersectionWeights: [10, 60, 100, 160, 160]
     };
 }
 
@@ -121,7 +137,7 @@ function getTopologicalFingerprint(wordA, wordB, shift, bridges) {
     return connections.join('|');
 }
 
-function calculateIntermediateScore(backbone, allWords, config) {
+function calculateIntermediateScore(backbone, allWords, config, targetRatio) {
     const { wordA, wordB, bridges, minX, maxX, minY, maxY } = backbone;
     let score = 0;
     
@@ -145,24 +161,17 @@ function calculateIntermediateScore(backbone, allWords, config) {
     });
     score += (scoreA + scoreB + scoreBridges);
 
-    // Squareness penalty
+    // Aspect ratio penalty (1/5 of final weight - exploratory phase)
     const width = maxX - minX;
     const height = maxY - minY;
-    const diff = Math.abs(width - height);
-    score -= (diff * config.squarenessWeight);
-
-    // Unused words (light penalty for backbone phase)
-    const usedWords = new Set([wordA, wordB, ...bridges.map(b => b.word)]);
-    let unusedLettersCount = 0;
-    allWords.forEach(w => {
-        if (!usedWords.has(w)) unusedLettersCount += w.length;
-    });
-    score -= (unusedLettersCount * 5); // Light penalty
+    const backboneRatio = width / height;
+    const ratioPenalty = Math.abs(targetRatio - backboneRatio) * (config.ratioWeight * 0.2);
+    score -= ratioPenalty;
     
     return score;
 }
 
-function tryConfiguration(wordA, wordB, indexA, indexB, pool, maxGap, results, uniqueTopologies, direction, config, allWords) {
+function tryConfiguration(wordA, wordB, indexA, indexB, pool, maxGap, results, uniqueTopologies, direction, config, allWords, targetRatio) {
     for (let gap = 1; gap <= maxGap; gap++) {
         const dist = gap + 1;
         const minShift = -(wordB.length - 1);
@@ -239,7 +248,7 @@ function tryConfiguration(wordA, wordB, indexA, indexB, pool, maxGap, results, u
                         minX, maxX, minY, maxY
                     };
 
-                    backboneObj.intermediateScore = calculateIntermediateScore(backboneObj, allWords, config);
+                    backboneObj.intermediateScore = calculateIntermediateScore(backboneObj, allWords, config, targetRatio);
                     results.push(backboneObj);
                 }
             }
@@ -247,7 +256,7 @@ function tryConfiguration(wordA, wordB, indexA, indexB, pool, maxGap, results, u
     }
 }
 
-function generateBackbones(topPairs, allWords, config) {
+function generateBackbones(topPairs, allWords, config, targetRatio) {
     const validBackbones = [];
     const uniqueTopologies = new Set();
     
@@ -265,8 +274,8 @@ function generateBackbones(topPairs, allWords, config) {
         const availableWords = allWords.map((w, idx) => ({ word: w, index: idx }))
             .filter(item => item.word !== wordA && item.word !== wordB);
 
-        tryConfiguration(wordA, wordB, indexA, indexB, availableWords, maxGap, validBackbones, uniqueTopologies, "below", config, allWords);
-        tryConfiguration(wordA, wordB, indexA, indexB, availableWords, maxGap, validBackbones, uniqueTopologies, "above", config, allWords);
+        tryConfiguration(wordA, wordB, indexA, indexB, availableWords, maxGap, validBackbones, uniqueTopologies, "below", config, allWords, targetRatio);
+        tryConfiguration(wordA, wordB, indexA, indexB, availableWords, maxGap, validBackbones, uniqueTopologies, "above", config, allWords, targetRatio);
         
         if (validBackbones.length > 200) break;
     }
@@ -324,7 +333,7 @@ function createNextState(prevState, newWordObj) {
     return { placed: newPlaced, used: newUsed };
 }
 
-function solveRemainingWords(backbone, allWords, config) {
+function solveRemainingWords(backbone, allWords, config, targetRatio) {
     const placed = [];
     const used = new Set();
 
@@ -440,6 +449,16 @@ function solveRemainingWords(backbone, allWords, config) {
         intersectionScore += getW(wordIntersects);
     });
 
+    // Cycle/Loop Detection (NEW - graph connectivity bonus)
+    // Cyclomatic number: M = E - V + P (where P=1 for connected graph)
+    const numWords = bestState.placed.length;
+    let numIntersections = 0;
+    cellCounts.forEach(count => {
+        if (count > 1) numIntersections++;
+    });
+    const numCycles = Math.max(0, numIntersections - numWords + 1);
+    const cycleBonus = numCycles * config.cycleBonus;
+    
     // Unused penalty
     let unusedLetters = 0;
     allWords.forEach((w, idx) => {
@@ -452,8 +471,12 @@ function solveRemainingWords(backbone, allWords, config) {
     // Area penalty
     const area = width * height;
     const compactnessPenalty = area * config.finalCompactness;
+    
+    // Aspect ratio penalty (FULL weight in final scoring)
+    const gridRatio = width / height;
+    const ratioPenalty = Math.abs(targetRatio - gridRatio) * config.ratioWeight;
 
-    const totalScore = intersectionScore - unusedPenalty - compactnessPenalty;
+    const totalScore = intersectionScore + cycleBonus - unusedPenalty - compactnessPenalty - ratioPenalty;
 
     return {
         placed: bestState.placed,
@@ -544,11 +567,43 @@ function selectVariantWeightedRandom(sortedResults, config) {
     return topVariants[0];
 }
 
+// === TRANSPOSE HELPER ===
+
+function transposeLayout(layout, currentGridSize) {
+    // Swap coordinates and directions for portrait mode
+    const transposedWords = layout.words.map(w => ({
+        word: w.word,
+        row: w.col,  // Swap row ↔ col
+        col: w.row,  // Swap col ↔ row
+        direction: w.direction === 'horizontal' ? 'vertical' : 'horizontal'
+    }));
+    
+    const transposedGridSize = {
+        rows: currentGridSize.cols,  // Swap dimensions
+        cols: currentGridSize.rows
+    };
+    
+    return {
+        layout: { words: transposedWords },
+        gridSize: transposedGridSize
+    };
+}
+
 // === MAIN ENTRY POINT ===
 
 function generateCrosswordLayout(words) {
     const startTime = performance.now();
     const config = getCrosswordConfig();
+    
+    // Detect screen orientation and calculate target ratio
+    const screenWidth = window.innerWidth || 1920;
+    const screenHeight = window.innerHeight || 1080;
+    const isPortrait = screenHeight > screenWidth;
+    
+    // Always calculate target ratio as LANDSCAPE (longer dimension / shorter dimension)
+    const targetRatio = Math.max(screenWidth, screenHeight) / Math.min(screenWidth, screenHeight);
+    
+    _log(`Screen: ${screenWidth}×${screenHeight} (${isPortrait ? 'Portrait' : 'Landscape'}), Target Ratio: ${targetRatio.toFixed(2)}`);
     
     // Detect language
     detectAndSetLanguage(words);
@@ -560,21 +615,21 @@ function generateCrosswordLayout(words) {
         return null;
     }
     
-    // Phase 2: Generate backbones
-    const backbones = generateBackbones(pairs, words, config);
+    // Phase 2: Generate backbones (with target ratio for intermediate scoring)
+    const backbones = generateBackbones(pairs, words, config, targetRatio);
     if (backbones.length === 0) {
         _log('No valid backbones generated');
         return null;
     }
     
-    // Phase 3: Fill remaining words
+    // Phase 3: Fill remaining words (with target ratio for final scoring)
     const finalResults = [];
     const candidates = backbones.slice(0, config.variantsToTry);
     
     for (const bb of candidates) {
         if (performance.now() - startTime > config.timeLimit) break;
         
-        const filled = solveRemainingWords(bb, words, config);
+        const filled = solveRemainingWords(bb, words, config, targetRatio);
         finalResults.push(filled);
     }
     
@@ -596,7 +651,7 @@ function generateCrosswordLayout(words) {
     }
     
     // Convert to expected output format
-    const layout = {
+    let layout = {
         words: bestResult.placed.map(p => ({
             word: p.wordIndex,
             row: p.y - bestResult.minY,
@@ -606,11 +661,22 @@ function generateCrosswordLayout(words) {
     };
     
     // Set global gridSize for compatibility
+    let currentGridSize = {
+        rows: bestResult.maxY - bestResult.minY,
+        cols: bestResult.maxX - bestResult.minX
+    };
+    
+    // Transpose if portrait mode (swap everything to fit vertical screen)
+    if (isPortrait) {
+        const transposed = transposeLayout(layout, currentGridSize);
+        layout = transposed.layout;
+        currentGridSize = transposed.gridSize;
+        _log(`Transposed for portrait: ${currentGridSize.cols}×${currentGridSize.rows}`);
+    }
+    
+    // Set global gridSize
     if (typeof gridSize !== 'undefined') {
-        gridSize = {
-            rows: bestResult.maxY - bestResult.minY,
-            cols: bestResult.maxX - bestResult.minX
-        };
+        gridSize = currentGridSize;
     }
     
     const elapsedTime = Math.round(performance.now() - startTime);
