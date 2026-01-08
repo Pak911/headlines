@@ -17,7 +17,6 @@ function _log(message, options = {always:true}) {
 }
 
 // Configuration
-const FETCH_TIMEOUT = 10000; // 10 seconds - increased for rate limiting
 const CACHE_DURATION = 300000; // 5 minutes in milliseconds
 const MAX_CONCURRENT_REQUESTS = 3; // Maximum concurrent requests to avoid rate limiting
 
@@ -96,14 +95,9 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
         _log('⚠️ RSS fetch returned no headlines, falling back to mock data');
         
     } catch (error) {
-        console.warn('⚠️ FALLBACK TO MOCK: RSS fetch failed with error:', error.message);
-        console.warn('  Possible causes:');
-        console.warn('  - Network timeout after', FETCH_TIMEOUT, 'ms');
-        console.warn('  - CORS restrictions blocking RSS API access');
-        console.warn('  - RSS2JSON API service unavailable');
-        console.warn('  - All RSS sources failed to respond');
-        console.error('❌ RSS fetch failed:', error);
-        _log('🔄 Falling back to mock data');
+        // This should no longer happen since fetchFromRSSWithTimeout resolves instead of rejects
+        console.error('❌ Unexpected error in RSS fetch (should not happen):', error);
+        _log('🔄 Unexpected error, falling back to mock data');
     }
     
     // Fallback to mock headlines
@@ -121,27 +115,14 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
 }
 
 /**
- * Fetches from RSS sources with timeout handling
- * @returns {Promise<Array>} Headlines from RSS or null if failed
+ * Fetches from RSS sources with controlled concurrency
+ * @returns {Promise<Array>} Headlines from RSS
  */
 async function fetchFromRSSWithTimeout() {
-    return new Promise(async (resolve, reject) => {
-        // Set up timeout
-        const timeoutId = setTimeout(() => {
-            _log(`⏰ RSS fetch timeout after ${FETCH_TIMEOUT}ms`);
-            reject(new Error('RSS fetch timeout'));
-        }, FETCH_TIMEOUT);
-        
-        try {
-            // Fetch from RSS sources with controlled concurrency
-            const headlines = await fetchFromRSSSourcesSequentially();
-            clearTimeout(timeoutId);
-            resolve(headlines);
-        } catch (error) {
-            clearTimeout(timeoutId);
-            reject(error);
-        }
-    });
+    // Removed timeout - let the process complete naturally
+    // Individual RSS fetches will timeout via browser's fetch if needed
+    _log('🚀 Starting RSS fetch without global timeout...');
+    return await fetchFromRSSSourcesSequentially();
 }
 
 /**
@@ -299,8 +280,8 @@ function startLoadingProcess() {
     loadingState.startTime = Date.now();
     loadingState.showingAnimation = false;
     
-    // Use configurable delay from data.js or fallback to FETCH_TIMEOUT
-    const loadingDelay = headlineScoringConfig?.rssConfig?.loadingAnimationDelay || FETCH_TIMEOUT;
+    // Use configurable delay from data.js or fallback to 300ms
+    const loadingDelay = headlineScoringConfig?.rssConfig?.loadingAnimationDelay || 300;
     
     // Show loading animation after a delay if still loading
     loadingState.timeoutId = setTimeout(() => {
@@ -475,7 +456,6 @@ if (typeof window !== 'undefined') {
         getCacheInfo,
         showLoadingAnimation,
         hideLoadingAnimation,
-        FETCH_TIMEOUT,
         CACHE_DURATION
     };
 }
