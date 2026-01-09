@@ -46,8 +46,6 @@
 
     // Logging helper function
     function _log(message, options = {}) {
-        // Force always log for debugging
-        options.always = true;
         if (window.__cosic && typeof window.__cosic.flog === 'function') {
             window.__cosic.flog('soundManager', message, options);
         } else {
@@ -262,6 +260,30 @@
         window.addEventListener('headlines:buttonPress', (event) => {
             _log('BUTTON PRESS EVENT RECEIVED');
             playEventSound('buttonPress');
+        });
+
+        // Listen for word solved events
+        window.addEventListener('headlines:wordSolved', (event) => {
+            _log('WORD SOLVED EVENT RECEIVED');
+            playEventSound('wordSolved');
+        });
+
+        // Listen for puzzle solved events
+        window.addEventListener('headlines:puzzleSolved', (event) => {
+            _log('PUZZLE SOLVED EVENT RECEIVED');
+            playEventSound('puzzleSolved');
+        });
+
+        // Listen for letter swap start events
+        window.addEventListener('headlines:letterSwapStart', (event) => {
+            _log('LETTER SWAP START EVENT RECEIVED');
+            playEventSound('letterSwapStart');
+        });
+
+        // Listen for letter swap end events
+        window.addEventListener('headlines:letterSwapEnd', (event) => {
+            _log('LETTER SWAP END EVENT RECEIVED');
+            playEventSound('letterSwapEnd');
         });
 
         _log('Event listeners configured');

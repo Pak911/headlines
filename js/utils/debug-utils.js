@@ -594,5 +594,6 @@ window.__cosic.flog = function(prefix, messageOrArgs, opts) {
 // Expose debug functions globally
 window.toggleDebugPanel = toggleDebugPanel;
 window.updateDebugInfo = updateDebugInfo;
+window.updateGridStateCode = updateGridStateCode;
 
 })();

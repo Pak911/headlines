@@ -19,6 +19,9 @@ function _log(message, options = {}) {
  * Called when all letters turn green but before victory modal appears
  */
 function playVictoryAnimation() {
+    // Dispatch puzzle solved event for sound
+    window.dispatchEvent(new CustomEvent('headlines:puzzleSolved'));
+    
     // Get all filled cells
     const filledCells = getAllFilledCells();
     

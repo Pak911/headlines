@@ -109,27 +109,51 @@ const headlinesAudio = {
             type: 'oscillator',
             waveform: 'sine',
             frequency: { start: 320, end: 240 },
-            volume: 0.08,
+            volume: 0.05,
             duration: 0.06,
             envelope: { attack: 0.004, decay: 0.056 }
         },
-        toggleOn: {
+        letterSwapStart: {
             type: 'oscillator',
             waveform: 'sine',
             frequency: { start: 280, end: 360 },
-            volume: 0.09,
+            volume: 0.05,
             duration: 0.07,
             envelope: { attack: 0.005, decay: 0.065 }
         },
-        toggleOff: {
+        letterSwapEnd: {
             type: 'oscillator',
             waveform: 'sine',
             frequency: { start: 240, end: 200 },
-            volume: 0.07,
+            volume: 0.05,
             duration: 0.08,
             envelope: { attack: 0.003, decay: 0.077 }
         },
-
+        // File-based UI sounds
+        uiPuzzleSolved: {
+            path: 'sounds/ui_puzzle_solved.mp3',
+            volume: 0.3,
+            attack: 0.1,
+            release: 0.2
+        },
+        uiWordSolved1: {
+            path: 'sounds/ui_word_solved_01.mp3',
+            volume: 0.3,
+            attack: 0.1,
+            release: 0.2
+        },
+        uiWordSolved2: {
+            path: 'sounds/ui_word_solved_02.mp3',
+            volume: 0.3,
+            attack: 0.1,
+            release: 0.2
+        },
+        uiWordSolved3: {
+            path: 'sounds/ui_word_solved_03.mp3',
+            volume: 0.3,
+            attack: 0.1,
+            release: 0.2
+        },
         // Template for file-based sounds (loaded from MP3/OGG files):
         // 'soundName': {
         //     path: 'sounds/effect.mp3',  // Path to audio file (relative to project root, supports .mp3 and .ogg)
@@ -216,6 +240,14 @@ const headlinesAudio = {
         'bounce5': ['bounce5'],
         'toggleOn': ['toggleOn'],
         'toggleOff': ['toggleOff'],
+
+        // Letter swapping sound events
+        'letterSwapStart': ['letterSwapStart'],
+        'letterSwapEnd': ['letterSwapEnd'],
+
+        // UI sound events
+        'wordSolved': ['uiWordSolved1', 'uiWordSolved2', 'uiWordSolved3'],
+        'puzzleSolved': ['uiPuzzleSolved'],
 
     }
 };

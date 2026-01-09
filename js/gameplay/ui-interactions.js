@@ -145,6 +145,9 @@ function isWordComplete(wordIndex) {
 
 // Play subtle color wave animation along a completed word
 function playWordCompletionAnimation(wordIndex) {
+    // Dispatch word solved event for sound
+    window.dispatchEvent(new CustomEvent('headlines:wordSolved'));
+    
     // Get all cells for this word
     const wordCells = [];
     for (let r = 0; r < grid.length; r++) {
@@ -198,6 +201,9 @@ function playWordCompletionAnimation(wordIndex) {
 }
 
 function swapLetters(pos1, pos2) {
+    // Dispatch letter swap start event for sound
+    window.dispatchEvent(new CustomEvent('headlines:letterSwapStart'));
+    
     // Store last swap positions for victory animation
     lastSwapPositions = [pos1, pos2];
     
@@ -228,9 +234,11 @@ function swapLetters(pos1, pos2) {
         void movesCircle.offsetWidth;
         movesCircle.classList.add('pulse');
     }
-    
     // After first 180 degrees, swap letters and update colors immediately
     setTimeout(() => {
+        // Dispatch letter swap end event for sound
+        window.dispatchEvent(new CustomEvent('headlines:letterSwapEnd'));
+        
         // Swap the letters in the grid data
         const temp = grid[pos1.row][pos1.col].currentLetter;
         grid[pos1.row][pos1.col].currentLetter = grid[pos2.row][pos2.col].currentLetter;
