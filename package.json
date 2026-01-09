@@ -1,0 +1,21 @@
+{
+  "name": "headlines-build",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Build system for Headlines crossword game",
+  "dependencies": {},
+  "devDependencies": {
+    "archiver": "^7.0.1",
+    "clean-css": "^5.3.3",
+    "fs-extra": "^11.3.1",
+    "html-minifier-terser": "^7.2.0",
+    "minimist": "^1.2.8",
+    "terser": "^5.31.0"
+  },
+  "scripts": {
+    "build:web": "node build.js",
+    "build:web:minify": "node build.js --minify",
+    "build:release": "node build.js --release",
+    "clean": "node -e \"const fs = require('fs-extra'); fs.emptyDir('dist').then(() => console.log('dist/ cleaned')).catch(console.error);\""
+  }
+}

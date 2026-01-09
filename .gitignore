@@ -4,6 +4,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Logs
+*.log
+
 # Environment files
 .env
 .env.local
@@ -16,6 +19,7 @@ headlines-game/.env
 dist/
 build/
 out/
+test/to_extract/
 
 # IDE and editor files
 .vscode/
