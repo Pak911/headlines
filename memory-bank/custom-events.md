@@ -49,6 +49,14 @@ All events use the `headlines:` prefix for game-specific events.
   ```
 - **Listeners**: `js/utils/gamestats.js` - GameStats module for statistics tracking
 
+#### `headlines:buttonPress`
+- **Purpose**: Fired when a player interacts with UI elements that should produce a button press sound effect
+- **Dispatched From**: 
+  - `js/gameplay/ui-interactions.js` - selectCell() function when selecting/deselecting grid cells
+  - `js/main.js` - Global click handler for all `<button>` elements
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/soundManager.js` - SoundManager module for audio feedback
+
 ## Event Production Logic
 
 ### Platform Ready Event
@@ -66,6 +74,12 @@ All events use the `headlines:` prefix for game-specific events.
 - This prevents double-counting when a player gives up then skips the same headline
 - Used to track player engagement and difficulty assessment
 
+### Button Press Event
+- Produced in `selectCell()` function when selecting or deselecting grid cells (adding/removing blue border)
+- Produced by global click handler for all `<button>` elements in the UI
+- Used to provide audio feedback for user interactions
+- Does not fire during letter swap operations (when clicking a second cell to perform the swap)
+
 ## Event Consumption
 
 ### GameStats Module (`js/utils/gamestats.js`)
@@ -74,3 +88,8 @@ All events use the `headlines:` prefix for game-specific events.
 - Maintains running counters for solved and skipped puzzles
 - Persists stats using platform storage functions
 - Provides `getCurrentStats()` for retrieving current statistics
+
+### SoundManager Module (`js/singletons/soundManager.js`)
+- Listens to `headlines:buttonPress` event
+- Plays button press sound effect using oscillator synthesis or sample playback
+- Provides audio feedback for UI interactions and grid cell selections

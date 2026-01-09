@@ -2,8 +2,9 @@
 
 ## Technology Stack
 - **Frontend**: Pure HTML5, CSS3, JavaScript (ES6+)
+- **Audio**: Web Audio API with Pizzicato.js library
 - **Build Tools**: None (direct browser execution)
-- **Dependencies**: None (zero dependencies)
+- **Dependencies**: Pizzicato.js (Web Audio API wrapper)
 - **Hosting Requirements**: Any static file server
 
 ## Development Environment
@@ -19,6 +20,7 @@
 headlines/
 ├── index.html                          # Main game interface
 ├── data.js                             # Configuration and data
+├── data-audio.js                       # Audio system configuration
 ├── news-fetching-config.js             # RSS feed configuration
 ├── README.md                           # Project documentation
 ├── css/                                # Stylesheets
@@ -54,10 +56,14 @@ headlines/
 │   │   ├── headline-scorer.js          # Headline filtering & scoring
 │   │   ├── rss-parser.js               # RSS feed parsing
 │   │   └── html-processor.js           # HTML cleaning
+│   ├── singletons/                     # Singleton pattern modules
+│   │   └── soundManager.js             # Audio system management
 │   └── utils/                          # Utilities
 │       ├── debug-utils.js              # Debug panel tools
 │       ├── gamestats.js                # Game statistics tracking
 │       └── utils.js                    # General utilities
+├── libs/                               # Third-party libraries
+│   └── pizzicato.min.js                # Web Audio API library
 ├── test/                               # Test framework and utilities
 │   └── [various test files]            # Test interfaces and utilities
 └── memory-bank/                        # Project documentation
@@ -189,6 +195,9 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 - **`platformAdapter.js`**: Platform abstraction layer interface
 - **`webPlatform.js`**: Web platform implementation for local storage
 
+### Singleton Modules (`js/singletons/`)
+- **`soundManager.js`**: Audio system management with Web Audio API and Pizzicato.js
+
 ### RSS Processing Modules (`js/rss/`)
 - **`async-rss-fetcher.js`**: Parallel RSS fetching with caching
 - **`headline-manager.js`**: Headline selection and lifecycle tracking
@@ -207,14 +216,15 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 
 ## Module Loading Strategy
 **Critical Dependency Order** (defined in index.html):
-1. **Data Layer**: `data.js`, `news-fetching-config.js` (configuration)
+1. **Data Layer**: `data.js`, `data-audio.js`, `news-fetching-config.js` (configuration)
 2. **Localization**: Translation system initialization
 3. **Core Engine**: Foundation algorithms
-4. **RSS Processing**: Headline fetching and processing
-5. **Platforms**: Platform abstraction layer
-6. **Gameplay**: User-facing features
-7. **Utilities**: Supporting functions
-8. **Main**: Entry point coordination
+4. **Singletons**: Audio system management
+5. **RSS Processing**: Headline fetching and processing
+6. **Platforms**: Platform abstraction layer
+7. **Gameplay**: User-facing features
+8. **Utilities**: Supporting functions
+9. **Main**: Entry point coordination
 
 ## Test Framework
 - **Purpose**: Validate color logic and intersection handling
@@ -229,7 +239,7 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 
 ## Technical Constraints
 1. **No Build Process**: Direct browser execution
-2. **No External Libraries**: Pure vanilla implementation
+2. **Minimal External Libraries**: Single audio library (Pizzicato.js)
 3. **Client-Side Only**: No server communication
 
 ## Performance Considerations

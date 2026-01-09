@@ -102,15 +102,17 @@ function selectCell(row, col) {
     const cellElement = document.querySelector(`.grid-cell[data-row="${row}"][data-col="${col}"]`);
     
     if (selectedCell === null) {
-        // First selection
+        // First selection - dispatch button press sound
         selectedCell = {row, col};
         cellElement.classList.add('selected');
+        window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
     } else if (selectedCell.row === row && selectedCell.col === col) {
-        // Deselect if clicking same cell
+        // Deselect if clicking same cell - dispatch button press sound
         cellElement.classList.remove('selected');
         selectedCell = null;
+        window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
     } else {
-        // Second selection - perform swap
+        // Second selection - perform swap (no sound for swap)
         swapLetters(selectedCell, {row, col});
         
         // Remove selection

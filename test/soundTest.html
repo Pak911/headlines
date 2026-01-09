@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headlines Sound Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .section h2 {
+            margin-top: 0;
+            color: #555;
+            border-bottom: 2px solid #007bff;
+            padding-bottom: 5px;
+        }
+        .button-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 10px;
+            margin-top: 15px;
+        }
+        button {
+            padding: 12px 20px;
+            font-size: 14px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            text-align: left;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        .game-event-btn {
+            background-color: #28a745;
+            color: white;
+        }
+        .sound-event-btn {
+            background-color: #007bff;
+            color: white;
+        }
+        .status {
+            margin-top: 20px;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+        .info {
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+            color: #0c5460;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎵 Headlines Sound Test</h1>
+
+        <div class="info">
+            <strong>Instructions:</strong><br>
+            • Click buttons to test sounds<br>
+            • Game Events: Dispatch actual game events that the sound manager listens for<br>
+            • Sound Events: Play specific sound events directly (for testing oscillator sounds)<br>
+            • Check browser console for detailed logging
+        </div>
+
+        <div class="section">
+            <h2>🎮 Game Events</h2>
+            <p>These dispatch actual game events that the sound manager listens for:</p>
+            <div class="button-grid">
+                <button class="game-event-btn" onclick="dispatchGameEvent('headlines:buttonPress')">
+                    📱 Button Press<br><small>headlines:buttonPress</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🔊 Sound Events (Oscillator)</h2>
+            <p>These play specific sound events directly (testing oscillator sounds from data-audio-alt.js):</p>
+            <div class="button-grid">
+                <button class="sound-event-btn" onclick="playSoundEvent('blackHoleCollected')">
+                    🕳️ Black Hole Collected<br><small>blackHoleCollected</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('merge')">
+                    🔄 Merge<br><small>merge</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('blackHoleDrop')">
+                    📦 Black Hole Drop<br><small>blackHoleDrop</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('blackHoleConsume')">
+                    🍴 Black Hole Consume<br><small>blackHoleConsume</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('gameOver')">
+                    💀 Game Over<br><small>gameOver</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce')">
+                    🏀 Bounce<br><small>bounce (random)</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce1')">
+                    🏀 Bounce 1<br><small>bounce1</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce2')">
+                    🏀 Bounce 2<br><small>bounce2</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce3')">
+                    🏀 Bounce 3<br><small>bounce3</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce4')">
+                    🏀 Bounce 4<br><small>bounce4</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('bounce5')">
+                    🏀 Bounce 5<br><small>bounce5</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('buttonPress')">
+                    📱 Button Press<br><small>buttonPress</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('toggleOn')">
+                    🔘 Toggle On<br><small>toggleOn</small>
+                </button>
+                <button class="sound-event-btn" onclick="playSoundEvent('toggleOff')">
+                    🔘 Toggle Off<br><small>toggleOff</small>
+                </button>
+            </div>
+        </div>
+
+        <div class="status">
+            <strong>Status:</strong> <span id="status">Initializing...</span><br>
+            <strong>Sound Manager:</strong> <span id="soundManagerStatus">Not loaded</span>
+        </div>
+    </div>
+
+    <!-- Load audio configuration -->
+    <script src="../data-audio.js"></script>
+
+    <!-- Load sound manager -->
+    <script src="../js/singletons/soundManager.js"></script>
+
+    <script>
+        // Update status when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateStatus();
+        });
+
+        // Function to dispatch game events
+        function dispatchGameEvent(eventName) {
+            console.log('🎮 Dispatching game event:', eventName);
+            updateStatus('Dispatching: ' + eventName);
+
+            // Dispatch the custom event
+            window.dispatchEvent(new CustomEvent(eventName, {
+                detail: {}
+            }));
+
+            setTimeout(() => updateStatus('Ready'), 1000);
+        }
+
+        // Function to play sound events directly
+        function playSoundEvent(soundEvent) {
+            console.log('🔊 Playing sound event:', soundEvent);
+            updateStatus('Playing: ' + soundEvent);
+
+            // Access the sound manager and play the event
+            if (window.__headlines_sound) {
+                window.__headlines_sound.playEventSound(soundEvent);
+            } else {
+                console.error('Sound manager not available');
+                updateStatus('ERROR: Sound manager not loaded');
+            }
+
+            setTimeout(() => updateStatus('Ready'), 1000);
+        }
+
+        // Update status display
+        function updateStatus(message) {
+            const statusEl = document.getElementById('status');
+            const soundManagerEl = document.getElementById('soundManagerStatus');
+
+            if (statusEl) statusEl.textContent = message || 'Ready';
+
+            if (soundManagerEl) {
+                if (window.__headlines_sound) {
+                    const state = window.__headlines_sound.getState();
+                    soundManagerEl.textContent = `Loaded (${state.initialized ? 'Initialized' : 'Not initialized'})`;
+                } else {
+                    soundManagerEl.textContent = 'Not loaded';
+                }
+            }
+        }
+
+        // Check sound manager status periodically
+        setInterval(updateStatus, 2000);
+    </script>
+</body>
+</html>

@@ -148,6 +148,13 @@ function initDifficultySelector() {
 
 // Initialize the game when DOM is loaded
 document.addEventListener('DOMContentLoaded', async function() {
+    // Add sound effects for UI button clicks
+    document.addEventListener('click', function(event) {
+        if (event.target.tagName === 'BUTTON') {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+        }
+    });
+
     // Initialize platform first
     if (typeof Platform !== 'undefined') {
         const platformResult = await Platform.init();
