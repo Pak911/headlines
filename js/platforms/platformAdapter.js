@@ -508,6 +508,43 @@
         }
 
         /**
+         * Save tutorial state
+         * @param {Object} state - Tutorial state object {tutorialName: boolean}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveTutorialState(state) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save tutorial state - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveTutorialState(state);
+            } catch (err) {
+                console.error(`[Platform] saveTutorialState failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load tutorial state
+         * @returns {Promise<Object>} Tutorial state object or empty object
+         */
+        async loadTutorialState() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load tutorial state - platform not initialized');
+                return {};
+            }
+
+            try {
+                return await this.currentPlatform.loadTutorialState();
+            } catch (err) {
+                console.error(`[Platform] loadTutorialState failed:`, err);
+                return {};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

@@ -337,6 +337,47 @@
         }
 
         /**
+         * Save tutorial state
+         * @param {Object} state - Tutorial state object {tutorialName: boolean}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveTutorialState(state) {
+            try {
+                const json = JSON.stringify(state);
+                localStorage.setItem('tutorialState', json);
+                
+                this._log('Saved tutorial state');
+                return { success: true };
+                
+            } catch (err) {
+                console.error('[Web Platform] saveTutorialState failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load tutorial state
+         * @returns {Promise<Object>} Tutorial state object or empty object
+         */
+        async loadTutorialState() {
+            try {
+                const json = localStorage.getItem('tutorialState');
+                if (!json) {
+                    this._log('No tutorial state found');
+                    return {};
+                }
+
+                const state = JSON.parse(json);
+                this._log('Loaded tutorial state');
+                return state;
+                
+            } catch (err) {
+                console.error('[Web Platform] loadTutorialState failed:', err);
+                return {};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

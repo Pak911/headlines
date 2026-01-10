@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Popup Test</title>
+    <link rel="stylesheet" href="../css/theme.css">
+    <link rel="stylesheet" href="../css/popups.css">
+</head>
+<body>
+    <button onclick="testPopup()">Test Popup</button>
+    <button onclick="testAlert()">Test Alert</button>
+    <button onclick="testConfirm()">Test Confirm</button>
+    <button onclick="testTutorial()">Test Tutorial</button>
+    <button onclick="resetTutorial()">Reset Tutorial</button>
+
+    <!-- Localization dependencies -->
+    <script src="../js/localization/en.js"></script>
+    <script src="../js/localization/ru.js"></script>
+    <script src="../js/localization/i18n.js"></script>
+
+    <script src="../js/tutorials/popups.js"></script>
+    <script src="../js/tutorials/tutorials.js"></script>
+    <script>
+        // Wait for scripts to load
+        window.addEventListener('load', function() {
+            console.log('Popup functions available:', typeof window.showPopup);
+            console.log('Tutorial system available:', typeof window.HeadlinesTutorial);
+        });
+
+        async function testPopup() {
+            if (typeof showPopup === 'undefined') {
+                alert('showPopup is not available. Please check the console for errors.');
+                return;
+            }
+            await showPopup({
+                title: "Test Popup",
+                content: "<p>This is a test popup with the new styling. It should have a distinct dark top bar and thin border.</p>",
+                buttons: [
+                    { text: "OK", class: "primary" },
+                    { text: "Cancel", class: "secondary" }
+                ]
+            });
+        }
+
+        async function testAlert() {
+            if (typeof showAlert === 'undefined') {
+                alert('showAlert is not available. Please check the console for errors.');
+                return;
+            }
+            await showAlert("Alert Test", "This is a test alert with the new styling.");
+        }
+
+        async function testConfirm() {
+            if (typeof showConfirm === 'undefined') {
+                alert('showConfirm is not available. Please check the console for errors.');
+                return;
+            }
+            const result = await showConfirm("Confirm Test", "Do you want to proceed?", () => console.log("Confirmed"), () => console.log("Cancelled"));
+        }
+
+        async function testTutorial() {
+            if (typeof window.HeadlinesTutorial === 'undefined') {
+                alert('HeadlinesTutorial is not available. Please check the console for errors.');
+                return;
+            }
+            await window.HeadlinesTutorial.showWelcomeTutorial();
+        }
+
+        async function resetTutorial() {
+            if (typeof window.HeadlinesTutorial === 'undefined') {
+                alert('HeadlinesTutorial is not available. Please check the console for errors.');
+                return;
+            }
+            await window.HeadlinesTutorial.resetTutorialState();
+            alert('Tutorial state reset! You can now test the tutorial again.');
+        }
+    </script>
+</body>
+</html>

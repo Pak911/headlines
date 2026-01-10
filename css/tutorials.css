@@ -1,0 +1,156 @@
+/* ===== TUTORIAL SYSTEM ===== */
+/* Headlines-themed tutorial overlay system */
+
+/* Tutorial overlay */
+.tutorial-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: var(--z-modal);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity var(--transition-slow), visibility var(--transition-slow);
+    padding: var(--spacing-2xl) var(--spacing-md);
+}
+
+.tutorial-overlay.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* Tutorial content with gradient background and thin border */
+.tutorial-content {
+    background: linear-gradient(180deg, var(--color-bg-gradient-start) 0%, var(--color-bg-gradient-end) 100%);
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-2xl);
+    /* Use flexbox for natural flow */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden; /* Ensure content doesn't overflow and respects border-radius */
+    /* Responsive sizing */
+    width: 92%;
+    max-width: 600px;
+    min-width: 400px;
+    max-height: 80vh;
+    transform: scale(0.95) translateY(10px);
+    opacity: 0;
+    transition: transform var(--transition-slow) cubic-bezier(0.34, 1.56, 0.64, 1), opacity var(--transition-slow) ease;
+}
+
+.tutorial-overlay.visible .tutorial-content {
+    transform: scale(1) translateY(0);
+    opacity: 1;
+}
+
+/* Tutorial title */
+.tutorial-title {
+    font-family: var(--font-family);
+    font-size: var(--font-size-3xl);
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin: 0 0 var(--spacing-lg) 0;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+/* Tutorial text */
+.tutorial-text {
+    color: var(--color-text-secondary);
+    font-family: var(--font-family);
+    font-size: var(--font-size-lg);
+    line-height: 1.6;
+    margin-bottom: var(--spacing-2xl);
+    text-align: center;
+    flex: 1;
+    overflow-y: auto;
+    padding: 0 var(--spacing-lg);
+}
+
+/* Tutorial close button */
+.tutorial-close {
+    position: absolute;
+    top: var(--spacing-md);
+    right: var(--spacing-md);
+    background: transparent;
+    border: none;
+    color: var(--color-text-muted);
+    font-size: var(--font-size-2xl);
+    cursor: pointer;
+    padding: var(--spacing-xs);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.tutorial-close:hover {
+    background-color: var(--color-border-light);
+    color: var(--color-text-primary);
+}
+
+/* Tutorial button */
+.tutorial-button {
+    padding: var(--spacing-md) var(--spacing-2xl);
+    background: linear-gradient(180deg, var(--color-primary), var(--color-primary-dark));
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    box-shadow: 0 2px 4px rgba(59, 130, 246, 0.3);
+    align-self: center;
+}
+
+.tutorial-button:hover {
+    background: linear-gradient(180deg, var(--color-primary-dark), var(--color-primary-darker));
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsive design */
+@media (max-width: 600px) {
+    .tutorial-overlay {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .tutorial-content {
+        width: 95%;
+        min-width: 320px;
+    }
+
+    .tutorial-title {
+        font-size: var(--font-size-2xl);
+        margin-bottom: var(--spacing-md);
+    }
+
+    .tutorial-text {
+        font-size: var(--font-size-base);
+        margin-bottom: var(--spacing-xl);
+        padding: 0 var(--spacing-md);
+    }
+
+    .tutorial-close {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+
+    .tutorial-button {
+        padding: var(--spacing-sm) var(--spacing-xl);
+        font-size: var(--font-size-sm);
+    }
+}

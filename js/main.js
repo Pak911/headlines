@@ -11,6 +11,16 @@ let selectedCell = null;
 let gridSize = { rows: 0, cols: 0 };
 let wordConnections = {};
 
+// Helper function to use flog from debug
+function _log(message, options = {always:true}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('main', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[main]', message);
+    }
+}
+
 // Count total filled cells and correct cells
 function countCorrectCells() {
     let totalCells = 0;
@@ -157,10 +167,17 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     // Initialize platform first
     if (typeof Platform !== 'undefined') {
+        _log('Initializing platform...');
         const platformResult = await Platform.init();
         if (!platformResult.success) {
             console.error('Platform initialization failed:', platformResult.error);
+        } else {
+            _log('Platform initialized successfully');
+            // Signal that platform is ready
+            window.dispatchEvent(new CustomEvent('headlines:platform:ready'));
         }
+    } else {
+        console.error('[Main] Platform object not found');
     }
     
     // Initialize localization
