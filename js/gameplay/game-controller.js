@@ -486,8 +486,22 @@ async function enhancedInitGame() {
     // Find word connections
     findWordConnections();
     
-    // Scramble letters
-    scrambleLetters();
+    // Check if player has seen welcome tutorial - if not, use easy difficulty for first puzzle
+    let puzzleDifficulty = currentDifficulty;
+    if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.hasSeenTutorial) {
+        try {
+            const hasSeenWelcome = await Platform.hasSeenTutorial('welcome');
+            if (!hasSeenWelcome) {
+                puzzleDifficulty = 'easy';
+                _log('🎓 First-time player detected - using easy difficulty for welcome puzzle', {always: true});
+            }
+        } catch (error) {
+            console.error('Failed to check tutorial state:', error);
+        }
+    }
+    
+    // Scramble letters using determined difficulty
+    scrambleLettersByDifficulty(puzzleDifficulty);
     
     // Render the crossword
     if (typeof renderCrossword === 'function') {

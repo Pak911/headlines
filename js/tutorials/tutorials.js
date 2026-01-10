@@ -91,9 +91,9 @@ class HeadlinesTutorial {
      */
     async showWelcomeTutorial() {
         if (this.showingTutorial) return;
-        
+
         this.showingTutorial = true;
-        
+
         await showPopup({
             title: t('tutorial.welcome.title'),
             content: `<div style="line-height: 1.6;">
@@ -102,17 +102,14 @@ class HeadlinesTutorial {
             buttons: [
                 { text: t('tutorial.welcome.buttonText'), class: 'primary' }
             ],
-            closeOnBackdrop: false
+            closeOnBackdrop: false,
+            isTutorial: true  // Mark this as a tutorial popup
         });
         
         // Mark as seen after popup closes
         this.closeTutorial();
         this.showingTutorial = false;
     }
-
-    /**
-     * Close the tutorial (mark as seen)
-     */
     closeTutorial() {
         // Mark as seen
         this.tutorialState.welcome = true;

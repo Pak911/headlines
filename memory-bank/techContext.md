@@ -25,12 +25,16 @@ headlines/
 ├── README.md                           # Project documentation
 ├── css/                                # Stylesheets
 │   ├── base.css                        # Base styling and layout
+│   ├── theme.css                       # CSS custom properties and design tokens
 │   ├── game-board.css                  # Game board styling
 │   ├── debug-panel.css                 # Debug panel styling
 │   ├── hint-section.css                # Hint section styling
 │   ├── moves-counter.css               # Moves counter styling
-│   ├── responsive.css                  # Responsive design
-│   └── victory-modal.css               # Victory modal styling
+│   ├── victory-modal.css               # Victory modal styling
+│   ├── popups.css                      # General popup/modal styling
+│   ├── tutorials.css                   # Tutorial overlay and content styling
+│   ├── loading.css                     # Loading animation and spinner styling
+│   └── responsive.css                  # Responsive design and media queries
 ├── fonts/                              # Font files
 ├── js/                                 # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
@@ -186,6 +190,10 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 - **`ui-interactions.js`**: User interface interactions and rendering
 - **`victory-animations.js`**: Victory celebration animations
 
+### Tutorial System (`js/tutorials/`)
+- **`tutorials.js`**: Tutorial state management and welcome flow
+- **`popups.js`**: General popup/modal system with tutorial integration
+
 ### Localization Modules (`js/localization/`)
 - **`en.js`**: English translations
 - **`ru.js`**: Russian translations
@@ -214,6 +222,29 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 - Global state variable declarations
 - Module coordination and initialization
 
+## Tutorial and Popup Systems
+
+### Tutorial System
+The tutorial system provides guided onboarding for new players:
+- **State Management**: Tracks which tutorials have been seen using platform storage
+- **Welcome Tutorial**: Shows game mechanics with interactive examples
+- **Difficulty Adaptation**: Automatically uses easy difficulty for first-time players
+- **Localization**: Fully supports multiple languages (EN/RU)
+
+### Popup System
+A flexible modal system used throughout the application:
+- **General Purpose**: Handles victory modals, confirmations, and alerts
+- **Tutorial Integration**: Special handling for tutorial popups with higher z-index
+- **Responsive Design**: Adapts to different screen sizes
+- **Accessibility**: Proper focus management and keyboard navigation
+
+### CSS Architecture
+The styling system uses a modular, theme-based approach:
+- **`theme.css`**: CSS custom properties for colors, spacing, and z-index values
+- **`base.css`**: Fundamental layout and typography
+- **Component CSS**: Dedicated stylesheets for specific UI components
+- **Responsive Design**: Mobile-first approach with progressive enhancement
+
 ## Module Loading Strategy
 **Critical Dependency Order** (defined in index.html):
 1. **Data Layer**: `data.js`, `data-audio.js`, `news-fetching-config.js` (configuration)
@@ -222,9 +253,10 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 4. **Singletons**: Audio system management
 5. **RSS Processing**: Headline fetching and processing
 6. **Platforms**: Platform abstraction layer
-7. **Gameplay**: User-facing features
-8. **Utilities**: Supporting functions
-9. **Main**: Entry point coordination
+7. **Tutorials**: Tutorial and popup systems
+8. **Gameplay**: User-facing features
+9. **Utilities**: Supporting functions
+10. **Main**: Entry point coordination
 
 ## Test Framework
 - **Purpose**: Validate color logic and intersection handling

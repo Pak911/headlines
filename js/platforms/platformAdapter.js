@@ -545,6 +545,26 @@
         }
 
         /**
+         * Check if a specific tutorial has been seen
+         * @param {string} tutorialName - Name of the tutorial to check
+         * @returns {Promise<boolean>} True if tutorial has been seen
+         */
+        async hasSeenTutorial(tutorialName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot check tutorial state - platform not initialized');
+                return false;
+            }
+
+            try {
+                const tutorialState = await this.loadTutorialState();
+                return !!tutorialState[tutorialName];
+            } catch (err) {
+                console.error(`[Platform] hasSeenTutorial failed:`, err);
+                return false;
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

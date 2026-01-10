@@ -97,6 +97,12 @@ const en = {
         hintTitle: "News Description"
     },
     
+    // Loading messages
+    loading: {
+        fetchingHeadlines: "Fetching latest headlines...",
+        fetchingSubtext: "This may take a few seconds"
+    },
+    
     // Tutorial
     tutorial: {
         welcome: {

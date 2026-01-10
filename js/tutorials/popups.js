@@ -27,7 +27,7 @@ function showPopup(options) {
     return new Promise((resolve) => {
         // Create overlay
         const overlay = document.createElement('div');
-        overlay.className = 'popup';
+        overlay.className = options.isTutorial ? 'popup tutorial-popup' : 'popup';
         
         // Create content
         const content = document.createElement('div');

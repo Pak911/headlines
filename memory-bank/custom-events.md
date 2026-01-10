@@ -19,7 +19,9 @@ All events use the `headlines:` prefix for game-specific events.
     platformType: string  // 'y', 'web', or 'unknown'
   }
   ```
-- **Listeners**: `js/utils/gamestats.js` - GameStats module waits for platform initialization before loading stats
+- **Listeners**: 
+  - `js/utils/gamestats.js` - GameStats module waits for platform initialization before loading stats
+  - `js/tutorials/tutorials.js` - Tutorials module waits for platform initialization before loading tutorial state
 
 ## Game Events
 
@@ -56,6 +58,24 @@ All events use the `headlines:` prefix for game-specific events.
   - `js/main.js` - Global click handler for all `<button>` elements
 - **Data Structure**: No additional data (empty event)
 - **Listeners**: `js/singletons/soundManager.js` - SoundManager module for audio feedback
+
+#### `headlines:wordSolved`
+- **Purpose**: Fired when a player correctly solves an individual word in the crossword
+- **Dispatched From**: `js/gameplay/ui-interactions.js` - checkWordCompletion() function
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/soundManager.js` - SoundManager module for word completion sound effects
+
+#### `headlines:letterSwapStart`
+- **Purpose**: Fired when a player begins a letter swap operation (selects first letter)
+- **Dispatched From**: `js/gameplay/ui-interactions.js` - selectCell() function when starting a swap
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/soundManager.js` - SoundManager module for swap start audio feedback
+
+#### `headlines:letterSwapEnd`
+- **Purpose**: Fired when a player completes a letter swap operation (swaps two letters)
+- **Dispatched From**: `js/gameplay/ui-interactions.js` - selectCell() function when completing a swap
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/soundManager.js` - SoundManager module for swap completion audio feedback
 
 ## Event Production Logic
 

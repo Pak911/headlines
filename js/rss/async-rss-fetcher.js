@@ -323,72 +323,18 @@ function showLoadingAnimation() {
     
     loadingState.showingAnimation = true;
     _log('🎭 Showing loading animation...');
-    
+
     // Create loading overlay
     const overlay = document.createElement('div');
     overlay.id = 'rss-loading-overlay';
     overlay.innerHTML = `
         <div class="loading-content">
             <div class="loading-spinner"></div>
-            <div class="loading-text">Fetching latest headlines...</div>
-            <div class="loading-subtext">This may take a few seconds</div>
+            <div class="loading-text">${t('loading.fetchingHeadlines')}</div>
+            <div class="loading-subtext">${t('loading.fetchingSubtext')}</div>
         </div>
     `;
-    
-    // Add styles
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.8);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 10000;
-        font-family: Arial, sans-serif;
-    `;
-    
-    const style = document.createElement('style');
-    style.textContent = `
-        .loading-content {
-            text-align: center;
-            color: white;
-            background: rgba(255, 255, 255, 0.1);
-            padding: 30px;
-            border-radius: 10px;
-            backdrop-filter: blur(10px);
-        }
-        
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(255, 255, 255, 0.3);
-            border-top: 4px solid white;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        
-        .loading-text {
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
-        
-        .loading-subtext {
-            font-size: 14px;
-            opacity: 0.8;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-    `;
-    
-    document.head.appendChild(style);
+
     document.body.appendChild(overlay);
 }
 

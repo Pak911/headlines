@@ -18,6 +18,11 @@
     transition: opacity var(--transition-normal), visibility var(--transition-normal);
 }
 
+/* Tutorial popups use higher z-index */
+.tutorial-popup {
+    z-index: var(--z-tutorial);
+}
+
 .popup.visible {
     opacity: 1;
     visibility: visible;

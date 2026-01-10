@@ -101,6 +101,12 @@ const ru = {
         hintTitle: "Описание новости"
     },
     
+    // Loading messages
+    loading: {
+        fetchingHeadlines: "Загрузка свежих новостей...",
+        fetchingSubtext: "Может занять несколько секунд"
+    },
+    
     // Tutorial
     tutorial: {
         welcome: {
