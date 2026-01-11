@@ -89,7 +89,8 @@ const headlineScoringConfig = {
         defaultCount: 10,            // Default number of headlines to fetch per source
         cacheTimeout: 300000,        // Cache timeout in milliseconds (5 minutes)
         loadingAnimationDelay: 300,  // Show loading animation after 5ms (for debugging)
-        fetchDelay: 0              // Delay before starting RSS fetch (for debugging)
+        fetchDelay: 0,               // Delay before starting RSS fetch (for debugging)
+        seenHeadlinesTimeout: 48      // Seen headlines cleanup timeout in hours (48 hours = 2 days)
     }
 };
 

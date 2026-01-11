@@ -397,9 +397,10 @@
          * Save seen headline data
          * @param {string} hash - djb2 hash of the headline
          * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @param {boolean} [cleanupOldEntries=true] - Whether to delete old entries based on config timeout
          * @returns {Promise<{success: boolean, error?: Error}>}
          */
-        async saveSeenHeadline(hash, data) {
+        async saveSeenHeadline(hash, data, cleanupOldEntries = true) {
             if (!this.initialized) {
                 console.error('[Platform] Cannot save seen headline - platform not initialized');
                 return { success: false, error: new Error('Platform not initialized') };
@@ -411,7 +412,19 @@
             }
 
             try {
-                const result = await this.currentPlatform.saveSeenHeadline(hash, data);
+                // Calculate maxAge if cleanup is requested
+                let maxAge = null;
+                if (cleanupOldEntries) {
+                    // Get timeout from config (assuming headlineScoringConfig is available globally)
+                    const seenHeadlinesTimeoutHours = (typeof headlineScoringConfig !== 'undefined' &&
+                                                      headlineScoringConfig.rssConfig &&
+                                                      headlineScoringConfig.rssConfig.seenHeadlinesTimeout)
+                                                    ? headlineScoringConfig.rssConfig.seenHeadlinesTimeout
+                                                    : 48; // Default to 48 hours
+                    maxAge = Date.now() - (seenHeadlinesTimeoutHours * 60 * 60 * 1000);
+                }
+
+                const result = await this.currentPlatform.saveSeenHeadline(hash, data, cleanupOldEntries, maxAge);
                 if (result.success) {
                     this._log(`Saved seen headline data for hash: ${hash}`);
                 }

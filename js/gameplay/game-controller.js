@@ -267,7 +267,7 @@ function showVictory() {
             movesUsed: swapCount,
             link: currentHeadline.link,
             timestamp: Date.now()
-        }).catch(err => {
+        }).catch(err => {  // Cleanup enabled by default
             console.error('Failed to save seen headline data:', err);
         });
 

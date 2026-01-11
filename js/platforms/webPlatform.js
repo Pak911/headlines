@@ -125,7 +125,7 @@
          */
         async saveGameLanguage(language) {
             try {
-                const key = 'settings_gameLanguage';
+                const key = 'headline_settings_gameLanguage';
                 localStorage.setItem(key, language);
                 
                 this._log(`Saved game language: ${language}`);
@@ -143,7 +143,7 @@
          */
         async loadGameLanguage() {
             try {
-                const key = 'settings_gameLanguage';
+                const key = 'headline_settings_gameLanguage';
                 const language = localStorage.getItem(key);
                 
                 if (language) {
@@ -167,7 +167,7 @@
          */
         async saveGameDifficulty(difficulty) {
             try {
-                const key = 'settings_gameDifficulty';
+                const key = 'headline_settings_gameDifficulty';
                 localStorage.setItem(key, difficulty);
 
                 this._log(`Saved game difficulty: ${difficulty}`);
@@ -185,7 +185,7 @@
          */
         async loadGameDifficulty() {
             try {
-                const key = 'settings_gameDifficulty';
+                const key = 'headline_settings_gameDifficulty';
                 const difficulty = localStorage.getItem(key);
 
                 if (difficulty) {
@@ -209,7 +209,7 @@
          */
         async saveSoundEnabled(enabled) {
             try {
-                const key = 'settings_soundEnabled';
+                const key = 'headline_settings_soundEnabled';
                 localStorage.setItem(key, enabled.toString());
 
                 this._log(`Saved sound enabled: ${enabled}`);
@@ -227,7 +227,7 @@
          */
         loadSoundEnabled() {
             try {
-                const key = 'settings_soundEnabled';
+                const key = 'headline_settings_soundEnabled';
                 const enabled = localStorage.getItem(key);
 
                 if (enabled !== null) {
@@ -275,12 +275,28 @@
          * Save seen headline data
          * @param {string} hash - djb2 hash of the headline
          * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @param {boolean} [cleanupOldEntries=true] - Whether to delete old entries
+         * @param {number} [maxAge] - Maximum age timestamp for cleanup (entries older than this will be deleted)
          * @returns {Promise<{success: boolean, error?: Error}>}
          */
-        async saveSeenHeadline(hash, data) {
+        async saveSeenHeadline(hash, data, cleanupOldEntries = true, maxAge = null) {
             try {
                 // Load existing seen headlines
                 const allSeen = await this.loadAllSeenHeadlines();
+                
+                // Clean up old entries if requested
+                if (cleanupOldEntries && maxAge !== null) {
+                    let cleanedCount = 0;
+                    for (const [key, entry] of Object.entries(allSeen)) {
+                        if (entry.timestamp && entry.timestamp < maxAge) {
+                            delete allSeen[key];
+                            cleanedCount++;
+                        }
+                    }
+                    if (cleanedCount > 0) {
+                        this._log(`Cleaned up ${cleanedCount} old seen headline entries`);
+                    }
+                }
 
                 // Update with new data
                 allSeen[hash] = {
@@ -290,7 +306,7 @@
 
                 // Save back to localStorage
                 const json = JSON.stringify(allSeen);
-                localStorage.setItem('seenHeadlines', json);
+                localStorage.setItem('headline_seenHeadlines', json);
 
                 this._log(`Saved seen headline data for hash: ${hash}`);
                 return { success: true };
@@ -331,7 +347,7 @@
          */
         async loadAllSeenHeadlines() {
             try {
-                const json = localStorage.getItem('seenHeadlines');
+                const json = localStorage.getItem('headline_seenHeadlines');
                 if (!json) {
                     this._log('No seen headlines data found');
                     return {};
@@ -429,7 +445,7 @@
         async saveTutorialState(state) {
             try {
                 const json = JSON.stringify(state);
-                localStorage.setItem('tutorialState', json);
+                localStorage.setItem('headline_tutorialState', json);
                 
                 this._log('Saved tutorial state');
                 return { success: true };
@@ -446,7 +462,7 @@
          */
         async loadTutorialState() {
             try {
-                const json = localStorage.getItem('tutorialState');
+                const json = localStorage.getItem('headline_tutorialState');
                 if (!json) {
                     this._log('No tutorial state found');
                     return {};
