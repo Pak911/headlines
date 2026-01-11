@@ -7,7 +7,7 @@ const defaultLanguageConfig = {
 // RSS language configuration - controls which RSS sources to use
 // Options: 'auto' (detect from UI language), 'ru' (Russian RSS), 'en' (English RSS)
 const rssLanguageConfig = {
-    rssLanguage: 'auto'  // Set to Russian by default as requested
+    rssLanguage: 'auto'
 };
 
 // Debug configuration - controls debug mode and logging

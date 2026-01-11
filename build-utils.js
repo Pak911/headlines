@@ -28,7 +28,8 @@ const essentialDirs = [
     'js',       // All JavaScript modules
     'libs',     // Third-party libraries (Pizzicato)
     'sounds',   // Audio files (MP3, WAV) for sound effects
-    'fonts'     // Font files for typography
+    'fonts',    // Font files for typography
+    'imgs'      // Image files (PNG) for UI elements
 ];
 
 /**

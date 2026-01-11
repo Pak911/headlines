@@ -35,6 +35,7 @@ const en = {
         title: "Congratulations!",
         subtitle: "You've reconstructed the headline!",
         headlineLabel: "RECONSTRUCTED HEADLINE",
+        articlePrompt: "Please read the full article for complete headline",
         stats: {
             swaps: {
                 one: "SWAP",

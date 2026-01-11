@@ -176,6 +176,7 @@ function showVictory() {
     const victoryTitle = document.querySelector('.victory-title');
     const victorySubtitle = document.querySelector('.victory-subtitle');
     const headlineLabel = document.querySelector('.headline-label');
+    const articlePrompt = document.getElementById('articlePrompt');
     const replayBtn = document.querySelector('.btn-secondary:first-child');
     const readArticleBtn = document.querySelector('.btn-primary');
     const nextHeadlineBtn = document.querySelector('.btn-secondary:last-child');
@@ -188,6 +189,7 @@ function showVictory() {
         if (victoryTitle) victoryTitle.textContent = t('victory.title');
         if (victorySubtitle) victorySubtitle.textContent = t('victory.subtitle');
         if (headlineLabel) headlineLabel.textContent = t('victory.headlineLabel');
+        if (articlePrompt) articlePrompt.textContent = t('victory.articlePrompt');
         if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
         if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
         
