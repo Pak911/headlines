@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {always:true}) {
+function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('menu', message, options);
     } else {

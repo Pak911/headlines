@@ -352,3 +352,9 @@ const mockRussianHeadlines = [
         djb2Hash: "1gm4x4h"
     }
 ];
+
+// RSS Fetching Configuration
+const rssFetchingConfig = {
+    maxConcurrentRequests: 2,  // Maximum concurrent RSS requests in a batch
+    batchDelayMs: 10         // Delay between batches in milliseconds (to avoid rate limiting)
+};

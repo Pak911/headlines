@@ -45,7 +45,7 @@
     let soundEventsCooldownMs = 100; // Default cooldown between sound events in milliseconds
 
     // Logging helper function
-    function _log(message, options = {always:true}) {
+    function _log(message, options = {}) {
         if (window.__cosic && typeof window.__cosic.flog === 'function') {
             window.__cosic.flog('soundManager', message, options);
         } else {
