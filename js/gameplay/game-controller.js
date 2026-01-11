@@ -275,7 +275,8 @@ function showVictory() {
         window.dispatchEvent(new CustomEvent('headlines:puzzle:solved', {
             detail: {
                 puzzleHash: currentHeadline.djb2Hash,
-                puzzleLink: currentHeadline.link
+                puzzleLink: currentHeadline.link,
+                starCount: starCount
             }
         }));
     }

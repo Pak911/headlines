@@ -36,7 +36,8 @@ All events use the `headlines:` prefix for game-specific events.
   ```javascript
   {
     puzzleHash: string,  // djb2 hash of the solved headline
-    puzzleLink: string   // URL link to the original article
+    puzzleLink: string,  // URL link to the original article
+    starCount: number    // Number of stars earned (1-5)
   }
   ```
 - **Listeners**: `js/utils/gamestats.js` - GameStats module for statistics tracking

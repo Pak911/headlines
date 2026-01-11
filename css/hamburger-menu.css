@@ -116,6 +116,11 @@
     border: 1px solid transparent;
 }
 
+/* Hide statistics menu item until functionality is implemented */
+#menuStatistics {
+    display: none !important;
+}
+
 .menu-item:hover {
     background: rgba(255, 255, 255, 0.8);
     border-color: var(--color-primary);

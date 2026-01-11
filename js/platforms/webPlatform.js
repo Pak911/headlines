@@ -494,6 +494,58 @@
         }
 
         /**
+         * Increment star rating stat for a specific star count
+         * @param {number} starCount - Number of stars earned (1-5)
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementStarRatingStat(starCount) {
+            try {
+                if (starCount < 1 || starCount > 5) {
+                    throw new Error(`Invalid star count: ${starCount}. Must be between 1 and 5.`);
+                }
+
+                const currentStats = await this.getStarRatingStats();
+                currentStats[starCount] = (currentStats[starCount] || 0) + 1;
+
+                const json = JSON.stringify(currentStats);
+                localStorage.setItem('headline_starRatingStats', json);
+
+                this._log(`Incremented star rating count for ${starCount} stars to: ${currentStats[starCount]}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementStarRatingStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get star rating statistics
+         * @returns {Promise<Object>} Object with star counts {1: count, 2: count, 3: count, 4: count, 5: count}
+         */
+        async getStarRatingStats() {
+            try {
+                const json = localStorage.getItem('headline_starRatingStats');
+                if (!json) {
+                    this._log('No star rating stats found');
+                    return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+                }
+
+                const stats = JSON.parse(json);
+                // Ensure all star levels are present with defaults
+                const completeStats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+                for (let i = 1; i <= 5; i++) {
+                    completeStats[i] = stats[i] || 0;
+                }
+
+                this._log(`Loaded star rating stats: ${JSON.stringify(completeStats)}`);
+                return completeStats;
+            } catch (err) {
+                console.error('[Web Platform] getStarRatingStats failed:', err);
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

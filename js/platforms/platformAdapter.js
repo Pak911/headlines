@@ -652,6 +652,59 @@
         }
 
         /**
+         * Increment star rating stat for a specific star count
+         * @param {number} starCount - Number of stars earned (1-5)
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementStarRatingStat(starCount) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment star rating stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementStarRatingStat) {
+                console.warn('[Platform] incrementStarRatingStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementStarRatingStat(starCount);
+                if (result.success) {
+                    this._log(`Star rating stat incremented for ${starCount} stars`);
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementStarRatingStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get star rating statistics
+         * @returns {Promise<Object>} Object with star counts {1: count, 2: count, 3: count, 4: count, 5: count}
+         */
+        async getStarRatingStats() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get star rating stats - platform not initialized');
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+
+            if (!this.currentPlatform.getStarRatingStats) {
+                this._log('getStarRatingStats not supported on current platform');
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+
+            try {
+                const stats = await this.currentPlatform.getStarRatingStats();
+                this._log(`Retrieved star rating stats: ${JSON.stringify(stats)}`);
+                return stats;
+            } catch (err) {
+                console.error('[Platform] getStarRatingStats failed:', err);
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+        }
+
+        /**
          * Check if platform is available and initialized
          * @returns {boolean}
          */

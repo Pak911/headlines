@@ -92,15 +92,23 @@ function setupEventListeners() {
 
 /**
  * Handle puzzle solved event
- * @param {Object} detail - Event detail with puzzleHash and puzzleLink
+ * @param {Object} detail - Event detail with puzzleHash, puzzleLink, and starCount
  */
 async function handlePuzzleSolved(detail) {
-    _log(`Puzzle solved: ${detail.puzzleHash}`);
+    _log(`Puzzle solved: ${detail.puzzleHash} with ${detail.starCount} stars`);
 
     try {
         await Platform.incrementPuzzleSolvedStat();
         currentStats.solved++;
         _log(`Puzzle solved count incremented to: ${currentStats.solved}`);
+
+        // Also increment star rating stat
+        if (detail.starCount && detail.starCount >= 1 && detail.starCount <= 5) {
+            await Platform.incrementStarRatingStat(detail.starCount);
+            _log(`Star rating stat incremented for ${detail.starCount} stars`);
+        } else {
+            console.warn('[gamestats] Invalid or missing starCount in puzzle solved event:', detail.starCount);
+        }
     } catch (error) {
         console.error('[gamestats] Failed to increment solved stat:', error);
     }
@@ -156,7 +164,15 @@ if (typeof window !== 'undefined') {
     window.GameStats = {
         initialize: initializeGameStats,
         getCurrentStats: getCurrentStats,
-        refreshStats: refreshStats
+        refreshStats: refreshStats,
+        getStarRatingStats: async () => {
+            try {
+                return await Platform.getStarRatingStats();
+            } catch (error) {
+                console.error('[gamestats] Failed to get star rating stats:', error);
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+        }
     };
 
     // Auto-initialize when platform is ready

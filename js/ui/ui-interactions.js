@@ -336,12 +336,12 @@ function positionMovesCounter() {
     const filledCells = document.querySelectorAll('.grid-cell.filled');
     const cellRects = Array.from(filledCells).map(cell => cell.getBoundingClientRect());
     
-    // Define corner positions to try (in order: bottom-right, bottom-left, top-left, top-right)
+    // Define corner positions to try (in order: bottom-right, bottom-left, top-right, top-left)
     const positions = [
         { bottom: margin, right: margin, top: 'auto', left: 'auto', name: 'bottom-right' },
         { bottom: margin, left: margin, top: 'auto', right: 'auto', name: 'bottom-left' },
-        { top: margin, left: margin, bottom: 'auto', right: 'auto', name: 'top-left' },
-        { top: margin, right: margin, bottom: 'auto', left: 'auto', name: 'top-right' }
+        { top: margin, right: margin, bottom: 'auto', left: 'auto', name: 'top-right' },
+        { top: margin, left: margin, bottom: 'auto', right: 'auto', name: 'top-left' }
     ];
     
     // Check each position for intersections
