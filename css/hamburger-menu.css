@@ -1,0 +1,330 @@
+/* ===== HAMBURGER MENU ===== */
+/* Side menu that slides in from the left */
+
+/* Overlay backdrop */
+.menu-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0);
+    z-index: var(--z-modal);
+    pointer-events: none;
+    transition: background var(--transition-normal);
+}
+
+.menu-overlay.visible {
+    background: rgba(0, 0, 0, 0.5);
+    pointer-events: auto;
+}
+
+/* Menu panel */
+.menu-panel {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 90%;
+    max-width: 450px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--color-popup-bg-start) 0%, var(--color-popup-bg-end) 100%);
+    border-right: 1px solid var(--color-popup-border);
+    box-shadow: var(--shadow-2xl);
+    z-index: calc(var(--z-modal) + 1);
+    display: flex;
+    flex-direction: column;
+    transform: translateX(-100%);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.menu-overlay.visible .menu-panel {
+    transform: translateX(0);
+}
+
+/* Menu header (similar to popup-top) */
+.menu-header {
+    position: relative;
+    width: 100%;
+    height: auto;
+    flex-shrink: 0;
+    background: var(--color-popup-header-bg);
+    padding: var(--spacing-lg);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--color-text-primary);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.menu-title {
+    font-family: var(--font-family);
+    font-style: normal;
+    font-weight: 700;
+    -webkit-text-stroke: 0.5px currentColor;
+    font-size: var(--font-size-2xl);
+    line-height: 1.2;
+    text-transform: uppercase;
+    color: var(--color-text-primary);
+    margin: 0;
+    flex: 1;
+    text-align: left;
+}
+
+.menu-close {
+    width: 48px;
+    height: 48px;
+    flex-shrink: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    font-family: var(--font-family);
+    font-size: 38px;
+    font-weight: bold;
+    -webkit-text-stroke: 0.5px currentColor;
+    color: var(--color-text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.05);
+}
+
+.menu-close:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+    transform: scale(1.1);
+}
+
+/* Menu content */
+.menu-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-md);
+}
+
+/* Menu items */
+.menu-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md) var(--spacing-lg);
+    margin-bottom: var(--spacing-xs);
+    background: rgba(255, 255, 255, 0.5);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    border: 1px solid transparent;
+}
+
+.menu-item:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: var(--color-primary);
+}
+
+.menu-item:active {
+    transform: none;
+}
+
+/* Menu item icon */
+.menu-item-icon {
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-primary);
+}
+
+.menu-item-icon svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+/* Help icon as text */
+.menu-help-icon {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--color-text-primary);
+}
+
+/* Menu item content */
+.menu-item-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.menu-item-label {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+}
+
+.menu-item-value {
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    line-height: 1.2;
+}
+
+/* Toggle switch for sound */
+.menu-item-toggle {
+    width: 48px;
+    height: 26px;
+    background: #cbd5e1;
+    border-radius: 13px;
+    position: relative;
+    flex-shrink: 0;
+    transition: background var(--transition-fast);
+    cursor: pointer;
+}
+
+.menu-item-toggle.active {
+    background: var(--color-primary);
+}
+
+.menu-item-toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 50%;
+    transition: transform var(--transition-fast);
+}
+
+.menu-item-toggle.active::after {
+    transform: translateX(22px);
+}
+
+/* Special styling for Give Up item */
+.menu-item.danger {
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.menu-item.danger:hover {
+    background: rgba(255, 255, 255, 0.8);
+    border-color: #dc2626;
+}
+
+.menu-item.danger .menu-item-label {
+    color: #b91c1c;
+}
+
+/* Dropdown select styling */
+.menu-dropdown-select {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.menu-dropdown-text {
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+    font-weight: 600;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+    white-space: nowrap;
+}
+
+.menu-dropdown-arrow {
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform var(--transition-fast);
+}
+
+.menu-dropdown-arrow svg {
+    display: block;
+}
+
+.menu-item-dropdown.open .menu-dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+/* Dropdown panel */
+.menu-dropdown-panel {
+    position: fixed;
+    background: white;
+    border: 1px solid var(--color-border-primary);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-sm);
+    box-shadow: var(--shadow-lg);
+    z-index: calc(var(--z-modal) + 2);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: opacity var(--transition-fast), visibility 0s linear var(--transition-fast), transform var(--transition-fast);
+    min-width: 180px;
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.menu-dropdown-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+    transition: opacity var(--transition-fast), transform var(--transition-fast);
+}
+
+/* Dropdown option */
+.menu-dropdown-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-sm) var(--spacing-md);
+    cursor: pointer;
+    border-radius: var(--radius-sm);
+    transition: background var(--transition-fast);
+    gap: var(--spacing-md);
+}
+
+.menu-dropdown-option:hover {
+    background: rgba(59, 130, 246, 0.1);
+}
+
+.menu-dropdown-option-text {
+    font-family: var(--font-family);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--color-text-primary);
+    line-height: 1.2;
+    flex: 1;
+}
+
+.menu-dropdown-option.selected .menu-dropdown-option-text {
+    font-weight: 600;
+}
+
+.menu-dropdown-check {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
+    display: none;
+    color: var(--color-primary);
+}
+
+.menu-dropdown-check svg {
+    width: 100%;
+    height: 100%;
+    fill: currentColor;
+}
+
+.menu-dropdown-option.selected .menu-dropdown-check {
+    display: block;
+}

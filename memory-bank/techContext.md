@@ -27,6 +27,7 @@ headlines/
 │   ├── base.css                        # Base styling and layout
 │   ├── theme.css                       # CSS custom properties and design tokens
 │   ├── game-board.css                  # Game board styling
+│   ├── hamburger-menu.css              # Hamburger menu styling
 │   ├── debug-panel.css                 # Debug panel styling
 │   ├── hint-section.css                # Hint section styling
 │   ├── moves-counter.css               # Moves counter styling
@@ -38,15 +39,17 @@ headlines/
 ├── fonts/                              # Font files
 ├── js/                                 # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
+│   ├── ui/                             # User interface modules
+│   │   ├── hamburger-menu.js           # Hamburger menu functionality
+│   │   ├── ui-interactions.js          # User interface & rendering
+│   │   └── victory-animations.js       # Victory animations
 │   ├── core/                           # Core engine modules
 │   │   ├── crossword-engine.js         # Smart backbone-first layout generation
 │   │   ├── grid-manager.js             # Grid management
 │   │   └── color-logic.js              # Color feedback logic
 │   ├── gameplay/                       # Game features
 │   │   ├── difficulty-system.js        # Letter scrambling algorithms
-│   │   ├── game-controller.js          # Game flow control
-│   │   ├── ui-interactions.js          # User interface & rendering
-│   │   └── victory-animations.js       # Victory animations
+│   │   └── game-controller.js          # Game flow control
 │   ├── localization/                   # Localization system
 │   │   ├── en.js                       # English translations
 │   │   ├── ru.js                       # Russian translations
@@ -187,6 +190,9 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 ### Gameplay Modules (`js/gameplay/`)
 - **`difficulty-system.js`**: Strategic letter scrambling with constraints
 - **`game-controller.js`**: Game flow control and initialization
+
+### UI Modules (`js/ui/`)
+- **`hamburger-menu.js`**: Hamburger/main menu functionality and navigation
 - **`ui-interactions.js`**: User interface interactions and rendering
 - **`victory-animations.js`**: Victory celebration animations
 

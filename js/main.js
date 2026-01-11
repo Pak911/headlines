@@ -11,6 +11,39 @@ let selectedCell = null;
 let gridSize = { rows: 0, cols: 0 };
 let wordConnections = {};
 
+// Initialize toolbar buttons
+function initToolbarButtons() {
+    // Help button - show welcome tutorial
+    const helpBtn = document.getElementById('helpBtn');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', () => {
+            if (window.HeadlinesTutorial && typeof window.HeadlinesTutorial.showWelcomeTutorial === 'function') {
+                window.HeadlinesTutorial.showWelcomeTutorial();
+            }
+        });
+    }
+    
+    // Next puzzle button
+    const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
+    if (nextPuzzleBtn) {
+        nextPuzzleBtn.addEventListener('click', () => {
+            if (typeof skipToNextHeadline === 'function') {
+                skipToNextHeadline();
+            }
+        });
+    }
+    
+    // Hamburger button - opens menu
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', () => {
+            if (window.HamburgerMenu && typeof window.HamburgerMenu.open === 'function') {
+                window.HamburgerMenu.open();
+            }
+        });
+    }
+}
+
 // Helper function to use flog from debug
 function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
@@ -145,6 +178,27 @@ function updateLocalizedText() {
             const tipPrefix = t('hints.tipPrefix').replace('💡 ', '').replace(':', '');
             descriptionElement.setAttribute('data-tip-prefix', tipPrefix);
         }
+        
+        // Update toolbar button tooltips
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        if (hamburgerBtn) {
+            hamburgerBtn.setAttribute('title', t('toolbar.menu'));
+        }
+        
+        const helpBtn = document.getElementById('helpBtn');
+        if (helpBtn) {
+            helpBtn.setAttribute('title', t('toolbar.howToPlay'));
+        }
+        
+        const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
+        if (nextPuzzleBtn) {
+            nextPuzzleBtn.setAttribute('title', t('toolbar.nextPuzzle'));
+        }
+        
+        // Update menu language
+        if (window.HamburgerMenu && typeof window.HamburgerMenu.updateLanguage === 'function') {
+            window.HamburgerMenu.updateLanguage();
+        }
     }
 }
 
@@ -190,6 +244,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Initialize difficulty selector
     initDifficultySelector();
+    
+    // Initialize toolbar buttons
+    initToolbarButtons();
     
     // Only initialize if we're on the main game page (not test page)
     if (document.getElementById('crosswordGrid')) {

@@ -280,6 +280,11 @@ function showVictory() {
         }));
     }
     
+    // Switch menu item to Next Puzzle mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
+        window.HamburgerMenu.switchToNextPuzzleMode();
+    }
+    
     document.getElementById('victoryModal').style.display = 'flex';
 }
 
@@ -358,6 +363,11 @@ async function enhancedInitGame() {
     selectedCell = null;
     document.getElementById('swapCount').textContent = '0';
     document.getElementById('victoryModal').style.display = 'none';
+    
+    // Reset menu item back to Give Up mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToGiveUpMode === 'function') {
+        window.HamburgerMenu.switchToGiveUpMode();
+    }
     
     // Update moves label with proper pluralization
     const movesLabel = document.querySelector('.moves-label');
@@ -666,6 +676,11 @@ async function giveUp() {
     // Re-render the grid
     renderCrossword();
     
+    // Switch menu item to Next Puzzle mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
+        window.HamburgerMenu.switchToNextPuzzleMode();
+    }
+    
     // Save seen headline data (gave up)
     if (currentHeadline && currentHeadline.djb2Hash) {
         // Check if headline was already seen before saving
@@ -727,6 +742,7 @@ async function skipToNextHeadline() {
     }
     
     // Start new game and wait for completion - call enhanced version directly
+    // This will automatically reset the Give Up menu item via enhancedInitGame
     await enhancedInitGame();
 }
 

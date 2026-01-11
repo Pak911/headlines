@@ -12,7 +12,9 @@ All events use the `headlines:` prefix for game-specific events.
 
 #### `headlines:platform:ready`
 - **Purpose**: Fired when the platform adapter has successfully initialized
-- **Dispatched From**: `js/platforms/platformAdapter.js` - PlatformAdapter.init()
+- **Dispatched From**: 
+  - `js/platforms/platformAdapter.js` - PlatformAdapter.init()
+  - `js/main.js` - DOMContentLoaded handler after platform initialization
 - **Data Structure**:
   ```javascript
   {

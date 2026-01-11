@@ -70,11 +70,26 @@ const ru = {
     
     // Difficulty levels
     difficulty: {
-        easy: "Легко - Только перестановка слов",
-        mediumEasy: "Средне-легко - 40% зеленых максимум",
-        medium: "Средне - 30% зеленых максимум",
-        mediumHard: "Средне-трудно - 20% зеленых максимум",
-        hard: "Трудно - 15% зеленых максимум"
+        easy: {
+            name: "Легчайше",
+            description: "Только перестановка слов"
+        },
+        mediumEasy: {
+            name: "Полегче",
+            description: "40% зеленых максимум"
+        },
+        medium: {
+            name: "Средне",
+            description: "30% зеленых максимум"
+        },
+        mediumHard: {
+            name: "Труднее",
+            description: "20% зеленых максимум"
+        },
+        hard: {
+            name: "Сложно",
+            description: "15% зеленых максимум"
+        }
     },
     
     // Debug panel
@@ -100,6 +115,27 @@ const ru = {
     hints: {
         tipPrefix: "💡 Подсказка:",
         hintTitle: "Описание новости"
+    },
+    
+    // Toolbar tooltips
+    toolbar: {
+        menu: "Меню",
+        howToPlay: "Как играть",
+        nextPuzzle: "Следующий пазл"
+    },
+    
+    // Menu items
+    menu: {
+        title: "Меню",
+        language: "Язык",
+        difficulty: "Сложность",
+        statistics: "Статистика",
+        sound: "Звук",
+        help: "Помощь",
+        giveUp: "Сдаться",
+        giveUpDescription: "Открывает решение",
+        nextPuzzle: "Следующий пазл",
+        nextPuzzleDescription: "Загрузить следующий заголовок"
     },
     
     // Loading messages

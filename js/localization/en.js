@@ -66,11 +66,26 @@ const en = {
     
     // Difficulty levels
     difficulty: {
-        easy: "Easy - Word Shuffle Only",
-        mediumEasy: "Medium-Easy - 40% Green Max",
-        medium: "Medium - 30% Green Max",
-        mediumHard: "Medium-Hard - 20% Green Max",
-        hard: "Hard - 15% Green Max"
+        easy: {
+            name: "Easy",
+            description: "Word Shuffle Only"
+        },
+        mediumEasy: {
+            name: "Medium-Easy",
+            description: "40% Green Max"
+        },
+        medium: {
+            name: "Medium",
+            description: "30% Green Max"
+        },
+        mediumHard: {
+            name: "Medium-Hard",
+            description: "20% Green Max"
+        },
+        hard: {
+            name: "Hard",
+            description: "15% Green Max"
+        }
     },
     
     // Debug panel
@@ -96,6 +111,27 @@ const en = {
     hints: {
         tipPrefix: "💡 Tip:",
         hintTitle: "News Description"
+    },
+    
+    // Toolbar tooltips
+    toolbar: {
+        menu: "Menu",
+        howToPlay: "How to Play",
+        nextPuzzle: "Next Puzzle"
+    },
+    
+    // Menu items
+    menu: {
+        title: "Menu",
+        language: "Language",
+        difficulty: "Difficulty",
+        statistics: "Statistics",
+        sound: "Sound",
+        help: "Help",
+        giveUp: "Give Up",
+        giveUpDescription: "Reveals the puzzle",
+        nextPuzzle: "Next Puzzle",
+        nextPuzzleDescription: "Load next headline"
     },
     
     // Loading messages
