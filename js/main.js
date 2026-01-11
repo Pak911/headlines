@@ -17,6 +17,7 @@ function initToolbarButtons() {
     const helpBtn = document.getElementById('helpBtn');
     if (helpBtn) {
         helpBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
             if (window.HeadlinesTutorial && typeof window.HeadlinesTutorial.showWelcomeTutorial === 'function') {
                 window.HeadlinesTutorial.showWelcomeTutorial();
             }
@@ -27,6 +28,7 @@ function initToolbarButtons() {
     const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
     if (nextPuzzleBtn) {
         nextPuzzleBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
             if (typeof skipToNextHeadline === 'function') {
                 skipToNextHeadline();
             }
@@ -37,6 +39,7 @@ function initToolbarButtons() {
     const hamburgerBtn = document.getElementById('hamburgerBtn');
     if (hamburgerBtn) {
         hamburgerBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
             if (window.HamburgerMenu && typeof window.HamburgerMenu.open === 'function') {
                 window.HamburgerMenu.open();
             }
@@ -237,6 +240,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Initialize localization
     if (typeof i18n !== 'undefined' && typeof i18n.init === 'function') {
         await i18n.init();
+    }
+    
+    // Initialize difficulty system
+    if (typeof initDifficultySystem === 'function') {
+        await initDifficultySystem();
     }
     
     // Initialize language selector

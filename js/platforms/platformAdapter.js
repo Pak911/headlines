@@ -250,6 +250,80 @@
         }
 
         /**
+         * Save game difficulty setting
+         * @param {string} difficulty - Difficulty key ('easy', 'mediumEasy', 'medium', 'mediumHard', 'hard')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameDifficulty(difficulty) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save game difficulty - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveGameDifficulty(difficulty);
+            } catch (err) {
+                console.error(`[Platform] saveGameDifficulty failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game difficulty setting
+         * @returns {Promise<string|null>} Difficulty key or null
+         */
+        async loadGameDifficulty() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load game difficulty - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadGameDifficulty();
+            } catch (err) {
+                console.error(`[Platform] loadGameDifficulty failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save sound enabled setting
+         * @param {boolean} enabled - Whether sound is enabled
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSoundEnabled(enabled) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save sound enabled - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveSoundEnabled(enabled);
+            } catch (err) {
+                console.error(`[Platform] saveSoundEnabled failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load sound enabled setting
+         * @returns {boolean|null} Sound enabled state or null if not set
+         */
+        loadSoundEnabled() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load sound enabled - platform not initialized');
+                return null;
+            }
+
+            try {
+                return this.currentPlatform.loadSoundEnabled();
+            } catch (err) {
+                console.error(`[Platform] loadSoundEnabled failed:`, err);
+                return null;
+            }
+        }
+
+        /**
          * Save data to platform storage
          * @param {string} key - Storage key
          * @param {any} data - Data to save

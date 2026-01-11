@@ -161,6 +161,91 @@
         }
 
         /**
+         * Save game difficulty setting
+         * @param {string} difficulty - Difficulty key ('easy', 'mediumEasy', 'medium', 'mediumHard', 'hard')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameDifficulty(difficulty) {
+            try {
+                const key = 'settings_gameDifficulty';
+                localStorage.setItem(key, difficulty);
+
+                this._log(`Saved game difficulty: ${difficulty}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveGameDifficulty failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game difficulty setting
+         * @returns {Promise<string|null>} Difficulty key or null if not found
+         */
+        async loadGameDifficulty() {
+            try {
+                const key = 'settings_gameDifficulty';
+                const difficulty = localStorage.getItem(key);
+
+                if (difficulty) {
+                    this._log(`Loaded game difficulty: ${difficulty}`);
+                } else {
+                    this._log('No saved game difficulty found');
+                }
+
+                return difficulty;
+
+            } catch (err) {
+                console.error('[Web Platform] loadGameDifficulty failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Save sound enabled setting
+         * @param {boolean} enabled - Whether sound is enabled
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSoundEnabled(enabled) {
+            try {
+                const key = 'settings_soundEnabled';
+                localStorage.setItem(key, enabled.toString());
+
+                this._log(`Saved sound enabled: ${enabled}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveSoundEnabled failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load sound enabled setting
+         * @returns {boolean|null} Sound enabled state or null if not set
+         */
+        loadSoundEnabled() {
+            try {
+                const key = 'settings_soundEnabled';
+                const enabled = localStorage.getItem(key);
+
+                if (enabled !== null) {
+                    const isEnabled = enabled === 'true';
+                    this._log(`Loaded sound enabled: ${isEnabled}`);
+                    return isEnabled;
+                } else {
+                    this._log('No saved sound enabled setting found');
+                    return null;
+                }
+
+            } catch (err) {
+                console.error('[Web Platform] loadSoundEnabled failed:', err);
+                return null;
+            }
+        }
+
+        /**
          * Check if cache timestamp is expired
          * @private
          * @param {number} timestamp - Cache timestamp

@@ -45,7 +45,7 @@
     let soundEventsCooldownMs = 100; // Default cooldown between sound events in milliseconds
 
     // Logging helper function
-    function _log(message, options = {}) {
+    function _log(message, options = {always:true}) {
         if (window.__cosic && typeof window.__cosic.flog === 'function') {
             window.__cosic.flog('soundManager', message, options);
         } else {
@@ -284,6 +284,35 @@
         window.addEventListener('headlines:letterSwapEnd', (event) => {
             _log('LETTER SWAP END EVENT RECEIVED');
             playEventSound('letterSwapEnd');
+        });
+
+        // Listen for sound toggle events
+        window.addEventListener('headlines:soundToggle', () => {
+            _log(`Sound toggle event received, current state: ${isEnabled}, toggling to: ${!isEnabled}`);
+            isEnabled = !isEnabled;
+            _log(`Sound toggled to: ${isEnabled}`);
+            // Save to platform
+            if (typeof window.Platform !== 'undefined' && window.Platform.saveSoundEnabled) {
+                window.Platform.saveSoundEnabled(isEnabled).catch(err => {
+                    console.error('[soundManager] Failed to save sound setting:', err);
+                });
+            } else {
+                _log('Platform not available for saving sound setting');
+            }
+        });
+
+        // Listen for platform ready event to load sound setting
+        window.addEventListener('headlines:platform:ready', () => {
+            _log('Platform ready, loading sound setting');
+            if (typeof window.Platform !== 'undefined' && window.Platform.loadSoundEnabled) {
+                const saved = window.Platform.loadSoundEnabled();
+                if (saved !== null) {
+                    isEnabled = saved;
+                    _log(`Loaded sound enabled: ${isEnabled}`);
+                } else {
+                    _log('No saved sound setting, using default: true');
+                }
+            }
         });
 
         _log('Event listeners configured');

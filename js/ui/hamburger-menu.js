@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {}) {
+function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('menu', message, options);
     } else {
@@ -33,7 +33,10 @@ class HamburgerMenu {
         
         // Close button
         if (menuClose) {
-            menuClose.addEventListener('click', () => this.close());
+            menuClose.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                this.close();
+            });
         }
         
         // Close on backdrop click
@@ -70,6 +73,7 @@ class HamburgerMenu {
         const statisticsItem = document.getElementById('menuStatistics');
         if (statisticsItem) {
             statisticsItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 _log('Statistics menu item clicked - TODO: implement statistics view');
                 // TODO: Implement statistics view
             });
@@ -80,11 +84,14 @@ class HamburgerMenu {
         const soundToggle = document.getElementById('menuSoundToggle');
         if (soundItem && soundToggle) {
             soundItem.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 e.stopPropagation();
+                // Toggle visual state immediately
                 soundToggle.classList.toggle('active');
-                const isActive = soundToggle.classList.contains('active');
-                _log(`Sound toggled: ${isActive ? 'ON' : 'OFF'}`);
-                // TODO: Implement sound toggle functionality
+                // Ensure sound manager is initialized
+                window.__headlines_sound;
+                // Dispatch sound toggle event
+                window.dispatchEvent(new CustomEvent('headlines:soundToggle'));
             });
         }
         
@@ -92,6 +99,7 @@ class HamburgerMenu {
         const helpItem = document.getElementById('menuHelp');
         if (helpItem) {
             helpItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 _log('Help menu item clicked');
                 this.close();
                 // Show tutorial popup
@@ -105,6 +113,7 @@ class HamburgerMenu {
         const giveUpItem = document.getElementById('menuGiveUp');
         if (giveUpItem) {
             giveUpItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 _log('Give Up/Next Puzzle menu item clicked');
                 this.close();
                 
@@ -198,6 +207,7 @@ class HamburgerMenu {
         this.isOpen = true;
         this.overlay.classList.add('visible');
         this.updateMenuValues();
+        this.updateSoundToggleState();
         
         _log('Menu opened');
     }
@@ -233,7 +243,16 @@ class HamburgerMenu {
         const languageValue = document.getElementById('menuLanguageText');
         if (languageValue && typeof i18n !== 'undefined') {
             const currentLang = i18n.currentLanguage;
-            languageValue.textContent = currentLang === 'ru' ? 'Русский' : 'English';
+            const displayName = currentLang === 'ru' ? 'Русский' : 'English';
+            _log(`Language dropdown: current i18n language = '${currentLang}', setting display to '${displayName}'`);
+            languageValue.textContent = displayName;
+            
+            // Also update the selected state of dropdown options
+            if (this.languageDropdown) {
+                this.languageDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.langCode === currentLang);
+                });
+            }
         }
         
         // Update difficulty name and description
@@ -242,6 +261,23 @@ class HamburgerMenu {
         if (difficultyText && difficultyValue && typeof currentDifficulty !== 'undefined' && typeof t !== 'undefined') {
             difficultyText.textContent = t(`difficulty.${currentDifficulty}.name`);
             difficultyValue.textContent = t(`difficulty.${currentDifficulty}.description`);
+            
+            // Also update the selected state of difficulty dropdown options
+            if (this.difficultyDropdown) {
+                this.difficultyDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.difficultyId === currentDifficulty);
+                });
+            }
+        }
+    }
+    
+    /**
+     * Update sound toggle state to reflect current sound manager state
+     */
+    updateSoundToggleState() {
+        const soundToggle = document.getElementById('menuSoundToggle');
+        if (soundToggle && window.__headlines_sound) {
+            soundToggle.classList.toggle('active', window.__headlines_sound.enabled);
         }
     }
     
@@ -354,6 +390,7 @@ class HamburgerMenu {
             }
             
             option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 e.stopPropagation();
                 this.selectLanguage(lang.code, lang.name);
                 this.closeLanguageDropdown();
@@ -367,6 +404,7 @@ class HamburgerMenu {
         
         // Click handler for language item
         languageItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
             e.stopPropagation();
             if (languageItem.classList.contains('open')) {
                 this.closeLanguageDropdown();
@@ -451,8 +489,8 @@ class HamburgerMenu {
         }
         
         // Save to platform
-        if (typeof Platform !== 'undefined' && Platform.saveLanguage) {
-            await Platform.saveLanguage(langCode);
+        if (typeof Platform !== 'undefined' && Platform.saveGameLanguage) {
+            await Platform.saveGameLanguage(langCode);
         }
         
         // Update all UI
@@ -513,6 +551,7 @@ class HamburgerMenu {
             }
             
             option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
                 e.stopPropagation();
                 this.selectDifficulty(diff.id);
                 this.closeDifficultyDropdown();
@@ -526,6 +565,7 @@ class HamburgerMenu {
         
         // Click handler for difficulty item
         difficultyItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
             e.stopPropagation();
             if (difficultyItem.classList.contains('open')) {
                 this.closeDifficultyDropdown();

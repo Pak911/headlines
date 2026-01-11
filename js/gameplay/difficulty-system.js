@@ -441,6 +441,13 @@ function scrambleLetters() {
 function changeDifficulty(newDifficulty) {
     currentDifficulty = newDifficulty;
     
+    // Save to platform system
+    if (typeof Platform !== 'undefined' && Platform.saveGameDifficulty) {
+        Platform.saveGameDifficulty(newDifficulty).catch(err => {
+            console.error('Failed to save difficulty:', err);
+        });
+    }
+    
     // Reset to correct grid first
     for (let r = 0; r < grid.length; r++) {
         for (let c = 0; c < grid[r].length; c++) {
@@ -480,10 +487,27 @@ function updateDifficultyDisplay() {
     }
 }
 
+// Initialize difficulty system
+async function initDifficultySystem() {
+    // Load saved difficulty from platform
+    if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.loadGameDifficulty) {
+        const savedDifficulty = await Platform.loadGameDifficulty();
+        if (savedDifficulty && difficultySettings[savedDifficulty]) {
+            currentDifficulty = savedDifficulty;
+            _log(`Loaded saved difficulty: ${savedDifficulty}`);
+        } else {
+            _log(`Using default difficulty: ${currentDifficulty}`);
+        }
+    } else {
+        _log(`Platform not available, using default difficulty: ${currentDifficulty}`);
+    }
+}
+
 // Expose functions globally
 window.scrambleLetters = scrambleLetters;
 window.scrambleLettersByDifficulty = scrambleLettersByDifficulty;
 window.changeDifficulty = changeDifficulty;
 window.updateDifficultyDisplay = updateDifficultyDisplay;
+window.initDifficultySystem = initDifficultySystem;
 
 })();
