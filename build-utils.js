@@ -103,13 +103,23 @@ async function minifyFile(srcPath, destPath, filename, options = {}) {
 
     const content = await fs.readFile(srcPath, 'utf8');
 
-    // Remove Eruda code block in release builds
-    let processedContent = release ? content.replace(/\/\/ BUILD_ERUDA_START[\s\S]*?\/\/ BUILD_ERUDA_END/g, '') : content;
-
-    let minifiedContent = processedContent;
+    let minifiedContent = content;
 
     try {
         let processedContent = content;
+
+        // Remove Eruda code block in release builds
+        if (release) {
+            processedContent = processedContent.replace(/\/\/ BUILD_ERUDA_START[\s\S]*?\/\/ BUILD_ERUDA_END/g, '');
+        }
+
+        // Uncomment release code blocks in release builds
+        if (release) {
+            processedContent = processedContent.replace(/\/\/ BUILD_RELEASE_START[\s\S]*?\/\/ BUILD_RELEASE_END/g, (match) => {
+                let content = match.replace(/^\/\/ BUILD_RELEASE_START/, '').replace(/\/\/ BUILD_RELEASE_END$/, '');
+                return content.replace(/^\/\/+\s*/gm, '');
+            });
+        }
 
         if (ext === '.js') {
             // Special handling for data.js - inject build-time debug flag

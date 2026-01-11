@@ -262,3 +262,17 @@ document.addEventListener('DOMContentLoaded', async function() {
         enhancedInitGameWithReset();
     }
 });
+
+// BUILD_RELEASE_START
+// // Disable the right-click context menu
+// document.addEventListener('contextmenu', function(event) {
+//   event.preventDefault();
+// }, false);
+// 
+// // Disable dragging of images and links
+// document.addEventListener('dragstart', function(event) {
+//   if (event.target.tagName === 'IMG' || event.target.tagName === 'A') {
+//     event.preventDefault();
+//   }
+// }, false);
+// // BUILD_RELEASE_END
