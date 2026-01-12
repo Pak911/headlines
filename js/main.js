@@ -169,6 +169,21 @@ function updateLocalizedText() {
             legendItems[3].textContent = t('legend.otherWord');
         }
         
+        // Check legend height after a short delay and switch to shorter translations if needed
+        setTimeout(() => {
+            const colorLegend = document.querySelector('.color-legend');
+            if (colorLegend) {
+                const legendHeight = colorLegend.offsetHeight;
+                if (legendHeight > 110 && legendItems.length >= 4) {
+                    // Switch to shorter translations
+                    legendItems[0].textContent = t('legend.correctShort');
+                    legendItems[1].textContent = t('legend.wrongPositionShort');
+                    legendItems[2].textContent = t('legend.connectedWordShort');
+                    legendItems[3].textContent = t('legend.otherWordShort');
+                }
+            }
+        }, 100);
+        
         // Update debug panel text
         const debugToggleHint = document.querySelector('.debug-toggle-hint small');
         if (debugToggleHint) {

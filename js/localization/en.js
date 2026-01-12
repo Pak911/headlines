@@ -27,7 +27,12 @@ const en = {
         correct: "Correct position",
         wrongPosition: "Wrong position",
         connectedWord: "Intersecting word",
-        otherWord: "Other word"
+        otherWord: "Other word",
+        // Shorter versions for when legend wraps to multiple lines
+        correctShort: "Correct",
+        wrongPositionShort: "Wrong position",
+        connectedWordShort: "Connected word",
+        otherWordShort: "Other"
     },
     
     // Victory modal

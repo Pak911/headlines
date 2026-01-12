@@ -28,7 +28,12 @@ const ru = {
         correct: "Верная позиция",
         wrongPosition: "Неверная позиция",
         connectedWord: "В соседнем слове",
-        otherWord: "В другом слове"
+        otherWord: "В другом слове",
+        // Shorter versions for when legend wraps to multiple lines
+        correctShort: "Верно",
+        wrongPositionShort: "В этом слове",
+        connectedWordShort: "В соседнем",
+        otherWordShort: "Другое"
     },
     
     // Victory modal
