@@ -533,14 +533,20 @@ async function enhancedInitGame() {
     // Display headline description as hint
     displayHeadlineDescription();
     
-    // Match hint section width to crossword container width
+    // Animate hint section appearance with CSS transitions
     setTimeout(() => {
         const crosswordContainer = document.querySelector('.crossword-container');
         const hintSection = document.querySelector('.hint-section');
+        
         if (crosswordContainer && hintSection) {
-            hintSection.style.width = crosswordContainer.offsetWidth + 'px';
+            // Set the maxWidth to match crossword container
+            hintSection.style.maxWidth = crosswordContainer.offsetWidth + 'px';
+            
+            // Set transition and trigger the fade-in animation
+            hintSection.style.transition = 'opacity 300ms ease-out';
+            hintSection.style.opacity = '1';
         }
-    }, 50);
+    }, 200);
     
     // Update difficulty display
     updateDifficultyDisplay();
@@ -622,6 +628,13 @@ function displayHeadlineDescription() {
         
         // Set the hint text
         descriptionElement.innerHTML = hintHTML;
+        
+        // Initially hide the entire hint section
+        const hintSection = document.querySelector('.hint-section');
+        if (hintSection) {
+            hintSection.style.opacity = '0';
+            hintSection.style.maxWidth = '0px';
+        }
         
     } else {
         // Clear the content if no description
