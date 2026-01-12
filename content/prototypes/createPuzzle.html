@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headlines - Create Challenge</title>
+    
+    <!-- External Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        /* =========================================
+           1. CORE THEME & VARIABLES (from theme.css)
+           ========================================= */
+        :root {
+            /* Colors */
+            --color-primary: #3b82f6;
+            --color-primary-dark: #2563eb;
+            --color-surface-light: #ffffff;
+            --color-text-primary: #1f2937;
+            --color-text-secondary: #374151;
+            --color-border-light: #e5e7eb;
+            --color-bg-gradient-start: #f8fafc;
+            --color-bg-gradient-end: #e2e8f0;
+            --color-error: #ef4444;
+            --color-success: #10b981;
+
+            /* Spacing & Radius */
+            --spacing-md: 16px;
+            --spacing-lg: 20px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            
+            /* Typography */
+            --font-family: 'Comfortaa', sans-serif;
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* =========================================
+           2. BASE STYLES (from base.css)
+           ========================================= */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-family);
+            background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: var(--color-text-primary);
+        }
+
+        /* =========================================
+           3. CREATOR PAGE SPECIFIC STYLES
+           ========================================= */
+        .creator-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--color-surface-light);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            padding: 32px;
+            margin-top: 20px;
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        h1 {
+            text-align: center;
+            font-weight: 700;
+            color: var(--color-text-primary);
+            margin-bottom: 8px;
+            font-size: 2rem;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: var(--color-text-secondary);
+            margin-bottom: 32px;
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        label {
+            display: block;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: var(--color-text-primary);
+            font-size: 0.9rem;
+        }
+
+        .input-hint {
+            font-size: 0.8rem;
+            color: #6b7280;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        input[type="text"], 
+        textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid var(--color-border-light);
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            outline: none;
+            resize: vertical;
+        }
+
+        input[type="text"]:focus, 
+        textarea:focus {
+            border-color: var(--color-primary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        textarea {
+            min-height: 100px;
+        }
+
+        /* Cleaned words visual display */
+        .cleaned-words-box {
+            margin-top: 8px;
+            font-family: var(--font-family); 
+            font-size: 0.9rem;
+            color: var(--color-text-secondary);
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 8px;
+            word-break: break-word;
+            display: none; /* Hidden by default */
+            border: 1px solid var(--color-border-light);
+            line-height: 1.6;
+        }
+
+        .cleaned-words-box.visible {
+            display: block;
+        }
+
+        .cleaned-label {
+            font-weight: 700;
+            color: var(--color-text-muted);
+            margin-right: 4px;
+            font-size: 0.75rem;
+            display: block;
+            margin-bottom: 8px;
+            letter-spacing: 0.05em;
+        }
+
+        .words-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        /* Badge Styles for Words */
+        .word-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            transition: all 0.2s;
+            cursor: default;
+        }
+
+        .word-valid {
+            background-color: #d1fae5;
+            color: #047857;
+            border: 1px solid #a7f3d0;
+        }
+
+        .word-invalid {
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .word-length-indicator {
+            font-size: 0.7em;
+            opacity: 0.7;
+            margin-left: 6px;
+            background: rgba(0,0,0,0.1);
+            padding: 1px 4px;
+            border-radius: 4px;
+        }
+
+        /* Validation status indicators */
+        .status-badge {
+            display: none; /* Hidden by default */
+            align-items: center;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-top: 10px;
+            line-height: 1.4;
+        }
+
+        .status-badge.error {
+            /* Removed display: inline-flex here to prevent it from showing on load */
+            background-color: #fef2f2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
+        }
+
+        .status-badge.success {
+            /* Removed display: inline-flex here to prevent it from showing on load */
+            background-color: #d1fae5;
+            color: #047857;
+        }
+
+        /* Language indicator */
+        .detected-lang {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-transform: uppercase;
+            margin-left: 8px;
+        }
+
+        /* Buttons */
+        .btn-primary {
+            width: 100%;
+            padding: 14px;
+            background: var(--color-primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: var(--font-family);
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.2s ease, transform 0.1s ease;
+            box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-primary:hover {
+            background: var(--color-primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-primary:active {
+            transform: translateY(1px);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            color: var(--color-text-secondary);
+            border: 2px solid var(--color-border-light);
+            margin-top: 12px;
+        }
+
+        .btn-secondary:hover {
+            background: #f3f4f6;
+            border-color: #d1d5db;
+        }
+
+        /* Preview Area (Mock) */
+        .preview-area {
+            margin-top: 32px;
+            padding: 20px;
+            background: #f0f9ff;
+            border: 2px dashed #bae6fd;
+            border-radius: var(--radius-md);
+            display: none; /* Hidden initially */
+            text-align: center;
+        }
+
+        .preview-title {
+            color: #0369a1;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .preview-stats {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+            color: #0c4a6e;
+        }
+
+        /* Link Generation Area */
+        .link-area {
+            margin-top: 20px;
+            display: none;
+            animation: slideUp 0.3s ease-out;
+        }
+
+        .link-box {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .link-input {
+            flex: 1;
+            background: #f9fafb;
+            color: #6b7280;
+            font-size: 0.9rem;
+        }
+
+        .btn-copy {
+            width: auto;
+            padding: 0 20px;
+            white-space: nowrap;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: rgba(31, 41, 55, 0.95);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toast.visible {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .creator-container {
+                padding: 20px;
+            }
+            h1 { font-size: 1.5rem; }
+            .link-box { flex-direction: column; }
+            .btn-copy { width: 100%; margin-top: 8px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <h1>Create Challenge</h1>
+        <p class="subtitle">Design a custom puzzle for your friends.</p>
+    </div>
+
+    <div class="creator-container">
+        <!-- Input Form -->
+        <div class="form-group">
+            <label for="headlineInput">
+                Hidden Headline (The Puzzle)
+                <span id="langIndicator" class="detected-lang"></span>
+            </label>
+            <span class="input-hint">Min 5 words, 4+ letters each. Punctuation & emojis will be ignored.</span>
+            <textarea id="headlineInput" placeholder="e.g., The quick brown fox jumps over the lazy dog"></textarea>
+            
+            <!-- Cleaned Words Display -->
+            <div id="cleanedWordsDisplay" class="cleaned-words-box"></div>
+            
+            <div id="headlineError" class="status-badge error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="hintInput">Contextual Hint</label>
+            <span class="input-hint">The clue displayed to the player. <strong>Must contain at least 2x the number of words in the headline.</strong></span>
+            <textarea id="hintInput" placeholder="e.g., A famous pangram about animals that contains every letter"></textarea>
+            <div id="hintError" class="status-badge error"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <button id="previewBtn" class="btn-primary">Verify & Generate Preview</button>
+        <button onclick="window.location.href='index.html'" class="btn-primary btn-secondary">Back to Game</button>
+
+        <!-- Mock Preview Area -->
+        <div id="previewArea" class="preview-area">
+            <div class="preview-title">✨ Grid Generated Successfully</div>
+            <p style="font-size: 0.9rem; color: #4b5563; margin-bottom: 15px;">
+                (Mock) The engine successfully arranged your words into a valid crossword layout.
+            </p>
+            <div class="preview-stats">
+                <span>Words: <strong id="statWords">0</strong></span>
+                <span>Language: <strong id="statLang">-</strong></span>
+            </div>
+            
+            <button id="generateLinkBtn" class="btn-primary" style="background-color: var(--color-success);">
+                Create Challenge Link
+            </button>
+        </div>
+
+        <!-- Link Result Area -->
+        <div id="linkArea" class="link-area">
+            <label>Share this link:</label>
+            <div class="link-box">
+                <input type="text" id="shareLinkInput" class="link-input" readonly>
+                <button id="copyBtn" class="btn-primary btn-copy">Copy Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Center Toast Notification -->
+    <div id="toast" class="toast">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <span>Copied to Clipboard!</span>
+    </div>
+
+    <script>
+        // DOM Elements
+        const headlineInput = document.getElementById('headlineInput');
+        const cleanedWordsDisplay = document.getElementById('cleanedWordsDisplay');
+        const hintInput = document.getElementById('hintInput');
+        const headlineError = document.getElementById('headlineError');
+        const hintError = document.getElementById('hintError');
+        const langIndicator = document.getElementById('langIndicator');
+        const previewBtn = document.getElementById('previewBtn');
+        const previewArea = document.getElementById('previewArea');
+        const linkArea = document.getElementById('linkArea');
+        const generateLinkBtn = document.getElementById('generateLinkBtn');
+        const shareLinkInput = document.getElementById('shareLinkInput');
+        const copyBtn = document.getElementById('copyBtn');
+        const statWords = document.getElementById('statWords');
+        const statLang = document.getElementById('statLang');
+
+        // State
+        let currentLang = null; // 'en' or 'ru'
+        let cleanedWordsArray = []; // Stores the final processed words
+
+        // Constants
+        const MIN_WORDS = 5;
+        const MIN_WORD_LENGTH = 4;
+
+        // Regex
+        // English: A-Z
+        const REGEX_EN = /^[a-zA-Z]+$/;
+        // Russian: А-Я
+        const REGEX_RU = /^[а-яА-Я]+$/;
+
+        // --- Event Listeners ---
+
+        headlineInput.addEventListener('input', () => {
+            resetUI();
+            validateHeadline();
+        });
+
+        previewBtn.addEventListener('click', () => {
+            // 1. Validate Headline
+            const isHeadlineValid = validateHeadline(true); // true = show errors
+            
+            // 2. Validate Hint
+            const hintVal = hintInput.value.trim();
+            let isHintValid = true;
+            
+            // Parse hint words (simple space split, ignore empty)
+            const hintWords = hintVal.split(/\s+/).filter(w => w.length > 0);
+            
+            if (hintVal.length === 0) {
+                showError(hintError, "Please provide a hint.");
+                isHintValid = false;
+            } else if (cleanedWordsArray.length > 0 && hintWords.length < 2 * cleanedWordsArray.length) {
+                // Hint must be at least 2x length of headline
+                showError(hintError, `Hint must be more descriptive (Hint words: ${hintWords.length} vs Required: ${2 * cleanedWordsArray.length}).`);
+                isHintValid = false;
+            } else {
+                hideError(hintError);
+            }
+
+            if (isHeadlineValid && isHintValid) {
+                // SIMULATE ENGINE CALL
+                simulateGridGeneration();
+            }
+        });
+
+        generateLinkBtn.addEventListener('click', generateLink);
+        copyBtn.addEventListener('click', copyToClipboard);
+
+        // --- Core Functions ---
+
+        function validateHeadline(showUiErrors = false) {
+            let text = headlineInput.value;
+            
+            // 1. Normalize: Replace ë with e for Russian consistency
+            text = text.replace(/ё/g, 'е').replace(/Ё/g, 'Е');
+            
+            // 2. Strict Filtering:
+            // Remove everything EXCEPT letters (Eng/Rus) and spaces
+            const cleanText = text.replace(/[^a-zA-Zа-яА-Я\s]/g, '');
+
+            // 3. Tokenize
+            cleanedWordsArray = cleanText.trim().split(/\s+/).filter(w => w.length > 0);
+
+            // 4. Update Visual Display (Colored Badges)
+            if (cleanedWordsArray.length > 0) {
+                // Generate Badge HTML
+                const badgesHTML = cleanedWordsArray.map(word => {
+                    const len = word.length;
+                    const isValidLen = len >= MIN_WORD_LENGTH;
+                    const badgeClass = isValidLen ? 'word-valid' : 'word-invalid';
+                    return `
+                        <div class="word-badge ${badgeClass}">
+                            ${word}
+                            <span class="word-length-indicator">${len}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                cleanedWordsDisplay.innerHTML = `<span class="cleaned-label">WORD ANALYSIS:</span><div class="words-wrapper">${badgesHTML}</div>`;
+                cleanedWordsDisplay.classList.add('visible');
+            } else {
+                cleanedWordsDisplay.classList.remove('visible');
+            }
+
+            // 5. Check Word Count
+            if (cleanedWordsArray.length < MIN_WORDS) {
+                if (showUiErrors) showError(headlineError, `Need at least ${MIN_WORDS} words (Current: ${cleanedWordsArray.length}). Keep typing!`);
+                return false;
+            }
+
+            // 6. Check Word Length
+            const shortWords = cleanedWordsArray.filter(w => w.length < MIN_WORD_LENGTH);
+            if (shortWords.length > 0) {
+                if (showUiErrors) showError(headlineError, `Found ${shortWords.length} word(s) that are too short (marked in RED above). All words must be 4+ letters.`);
+                return false;
+            }
+
+            // 7. Check Language Consistency
+            const joinedWords = cleanedWordsArray.join('');
+            const isEn = REGEX_EN.test(joinedWords);
+            const isRu = REGEX_RU.test(joinedWords);
+
+            if (isEn && !isRu) {
+                currentLang = 'en';
+                langIndicator.textContent = 'ENGLISH';
+            } else if (isRu && !isEn) {
+                currentLang = 'ru';
+                langIndicator.textContent = 'РУССКИЙ';
+            } else if (!isEn && !isRu && joinedWords.length > 0) {
+                if (showUiErrors) showError(headlineError, "Cannot mix English and Russian letters.");
+                langIndicator.textContent = 'MIXED/INVALID';
+                return false;
+            } else {
+                currentLang = null;
+            }
+
+            hideError(headlineError);
+            return true;
+        }
+
+        function simulateGridGeneration() {
+            // MOCK: In the real game, this calls the engine.
+            statWords.textContent = cleanedWordsArray.length;
+            statLang.textContent = currentLang === 'en' ? 'English' : 'Russian';
+
+            // Show Mock Area
+            previewArea.style.display = 'block';
+            linkArea.style.display = 'none';
+            
+            // Scroll to preview
+            previewArea.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function generateLink() {
+            // 1. Gather Data using the CLEANED array, not the raw input
+            // Reconstruct headline from cleaned words
+            const finalHeadline = cleanedWordsArray.join(' ');
+
+            const puzzleData = {
+                h: finalHeadline,              // Headline (Cleaned)
+                d: hintInput.value.trim(),     // Description/Hint (Raw)
+                l: currentLang                 // Language
+            };
+
+            // 2. Serialize & Compress
+            const jsonString = JSON.stringify(puzzleData);
+            const compressed = LZString.compressToEncodedURIComponent(jsonString);
+
+            // 3. Build URL
+            // We assume this file is named create.html and sits next to index.html
+            // So we just replace the filename in the current path
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            // Construct index.html path. If we are at root /, assume index.html
+            const indexUrl = window.location.origin + (basePath ? basePath : '') + '/index.html';
+            
+            const fullUrl = `${indexUrl}?p=${compressed}`;
+
+            // 4. Show Result
+            shareLinkInput.value = fullUrl;
+            linkArea.style.display = 'block';
+        }
+
+        async function copyToClipboard() {
+            const link = shareLinkInput.value;
+            if (!link) return;
+
+            try {
+                await navigator.clipboard.writeText(link);
+                showToast();
+                shareLinkInput.select();
+            } catch (err) {
+                console.error('Failed to copy: ', err);
+                // Fallback for older browsers
+                shareLinkInput.select();
+                document.execCommand('copy');
+                showToast();
+            }
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.add('visible');
+            setTimeout(() => {
+                toast.classList.remove('visible');
+            }, 3000);
+        }
+
+        function showError(element, msg) {
+            element.textContent = msg;
+            element.style.display = 'inline-flex';
+        }
+
+        function hideError(element) {
+            element.style.display = 'none';
+        }
+
+        function resetUI() {
+            previewArea.style.display = 'none';
+            linkArea.style.display = 'none';
+            langIndicator.textContent = '';
+            hideError(headlineError);
+        }
+    </script>
+</body>
+</html>
