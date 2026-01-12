@@ -36,6 +36,7 @@
     --color-popup-highlight: #2563eb; /* Blue highlight color for bold text */
 
     /* ===== SPACING SYSTEM ===== */
+    --spacing-none: 0;
     --spacing-xs: 8px;
     --spacing-sm: 12px;
     --spacing-md: 16px;
@@ -60,6 +61,8 @@
 
     /* ===== TYPOGRAPHY ===== */
     --font-family: 'Comfortaa', sans-serif;
+    --font-size-xxxs: 10px;
+    --font-size-xxs: 11px;
     --font-size-xs: 12px;
     --font-size-sm: 14px;
     --font-size-base: 16px;

@@ -1,6 +1,6 @@
 /* Main game container */
 .main-game-container {
-    min-width: 400px;
+    min-width: 300px;
     width: fit-content;
     margin: 0 auto;
     display: flex;
@@ -10,7 +10,7 @@
 
 .crossword-container {
     background: white;
-    padding: 24px;
+    padding: var(--container-padding);
     border-radius: 16px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
     margin-bottom: 0;
@@ -30,22 +30,22 @@
 }
 
 .grid-cell {
-    width: 56px;
-    height: 56px;
+    width: var(--cell-size);
+    height: var(--cell-size);
     border: none;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
+    font-size: calc(var(--cell-size) * var(--font-scale));
     font-weight: 700;
     text-transform: uppercase;
     position: relative;
     cursor: pointer;
     transition: all 0.2s ease;
     user-select: none;
-    border-radius: 8px;
+    border-radius: calc(var(--cell-size) * var(--border-radius-scale));
     margin: 1px;
-    -webkit-text-stroke: 1px currentColor;
+    -webkit-text-stroke: calc(var(--cell-size) * var(--text-stroke-scale)) currentColor;
     paint-order: stroke fill;
 }
 
@@ -194,7 +194,7 @@
     display: flex;
     align-items: center;
     gap: 8px;
-    font-size: 0.813rem;
+    font-size: var(--font-size-sm);
     color: #4b5563;
     margin: 0;
     padding: 0;

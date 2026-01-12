@@ -348,17 +348,17 @@ function positionMovesCounter() {
     for (let pos of positions) {
         let hasIntersection = false;
         
-        // Calculate absolute position of counter for this corner
+        // Calculate position relative to container
         let counterTop, counterLeft;
         if (pos.top !== 'auto') {
-            counterTop = containerRect.top + pos.top;
+            counterTop = (gridRect.top - containerRect.top) + pos.top;
         } else {
-            counterTop = containerRect.bottom - pos.bottom - counterSize;
+            counterTop = (gridRect.bottom - containerRect.top) - pos.bottom - counterSize;
         }
         if (pos.left !== 'auto') {
-            counterLeft = containerRect.left + pos.left;
+            counterLeft = (gridRect.left - containerRect.left) + pos.left;
         } else {
-            counterLeft = containerRect.right - pos.right - counterSize;
+            counterLeft = (gridRect.right - containerRect.left) - pos.right - counterSize;
         }
         
         const counterRect = {
@@ -383,21 +383,34 @@ function positionMovesCounter() {
         // If no intersection with letters, use this position
         // Note: We allow intersection with legend at top-left position as per user request
         if (!hasIntersection) {
-            movesCounter.style.top = pos.top === 'auto' ? 'auto' : pos.top + 'px';
-            movesCounter.style.bottom = pos.bottom === 'auto' ? 'auto' : pos.bottom + 'px';
-            movesCounter.style.left = pos.left === 'auto' ? 'auto' : pos.left + 'px';
-            movesCounter.style.right = pos.right === 'auto' ? 'auto' : pos.right + 'px';
+            movesCounter.style.top = counterTop + 'px';
+            movesCounter.style.left = counterLeft + 'px';
+            movesCounter.style.bottom = 'auto';
+            movesCounter.style.right = 'auto';
             _log(`Moves counter positioned at: ${pos.name}`);
             return;
         }
     }
     
-    // If all positions hide letters, use top-left as last resort (may hide legend but that's acceptable)
-    movesCounter.style.top = margin + 'px';
-    movesCounter.style.left = margin + 'px';
-    movesCounter.style.bottom = 'auto';
-    movesCounter.style.right = 'auto';
-    _log('Moves counter positioned at: top-left (fallback - may overlap legend)');
+    // If all positions hide letters, center in top toolbar as last resort (may hide legend)
+    const toolbar = document.querySelector('.top-toolbar');
+    if (toolbar) {
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const counterLeft = (toolbarRect.left - containerRect.left) + (toolbarRect.width / 2) - (counterSize / 2);
+        const counterTop = (toolbarRect.top - containerRect.top) + (toolbarRect.height / 2) - (counterSize / 2);
+        movesCounter.style.top = counterTop + 'px';
+        movesCounter.style.left = counterLeft + 'px';
+        movesCounter.style.bottom = 'auto';
+        movesCounter.style.right = 'auto';
+        _log('Moves counter positioned at: center of top toolbar (fallback - may overlap legend)');
+    } else {
+        // Fallback to old behavior if toolbar not found
+        movesCounter.style.top = margin + 'px';
+        movesCounter.style.left = margin + 'px';
+        movesCounter.style.bottom = 'auto';
+        movesCounter.style.right = 'auto';
+        _log('Moves counter positioned at: top-left (fallback - toolbar not found)');
+    }
 }
 
 // Make functions globally available

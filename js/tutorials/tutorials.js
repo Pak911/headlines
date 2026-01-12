@@ -18,8 +18,8 @@ function _log(message, options = {}) {
 function processMarkdown(text) {
     // Convert --- to horizontal rule (with optional surrounding whitespace/newlines)
     text = text.replace(/\n\s*---\s*\n/g, '\n<hr>\n');
-    // Convert ![alt](url) to <img alt="alt" src="url">
-    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img alt="$1" src="$2">');
+    // Convert ![alt](url) to <center><img alt="alt" src="url"></center>
+    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<center><img alt="$1" src="$2"></center>');
     // Convert **text** to <strong>text</strong>
     text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
     // Convert __text__ to <strong>text</strong>

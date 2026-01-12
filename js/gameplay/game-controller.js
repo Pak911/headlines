@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {}) {
+function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('game-controller', message, options);
     } else {
@@ -29,6 +29,30 @@ function checkVictory() {
         }
     }
     return true;
+}
+
+function fitGridToScreen() {
+    if (!grid || !grid.length) return;
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+
+    // Configurable padding constants
+    const paddingX = 30;
+    const paddingY = 300;
+
+    // Account for 1px margins between cells
+    const availableWidth = window.innerWidth - paddingX - (cols - 1) * 2;
+    const availableHeight = window.innerHeight - paddingY - (rows - 1) * 2;
+
+    const maxCellWidth = Math.floor(availableWidth / cols);
+    const maxCellHeight = Math.floor(availableHeight / rows);
+
+    let newCellSize = Math.min(maxCellWidth, maxCellHeight, 56);
+    newCellSize = Math.max(newCellSize, 24);
+
+    document.documentElement.style.setProperty('--cell-size', `${newCellSize}px`);
+    _log(`Resizing grid: ${cols}x${rows}. Cell size: ${newCellSize}px`);
 }
 
 // Calculate star rating based on swap count and letter count
@@ -324,6 +348,8 @@ function replayGame() {
     // Re-render the crossword
     renderCrossword();
     
+    fitGridToScreen();
+    
     _log('🔄 Replaying the same puzzle');
 }
 
@@ -519,6 +545,8 @@ async function enhancedInitGame() {
     // Render the crossword
     if (typeof renderCrossword === 'function') {
         renderCrossword();
+        
+        fitGridToScreen();
     } else {
         console.error('renderCrossword function not available');
     }
@@ -663,6 +691,8 @@ function autoWinGame() {
     // Re-render the grid
     renderCrossword();
     
+    fitGridToScreen();
+    
     // Show victory
     showVictory();
     
@@ -689,6 +719,8 @@ async function giveUp() {
     
     // Re-render the grid
     renderCrossword();
+    
+    fitGridToScreen();
     
     // Switch menu item to Next Puzzle mode
     if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
@@ -768,5 +800,9 @@ window.generateTooltipContent = generateTooltipContent;
 window.getStarThresholds = getStarThresholds;
 window.calculateStarRating = calculateStarRating;
 window.skipToNextHeadline = skipToNextHeadline;
+
+// window.addEventListener('resize', () => {
+//     setTimeout(fitGridToScreen, 50);
+// });
 
 })();

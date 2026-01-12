@@ -23,6 +23,15 @@
     font-display: swap;
 }
 
+/* CSS Variables for Dynamic Grid Sizing */
+:root {
+    --cell-size: 56px;
+    --font-scale: 0.429;
+    --text-stroke-scale: 0.018;
+    --border-radius-scale: 0.143;
+    --container-padding: 24px;
+}
+
 /* Text stroke utility classes */
 .text-stroke-thick {
     -webkit-text-stroke: 2px currentColor;
@@ -106,7 +115,7 @@ body {
     align-items: center;
     justify-content: center;
     min-height: 100vh;
-    padding: 24px;
+    padding: 4px;
 }
 
 .header {
