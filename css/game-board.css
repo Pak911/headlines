@@ -19,6 +19,12 @@
     width: fit-content;
 }
 
+.main-crossword-content {
+    display: flex;
+    justify-content: center;
+    position: relative;
+}
+
 .crossword-grid {
     display: inline-block;
     position: relative;

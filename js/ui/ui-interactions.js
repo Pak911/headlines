@@ -315,16 +315,16 @@ function resetCompletedWords() {
 // Position the moves counter to avoid intersections with grid elements
 function positionMovesCounter() {
     const movesCounter = document.querySelector('.moves-counter-circle');
-    const gridContainer = document.querySelector('.crossword-container');
+    const mainContent = document.querySelector('.main-crossword-content');
     const legend = document.querySelector('.color-legend');
     const grid = document.querySelector('.crossword-grid');
     
-    if (!movesCounter || !gridContainer) {
+    if (!movesCounter || !mainContent) {
         return;
     }
     
     // Get grid and legend dimensions
-    const containerRect = gridContainer.getBoundingClientRect();
+    const containerRect = mainContent.getBoundingClientRect();
     const legendRect = legend ? legend.getBoundingClientRect() : null;
     const gridRect = grid ? grid.getBoundingClientRect() : null;
     
@@ -351,14 +351,14 @@ function positionMovesCounter() {
         // Calculate position relative to container
         let counterTop, counterLeft;
         if (pos.top !== 'auto') {
-            counterTop = (gridRect.top - containerRect.top) + pos.top;
+            counterTop = pos.top;
         } else {
-            counterTop = (gridRect.bottom - containerRect.top) - pos.bottom - counterSize;
+            counterTop = containerRect.height - pos.bottom - counterSize;
         }
         if (pos.left !== 'auto') {
-            counterLeft = (gridRect.left - containerRect.left) + pos.left;
+            counterLeft = pos.left;
         } else {
-            counterLeft = (gridRect.right - containerRect.left) - pos.right - counterSize;
+            counterLeft = containerRect.width - pos.right - counterSize;
         }
         
         const counterRect = {
@@ -370,10 +370,18 @@ function positionMovesCounter() {
         
         // Check intersection with any filled grid cell (letters)
         for (let cellRect of cellRects) {
-            if (!(counterRect.right <= cellRect.left || 
-                  counterRect.left >= cellRect.right || 
-                  counterRect.bottom <= cellRect.top || 
-                  counterRect.top >= cellRect.bottom)) {
+            // Convert cell coordinates to be relative to container
+            const cellRelativeToContainer = {
+                top: cellRect.top - containerRect.top,
+                left: cellRect.left - containerRect.left,
+                right: cellRect.right - containerRect.left,
+                bottom: cellRect.bottom - containerRect.top
+            };
+            
+            if (!(counterRect.right <= cellRelativeToContainer.left || 
+                  counterRect.left >= cellRelativeToContainer.right || 
+                  counterRect.bottom <= cellRelativeToContainer.top || 
+                  counterRect.top >= cellRelativeToContainer.bottom)) {
                 hasIntersection = true;
                 _log(`Position ${pos.name} would hide a letter`);
                 break;
@@ -392,7 +400,7 @@ function positionMovesCounter() {
         }
     }
     
-    // If all positions hide letters, center in top toolbar as last resort (may hide legend)
+    // If all positions hide letters, center in top toolbar as last resort
     const toolbar = document.querySelector('.top-toolbar');
     if (toolbar) {
         const toolbarRect = toolbar.getBoundingClientRect();
@@ -402,7 +410,7 @@ function positionMovesCounter() {
         movesCounter.style.left = counterLeft + 'px';
         movesCounter.style.bottom = 'auto';
         movesCounter.style.right = 'auto';
-        _log('Moves counter positioned at: center of top toolbar (fallback - may overlap legend)');
+        _log('Moves counter positioned at: center of top toolbar (fallback - all positions hide letters)');
     } else {
         // Fallback to old behavior if toolbar not found
         movesCounter.style.top = margin + 'px';

@@ -129,12 +129,6 @@
 
     <div class="main-game-container">
         <div class="crossword-container">
-            <!-- Moves counter circle overlaid on grid -->
-            <div class="moves-counter-circle">
-                <div class="moves-number" id="swapCount">0</div>
-                <div class="moves-label">moves</div>
-            </div>
-            
             <!-- Top Toolbar with buttons and legend -->
             <div class="top-toolbar">
                 <!-- Left: Hamburger menu button -->
@@ -182,7 +176,16 @@
                 </div>
             </div>
             
-        <div id="crosswordGrid" class="crossword-grid"></div>
+            <!-- Main crossword content area -->
+            <div class="main-crossword-content">
+                <!-- Moves counter circle overlaid on grid -->
+                <div class="moves-counter-circle">
+                    <div class="moves-number" id="swapCount">0</div>
+                    <div class="moves-label">moves</div>
+                </div>
+                
+                <div id="crosswordGrid" class="crossword-grid"></div>
+            </div>
         </div>
         
         <!-- Hint section integrated with playing field -->
