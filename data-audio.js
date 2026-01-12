@@ -15,7 +15,7 @@ const headlinesAudio = {
     // Individual sound effect configurations
     // Each sound can be either file-based (loaded via Pizzicato) or oscillator-based (synthesized)
     sounds: {
-        // Oscillator-based sounds from data-audio-alt.js (for testing)
+        // TEST SOUNDS - Oscillator-based sounds (for testing/development)
         blackHoleCollected: {
             type: 'oscillator',
             waveform: 'sine',
@@ -105,6 +105,8 @@ const headlinesAudio = {
             duration: 0.09,
             envelope: { attack: 0.006, decay: 0.084 }
         },
+        
+        // GAME SOUNDS - Active oscillator sounds for Headlines game
         buttonPress: {
             type: 'oscillator',
             waveform: 'sine',
@@ -129,30 +131,27 @@ const headlinesAudio = {
             duration: 0.08,
             envelope: { attack: 0.003, decay: 0.077 }
         },
-        // File-based UI sounds
-        uiPuzzleSolved: {
-            path: 'sounds/ui_puzzle_solved.mp3',
-            volume: 0.3,
-            attack: 0.1,
-            release: 0.2
+        // Word Solved sound - tremolo pulse
+        wordSolved: {
+            type: 'oscillator',
+            waveform: 'sine',
+            frequency: { start: 400, end: 400 },
+            volume: 0.05,
+            duration: 0.35,
+            envelope: { attack: 0.15, decay: 0.2 },
+            tremolo: {
+                frequency: 12,
+                depth: 0.4
+            }
         },
-        uiWordSolved1: {
-            path: 'sounds/ui_word_solved_01.mp3',
-            volume: 0.3,
-            attack: 0.1,
-            release: 0.2
-        },
-        uiWordSolved2: {
-            path: 'sounds/ui_word_solved_02.mp3',
-            volume: 0.3,
-            attack: 0.1,
-            release: 0.2
-        },
-        uiWordSolved3: {
-            path: 'sounds/ui_word_solved_03.mp3',
-            volume: 0.3,
-            attack: 0.1,
-            release: 0.2
+        // Puzzle Solved sound - wide sweep
+        puzzleSolved: {
+            type: 'oscillator',
+            waveform: 'sine',
+            frequency: { start: 300, end: 800 },
+            volume: 0.15,
+            duration: 1.2,
+            envelope: { attack: 0.08, decay: 1.0 }
         },
         // Template for file-based sounds (loaded from MP3/OGG files):
         // 'soundName': {
@@ -245,9 +244,9 @@ const headlinesAudio = {
         'letterSwapStart': ['letterSwapStart'],
         'letterSwapEnd': ['letterSwapEnd'],
 
-        // UI sound events
-        'wordSolved': ['uiWordSolved1', 'uiWordSolved2', 'uiWordSolved3'],
-        'puzzleSolved': ['uiPuzzleSolved'],
+        // UI sound events - oscillator versions for word and puzzle completion
+        'wordSolved': ['wordSolved'],
+        'puzzleSolved': ['puzzleSolved']
 
     }
 };

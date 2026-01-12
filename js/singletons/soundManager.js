@@ -82,40 +82,13 @@
 
     /**
      * Dynamically load Pizzicato.js script
-     * Required for WebKit/iOS where AudioContext must be created after user interaction
+     * Note: Pizzicato is no longer used - all sounds are oscillator-based
      */
     function loadPizzicatoScript() {
-        return new Promise((resolve, reject) => {
-            // Check if already loaded
-            if (typeof Pizzicato !== 'undefined') {
-                _log('Pizzicato already loaded');
-                resolve();
-                return;
-            }
-
-            // Check if AudioContext is supported before loading Pizzicato
-            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) {
-                _log('AudioContext not supported - skipping Pizzicato load');
-                resolve(); // Resolve anyway to continue without Pizzicato
-                return;
-            }
-
-            _log('Loading Pizzicato.js dynamically...');
-            const script = document.createElement('script');
-            // Use different path for test vs main game
-            const isTestMode = document.location.pathname.includes('/test/');
-            script.src = isTestMode ? '../libs/pizzicato.min.js' : 'libs/pizzicato.min.js';
-            script.async = false; // Load synchronously to ensure order
-            script.onload = () => {
-                _log('Pizzicato.js loaded successfully');
-                resolve();
-            };
-            script.onerror = (error) => {
-                console.error('[soundManager] Failed to load Pizzicato.js:', error);
-                reject(error);
-            };
-            document.head.appendChild(script);
+        return new Promise((resolve) => {
+            // Skip Pizzicato loading - we only use oscillator sounds now
+            _log('Skipping Pizzicato.js load - using oscillator sounds only');
+            resolve();
         });
     }
 
@@ -141,10 +114,11 @@
             _log('AudioContext supported, initializing audio system...');
 
             // Step 1: Load Pizzicato.js dynamically (WebKit/iOS requires this)
+            // Note: Pizzicato is optional - oscillators work without it
             try {
                 await loadPizzicatoScript();
             } catch (e) {
-                console.error('[soundManager] Failed to load Pizzicato, continuing with oscillators only:', e);
+                _log('Pizzicato not available, using oscillators only');
             }
 
             // Step 2: Create AudioContext on first interaction
@@ -566,26 +540,21 @@
             return;
         }
 
-        // Check event cooldown for sample-based sounds
+        // Priority 1: Check if there's an oscillator sound with this name
+        const oscillatorConfig = samplesConfig.sounds[eventName];
+        if (oscillatorConfig && oscillatorConfig.type === 'oscillator') {
+            playOscillatorSound(oscillatorConfig);
+            return;
+        }
+
+        // Priority 2: Check if event exists in sample-based system
         if (samplesConfig.eventMap[eventName]) {
             if (!canPlayEventSound(eventName)) {
                 _log(`Skipping sound event "${eventName}" - cooldown active`);
                 return;
             }
-        }
-
-        // Priority 1: Check if event exists in sample-based system
-        if (samplesConfig.eventMap[eventName]) {
             playSampleSound(eventName);
             markEventSoundPlayed(eventName);
-            return;
-        }
-
-        // Priority 2: Fallback to oscillator system
-        // Check if there's an oscillator sound with this name
-        const oscillatorConfig = soundInstances.get(eventName);
-        if (oscillatorConfig && oscillatorConfig.type === 'oscillator') {
-            playOscillatorSound(oscillatorConfig);
             return;
         }
 

@@ -87,8 +87,8 @@ const headlineScoringConfig = {
         minWordLengthForParsing: 2,  // Minimum word length during RSS parsing
         skipWordsInParsing: ['THE', 'AND', 'OR', 'BUT', 'FOR', 'NOR', 'SO', 'YET', 'A', 'AN', 'И', 'В', 'НА', 'С', 'ПО', 'К', 'О', 'ТО', 'ТАКЖЕ', 'ТАК', 'НЕ', 'НИ', 'ЧТО', 'КАК', 'КТО', 'ГДЕ', 'КОГДА', 'ПОЧЕМУ', 'ЗАЧЕМ'], // Words to skip during parsing
         defaultCount: 10,            // Default number of headlines to fetch per source
-        cacheTimeout: 300000,        // Cache timeout in milliseconds (5 minutes)
-        loadingAnimationDelay: 300,  // Show loading animation after 5ms (for debugging)
+        cacheTimeout: 1800000,        // Cache timeout in milliseconds (30 minutes)
+        loadingAnimationDelay: 5,  // Show loading animation after 5ms (for debugging)
         fetchDelay: 0,               // Delay before starting RSS fetch (for debugging)
         seenHeadlinesTimeout: 48      // Seen headlines cleanup timeout in hours (48 hours = 2 days)
     }

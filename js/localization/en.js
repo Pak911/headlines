@@ -26,7 +26,7 @@ const en = {
     legend: {
         correct: "Correct position",
         wrongPosition: "Wrong position",
-        connectedWord: "Connected word",
+        connectedWord: "Intersecting word",
         otherWord: "Other word"
     },
     
@@ -110,7 +110,7 @@ const en = {
     // Tooltips and hints
     hints: {
         tipPrefix: "💡 Tip:",
-        hintTitle: "News Description"
+        hintTitle: "Tip"
     },
     
     // Toolbar tooltips
@@ -144,7 +144,7 @@ const en = {
     tutorial: {
         welcome: {
             title: "How to Play?",
-            content: "Unscramble the **news headline** using the **description below the game board**. Letters turn **green** when placed **correctly**.\n![Reconstructed word](imgs/ex_green_en.png)\n\n---\n\nLetters belonging to the **current word** but in the **wrong position** appear **orange**.\nTo **swap two letters**, simply **tap** them one by one.\n![Tap two letters](imgs/ex_ornage_en.png)\n\n---\n\nLetters in an **intersecting word** appear **purple**. Letters in a **different word** remain **gray**.\n![Other colors](imgs/ex_misc_en.png)\n\n---\n\nUse **logic** and the **news clue** to solve the headline with as few moves as possible.",
+            content: "Unscramble the **headline** using the **description below the game board**. Letters turn **green** when placed **correctly**.\n![Reconstructed word](imgs/ex_green_en.png)\n\n---\n\nLetters belonging to the **current word** but in the **wrong position** appear **orange**.\nTo **swap two letters**, simply **tap** them one by one.\n![Tap two letters](imgs/ex_ornage_en.png)\n\n---\n\nLetters in an **intersecting word** appear **purple**. Letters in a **different word** remain **gray**.\n![Other colors](imgs/ex_misc_en.png)\n\n---\n\nUse **logic** and the **clue** to solve the headline with as few moves as possible.",
             buttonText: "Got it"
         }
     }

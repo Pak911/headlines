@@ -26,8 +26,6 @@ const essentialFiles = [
 const essentialDirs = [
     'css',      // All CSS files needed for styling
     'js',       // All JavaScript modules
-    'libs',     // Third-party libraries (Pizzicato)
-    'sounds',   // Audio files (MP3, WAV) for sound effects
     'fonts',    // Font files for typography
     'imgs'      // Image files (PNG) for UI elements
 ];
@@ -202,7 +200,7 @@ async function minifyFile(srcPath, destPath, filename, options = {}) {
 /**
  * Copy directory with optional minification (directory-level logging)
  * This is the preferred function for copying directories - logs at directory level, not per-file.
- * Handles binary files (fonts, sounds) specially by copying them directly.
+ * Handles binary files (fonts) specially by copying them directly.
  *
  * @param {string} srcDir - Source directory path
  * @param {string} destDir - Destination directory path
@@ -224,8 +222,8 @@ async function copyDirWithMinification(srcDir, destDir, dirName, options = {}) {
     } = options;
 
     if (await fs.pathExists(srcDir)) {
-        // Skip minification for fonts and sounds directories (binary files)
-        if (dirName === 'fonts' || dirName === 'sounds') {
+        // Skip minification for fonts directory (binary files)
+        if (dirName === 'fonts') {
             await fs.copy(srcDir, destDir);
             console.log(`  ✓ ${dirName}/ (copied - binary files)`);
             return;
