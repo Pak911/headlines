@@ -441,8 +441,8 @@ class HamburgerMenu {
         const dropdownSelect = this.languageItem.querySelector('.menu-dropdown-select');
         const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
         
-        this.languageDropdown.style.left = `${selectRect.right + 8}px`;
-        this.languageDropdown.style.top = `${selectRect.top}px`;
+        this.languageDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.languageDropdown.style.top = `${selectRect.bottom}px`;
         
         this.languageDropdown.classList.add('visible');
         
@@ -602,8 +602,8 @@ class HamburgerMenu {
         const dropdownSelect = this.difficultyItem.querySelector('.menu-dropdown-select');
         const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
         
-        this.difficultyDropdown.style.left = `${selectRect.right + 8}px`;
-        this.difficultyDropdown.style.top = `${selectRect.top}px`;
+        this.difficultyDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.difficultyDropdown.style.top = `${selectRect.bottom}px`;
         
         this.difficultyDropdown.classList.add('visible');
         
