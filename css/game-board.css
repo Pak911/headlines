@@ -2,6 +2,7 @@
 .main-game-container {
     min-width: 300px;
     width: fit-content;
+    max-width: 100vw; /* Never exceed viewport width */
     margin: 0 auto;
     display: flex;
     flex-direction: column;
@@ -17,6 +18,7 @@
     position: relative;
     display: inline-block;
     width: fit-content;
+    max-width: 100vw; /* Never exceed viewport width */
 }
 
 .main-crossword-content {

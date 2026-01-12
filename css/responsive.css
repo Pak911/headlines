@@ -84,6 +84,29 @@
     .legend-text {
         font-weight: 600;
     }
+    
+    /* Victory modal responsiveness */
+    .victory-content {
+        max-width: 480px; /* Slightly narrower */
+    }
+    
+    .victory-header {
+        padding: 28px 20px 20px; /* Reduce padding */
+    }
+    
+    .victory-body {
+        padding: 28px 20px; /* Reduce padding */
+    }
+    
+    .victory-actions {
+        padding: 0 20px 28px; /* Reduce padding */
+        gap: 10px; /* Slightly smaller gap */
+    }
+    
+    .btn-primary, .btn-secondary {
+        min-width: 130px; /* Slightly smaller min-width */
+        padding: 11px 22px; /* Slightly smaller padding */
+    }
 }
 
 @media (max-width: 600px) {
@@ -116,6 +139,65 @@
     .tutorial-button {
         padding: var(--spacing-xs) var(--spacing-lg);
         font-size: var(--font-size-xs);
+    }
+    
+    /* Victory modal responsiveness */
+    .victory-content {
+        width: 95%; /* Use more screen width */
+        max-width: 450px; /* Narrower max-width */
+    }
+    
+    .victory-close {
+        width: 32px; /* Smaller close button */
+        height: 32px;
+        top: 14px;
+        right: 14px;
+    }
+    
+    .victory-close svg {
+        width: 18px; /* Smaller icon */
+        height: 18px;
+    }
+    
+    .victory-title {
+        font-size: 1.75rem; /* Smaller title */
+    }
+    
+    .victory-subtitle {
+        font-size: 0.9rem; /* Smaller subtitle */
+    }
+    
+    .victory-header {
+        padding: 24px 18px 18px; /* More reduced padding */
+    }
+    
+    .victory-body {
+        padding: 24px 18px; /* More reduced padding */
+    }
+    
+    .headline-card {
+        padding: 18px; /* Smaller padding */
+        margin-bottom: 20px; /* Smaller margin */
+    }
+    
+    .headline-reveal {
+        font-size: 1.15rem; /* Smaller headline text */
+    }
+    
+    .stat-value {
+        font-size: 1.75rem; /* Smaller stat numbers */
+    }
+    
+    .victory-actions {
+        padding: 0 18px 24px; /* More reduced padding */
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 12px;
+    }
+    
+    .btn-primary, .btn-secondary {
+        min-width: 120px; /* Smaller min-width */
+        padding: 10px 20px; /* Smaller padding */
+        font-size: 0.95rem; /* Smaller font */
     }
 }
 
@@ -209,5 +291,83 @@
 
     .legend-text {
         font-weight: 700;
+    }
+    
+    /* Victory modal responsiveness */
+    .victory-content {
+        width: 98%; /* Use almost full width */
+        max-width: 400px; /* Much narrower max-width */
+        border-radius: 20px; /* Slightly smaller border radius */
+    }
+    
+    .victory-close {
+        width: 28px; /* Much smaller close button */
+        height: 28px;
+        top: 12px;
+        right: 12px;
+    }
+    
+    .victory-close svg {
+        width: 16px; /* Smaller icon */
+        height: 16px;
+    }
+    
+    .victory-title {
+        font-size: 1.5rem; /* Much smaller title */
+        margin-bottom: 6px; /* Tighter spacing */
+    }
+    
+    .victory-subtitle {
+        font-size: 0.85rem; /* Much smaller subtitle */
+    }
+    
+    .victory-header {
+        padding: 20px 16px 16px; /* Much more reduced padding */
+    }
+    
+    .victory-stars {
+        gap: 6px; /* Tighter star spacing */
+        margin-bottom: 16px; /* Less margin */
+    }
+    
+    .victory-body {
+        padding: 20px 16px; /* Much more reduced padding */
+    }
+    
+    .headline-card {
+        padding: 16px; /* Smaller padding */
+        margin-bottom: 18px; /* Smaller margin */
+        border-radius: 10px; /* Smaller border radius */
+    }
+    
+    .headline-reveal {
+        font-size: 1.1rem; /* Smaller headline text */
+        line-height: 1.3; /* Tighter line height */
+    }
+    
+    .stats-container {
+        gap: 12px; /* Smaller gap between stat cards */
+    }
+    
+    .stat-card {
+        padding: 14px; /* Smaller padding */
+        border-radius: 10px; /* Smaller border radius */
+    }
+    
+    .stat-value {
+        font-size: 1.5rem; /* Smaller stat numbers */
+        margin-bottom: 2px; /* Tighter spacing */
+    }
+    
+    .victory-actions {
+        padding: 0 16px 20px; /* Much more reduced padding */
+        gap: 10px; /* Smaller gap */
+    }
+    
+    .btn-primary, .btn-secondary {
+        min-width: 100px; /* Much smaller min-width */
+        padding: 9px 18px; /* Much smaller padding */
+        font-size: 0.9rem; /* Smaller font */
+        border-radius: 10px; /* Smaller border radius */
     }
 }

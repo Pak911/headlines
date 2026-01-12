@@ -39,7 +39,7 @@ function fitGridToScreen() {
 
     // Configurable padding constants
     const paddingX = 30;
-    const paddingY = 300;
+    const paddingY = 250;
 
     // Account for 1px margins between cells
     const availableWidth = window.innerWidth - paddingX - (cols - 1) * 2;
