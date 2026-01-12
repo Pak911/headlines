@@ -1,0 +1,411 @@
+/* ===== CREATE PUZZLE PAGE STYLES ===== */
+/* Styles specific to the custom puzzle creator page */
+
+/* Page-specific body styling */
+body.create-puzzle-page {
+    background: linear-gradient(135deg, var(--color-bg-gradient-start), var(--color-bg-gradient-end));
+    padding: 20px;
+}
+
+/* Creator Container */
+.creator-container {
+    width: 100%;
+    max-width: 600px;
+    background: var(--color-surface-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    margin: 20px auto;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* Header styling */
+.creator-container h1 {
+    text-align: center;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 8px;
+    font-size: 2rem;
+}
+
+.subtitle {
+    text-align: center;
+    color: var(--color-text-secondary);
+    margin-bottom: 32px;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Form Groups */
+.form-group {
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--color-text-primary);
+    font-size: 0.9rem;
+}
+
+.input-hint {
+    font-size: 0.8rem;
+    color: #6b7280;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.input-hint strong {
+    font-weight: 700;
+}
+
+/* Cleaned Words Display Box */
+.cleaned-words-box {
+    margin-top: 8px;
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    background: #f8fafc;
+    padding: 12px;
+    border-radius: 8px;
+    word-break: break-word;
+    display: none;
+    border: 1px solid var(--color-border-light);
+    line-height: 1.6;
+}
+
+.cleaned-words-box.visible {
+    display: block;
+}
+
+.cleaned-label {
+    font-weight: 700;
+    color: var(--color-text-muted);
+    margin-right: 4px;
+    font-size: 0.75rem;
+    display: block;
+    margin-bottom: 8px;
+    letter-spacing: 0.05em;
+}
+
+.words-wrapper {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+/* Word Badge Styles */
+.word-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    cursor: default;
+}
+
+.word-valid {
+    background-color: #d1fae5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+.word-invalid {
+    background-color: #fee2e2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.word-length-indicator {
+    font-size: 0.7em;
+    opacity: 0.7;
+    margin-left: 6px;
+    background: rgba(0, 0, 0, 0.1);
+    padding: 1px 4px;
+    border-radius: 4px;
+}
+
+/* Status Badge (Error/Success) */
+.status-badge {
+    display: none;
+    align-items: center;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    margin-top: 10px;
+    line-height: 1.4;
+}
+
+.status-badge.error {
+    background-color: #fef2f2;
+    color: #b91c1c;
+    border: 1px solid #fecaca;
+}
+
+.status-badge.success {
+    background-color: #d1fae5;
+    color: #047857;
+    border: 1px solid #a7f3d0;
+}
+
+/* Language Indicator */
+.detected-lang {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    text-transform: uppercase;
+    margin-left: 8px;
+}
+
+/* Button Styles */
+.btn-primary {
+    width: 100%;
+    padding: 14px;
+    background: var(--color-primary);
+    color: white;
+    border: none;
+    border-radius: var(--radius-md);
+    font-family: var(--font-family);
+    font-weight: 700;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.1s ease;
+    box-shadow: 0 4px 6px rgba(59, 130, 246, 0.2);
+}
+
+.btn-primary:hover {
+    background: var(--color-primary-dark);
+    transform: translateY(-1px);
+}
+
+.btn-primary:active {
+    transform: translateY(1px);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--color-text-secondary);
+    border: 2px solid var(--color-border-light);
+    margin-top: 12px;
+}
+
+.btn-secondary:hover {
+    background: #f3f4f6;
+    border-color: #d1d5db;
+}
+
+/* Preview Area */
+.preview-area {
+    margin-top: 32px;
+    padding: 20px;
+    background: #f0f9ff;
+    border: 2px dashed #bae6fd;
+    border-radius: var(--radius-md);
+    display: none;
+    text-align: center;
+    animation: slideUp 0.3s ease-out;
+}
+
+.preview-title {
+    color: #0369a1;
+    font-weight: 700;
+    margin-bottom: 12px;
+}
+
+.preview-stats {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    font-size: 0.9rem;
+    color: #0c4a6e;
+}
+
+.preview-area .btn-primary {
+    background-color: var(--color-success, #10b981);
+}
+
+.preview-area .btn-primary:hover {
+    background-color: #059669;
+}
+
+/* Link Generation Area */
+.link-area {
+    margin-top: 20px;
+    display: none;
+    animation: slideUp 0.3s ease-out;
+}
+
+.link-area label {
+    display: block;
+    font-weight: 700;
+    margin-bottom: 8px;
+    color: var(--color-text-primary);
+}
+
+.link-box {
+    display: flex;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.link-input {
+    flex: 1;
+}
+
+.btn-copy {
+    width: auto;
+    padding: 0 20px;
+    white-space: nowrap;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .creator-container {
+        padding: 20px;
+    }
+
+    .creator-container h1 {
+        font-size: 1.5rem;
+    }
+
+    .link-box {
+        flex-direction: column;
+    }
+
+    .btn-copy {
+        width: 100%;
+        margin-top: 8px;
+    }
+}
+
+/* ===== PREVIEW GRID CONTAINER ===== */
+/* Separate container for the actual crossword preview */
+
+.preview-grid-container {
+    width: 100%;
+    max-width: 100vw;
+    background: var(--color-surface-light);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-lg);
+    padding: 32px;
+    margin: 20px auto;
+    display: none; /* Hidden by default */
+    animation: fadeIn 0.5s ease-out;
+}
+
+.preview-grid-header {
+    text-align: center;
+    margin-bottom: 24px;
+}
+
+.preview-grid-header h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    margin-bottom: 12px;
+}
+
+.preview-disclaimer {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    line-height: 1.6;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* Crossword Grid Styles (from game-board.css) */
+.crossword-grid {
+    display: inline-block;
+    position: relative;
+    margin: 0 auto;
+}
+
+/* Center the grid horizontally within preview container */
+.preview-grid-container {
+    text-align: center;
+}
+
+.grid-row {
+    display: flex;
+}
+
+.grid-cell {
+    width: var(--cell-size);
+    height: var(--cell-size);
+    border: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: calc(var(--cell-size) * var(--font-scale));
+    font-weight: 700;
+    text-transform: uppercase;
+    position: relative;
+    transition: all 0.2s ease;
+    user-select: none;
+    border-radius: calc(var(--cell-size) * var(--border-radius-scale));
+    margin: 1px;
+    -webkit-text-stroke: calc(var(--cell-size) * var(--text-stroke-scale)) currentColor;
+    paint-order: stroke fill;
+}
+
+.grid-cell.empty {
+    background: transparent;
+    cursor: default;
+    box-shadow: none;
+}
+
+.grid-cell.filled {
+    background: white;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+/* Color coding for letters - preview shows all correct */
+.grid-cell.correct {
+    background-color: #4CAF50;
+    color: white;
+    box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive for preview grid */
+@media (max-width: 480px) {
+    .preview-grid-container {
+        padding: 20px;
+    }
+
+    .preview-grid-header h2 {
+        font-size: 1.2rem;
+    }
+
+    .preview-disclaimer {
+        font-size: 0.85rem;
+    }
+}
+

@@ -471,6 +471,16 @@
         headlineInput.addEventListener('input', () => {
             resetUI();
             validateHeadline();
+            // Re-validate hint dynamically if user has started typing it
+            if (hintInput.value.trim().length > 0) {
+                validateHint(false);
+            }
+        });
+
+        // New listener for dynamic hint validation
+        hintInput.addEventListener('input', () => {
+            resetUI();
+            validateHint(false);
         });
 
         previewBtn.addEventListener('click', () => {
@@ -478,22 +488,7 @@
             const isHeadlineValid = validateHeadline(true); // true = show errors
             
             // 2. Validate Hint
-            const hintVal = hintInput.value.trim();
-            let isHintValid = true;
-            
-            // Parse hint words (simple space split, ignore empty)
-            const hintWords = hintVal.split(/\s+/).filter(w => w.length > 0);
-            
-            if (hintVal.length === 0) {
-                showError(hintError, "Please provide a hint.");
-                isHintValid = false;
-            } else if (cleanedWordsArray.length > 0 && hintWords.length < 2 * cleanedWordsArray.length) {
-                // Hint must be at least 2x length of headline
-                showError(hintError, `Hint must be more descriptive (Hint words: ${hintWords.length} vs Required: ${2 * cleanedWordsArray.length}).`);
-                isHintValid = false;
-            } else {
-                hideError(hintError);
-            }
+            const isHintValid = validateHint(true);
 
             if (isHeadlineValid && isHintValid) {
                 // SIMULATE ENGINE CALL
@@ -573,6 +568,36 @@
             }
 
             hideError(headlineError);
+            return true;
+        }
+
+        // New separate validation function for Hint
+        function validateHint(isStrictVerify = false) {
+            const hintVal = hintInput.value.trim();
+            // Parse hint words (simple space split, ignore empty)
+            const hintWords = hintVal.split(/\s+/).filter(w => w.length > 0);
+            
+            // Calculate required words based on current valid headline words
+            // If headline is empty/invalid, cleanedWordsArray might be empty, so req is 0.
+            const requiredWords = 2 * cleanedWordsArray.length;
+
+            hideError(hintError);
+
+            // 1. Check Empty
+            if (hintWords.length === 0) {
+                if (isStrictVerify) {
+                    showError(hintError, "Please provide a hint.");
+                }
+                return false;
+            }
+
+            // 2. Check Length Ratio (Dynamically checked if words exist)
+            // User requirement: "after we have typed at least one word... dynamically show this error"
+            if (cleanedWordsArray.length > 0 && hintWords.length < requiredWords) {
+                showError(hintError, `Hint too short: ${hintWords.length} words. Needs at least ${requiredWords} (2× headline).`);
+                return false;
+            }
+
             return true;
         }
 

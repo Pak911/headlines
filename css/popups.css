@@ -259,3 +259,37 @@
         font-size: var(--font-size-sm);
     }
 }
+
+/* ===== TOAST NOTIFICATION ===== */
+/* Centered toast notification for quick feedback messages */
+
+.toast {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.9);
+    background: rgba(31, 41, 55, 0.95);
+    color: white;
+    padding: 16px 24px;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: var(--shadow-2xl);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    z-index: var(--z-toast);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-family);
+    font-size: var(--font-size-base);
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.toast svg {
+    flex-shrink: 0;
+}

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Headlines - Create Challenge</title>
+    
+    <!-- Stylesheets -->
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/game-board.css">
+    <link rel="stylesheet" href="css/popups.css">
+    <link rel="stylesheet" href="css/create-puzzle.css">
+</head>
+<body class="create-puzzle-page">
+
+    <div class="header">
+        <h1>Create Challenge</h1>
+        <p class="subtitle">Design a custom puzzle for your friends.</p>
+    </div>
+
+    <div class="creator-container">
+        <!-- Input Form -->
+        <div class="form-group">
+            <label for="headlineInput">
+                Hidden Headline (The Puzzle)
+                <span id="langIndicator" class="detected-lang"></span>
+            </label>
+            <span class="input-hint">Min 5 words, 4+ letters each. Punctuation & emojis will be ignored.</span>
+            <textarea id="headlineInput" placeholder="e.g., The quick brown fox jumps over the lazy dog"></textarea>
+            
+            <!-- Cleaned Words Display -->
+            <div id="cleanedWordsDisplay" class="cleaned-words-box"></div>
+            
+            <div id="headlineError" class="status-badge error"></div>
+        </div>
+
+        <div class="form-group">
+            <label for="hintInput">Contextual Hint</label>
+            <span class="input-hint">The clue displayed to the player. <strong>Must contain at least 2x the number of words in the headline.</strong></span>
+            <textarea id="hintInput" placeholder="e.g., A famous pangram about animals that contains every letter"></textarea>
+            <div id="hintError" class="status-badge error"></div>
+        </div>
+
+        <!-- Action Buttons -->
+        <button id="previewBtn" class="btn-primary">Verify & Generate Preview</button>
+        <button onclick="window.location.href='index.html'" class="btn-primary btn-secondary">Back to Game</button>
+
+        <!-- Mock Preview Area -->
+        <div id="previewArea" class="preview-area">
+            <div class="preview-title">✨ Grid Generated Successfully</div>
+            <div class="preview-stats">
+                <span>Words: <strong id="statWords">0</strong></span>
+                <span>Language: <strong id="statLang">-</strong></span>
+            </div>
+            
+            <button id="generateLinkBtn" class="btn-primary">
+                Create Challenge Link
+            </button>
+        </div>
+
+        <!-- Link Result Area (moved inside creator-container) -->
+        <div id="linkArea" class="link-area">
+            <label>Share this link:</label>
+            <div class="link-box">
+                <input type="text" id="shareLinkInput" class="link-input" readonly>
+                <button id="copyBtn" class="btn-primary btn-copy">Copy Link</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Grid Container (separate, after creator-container) -->
+    <div id="previewGridContainer" class="preview-grid-container">
+        <div class="preview-grid-header">
+            <h2>Preview: One Possible Layout</h2>
+            <p class="preview-disclaimer">
+                Note: This is one example layout generated for your device. 
+                The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.
+            </p>
+        </div>
+        <div id="crosswordGrid" class="crossword-grid"></div>
+    </div>
+
+    <!-- Center Toast Notification -->
+    <div id="toast" class="toast">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+        <span>Copied to Clipboard!</span>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
+    <script src="js/lib/lz-string.min.js"></script>
+    <script src="js/core/crossword-engine.js"></script>
+    <script src="js/core/grid-manager.js"></script>
+    <script src="js/create-puzzle.js"></script>
+</body>
+</html>

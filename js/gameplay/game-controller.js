@@ -405,24 +405,65 @@ async function enhancedInitGame() {
     _log('🎮 Starting enhanced game initialization...');
     
     try {
-        // Initialize the enhanced headline management system
-        await initializeHeadlineManagement();
+        // Check for custom puzzle from URL before RSS initialization
+        let customPuzzleHeadline = null;
+        if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.initializeCustomPuzzle === 'function') {
+            customPuzzleHeadline = await window.CustomPuzzleLoader.initializeCustomPuzzle();
+        }
         
-        // Try to generate a valid layout with enhanced headline management system
-        const maxCaptionAttempts = 10;
-        let captionAttempts = 0;
-        
-        while (captionAttempts < maxCaptionAttempts) {
-            // Get next available headline using enhanced management system
-            currentHeadline = await getNextHeadline();
+        // If custom puzzle exists, use it and skip RSS
+        if (customPuzzleHeadline) {
+            _log('🎯 Loading custom puzzle from URL...');
+            currentHeadline = customPuzzleHeadline;
             
-            if (!currentHeadline) {
-                console.error('❌ No headlines available from enhanced system');
-                break;
+            // Normalize Russian Ё → Е for crossword algorithm
+            const normalizedWords = normalizeRussianWords(currentHeadline.words);
+            
+            _log(`🎯 Attempting layout for custom puzzle: "${currentHeadline.text}" (${normalizedWords.length} words)`);
+            
+            // Generate crossword layout
+            crosswordLayout = generateCrosswordLayout(normalizedWords);
+            
+            if (crosswordLayout !== null) {
+                _log(`✅ Successfully generated layout for custom puzzle`);
+                currentHeadline.words = normalizedWords;
+                currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+            } else {
+                _log(`⚠️ Failed to generate layout for custom puzzle, trying simple layout...`);
+                crosswordLayout = generateSimpleLayout(normalizedWords);
+                
+                if (crosswordLayout && crosswordLayout.words.length === normalizedWords.length) {
+                    normalizeLayout(crosswordLayout, normalizedWords);
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                } else {
+                    console.error('❌ Failed to generate layout for custom puzzle');
+                    if (window.CustomPuzzleLoader) {
+                        window.CustomPuzzleLoader.clearCustomPuzzleURL();
+                    }
+                    throw new Error('Failed to generate layout for custom puzzle');
+                }
             }
+        } else {
+            // Normal RSS mode
+            // Initialize the enhanced headline management system
+            await initializeHeadlineManagement();
+        
+            // Try to generate a valid layout with enhanced headline management system
+            const maxCaptionAttempts = 10;
+            let captionAttempts = 0;
             
-            // Use filtered words if available, otherwise fall back to original words
-            const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
+            while (captionAttempts < maxCaptionAttempts) {
+                // Get next available headline using enhanced management system
+                currentHeadline = await getNextHeadline();
+            
+                if (!currentHeadline) {
+                    console.error('❌ No headlines available from enhanced system');
+                    break;
+                }
+                
+                // Use filtered words if available, otherwise fall back to original words
+                const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
             
             // Normalize Russian Ё → Е for crossword algorithm
             const normalizedWords = normalizeRussianWords(wordsToUse);
@@ -455,11 +496,11 @@ async function enhancedInitGame() {
                 debugInfo.rejectedHeadlines.push(currentHeadline.filteredText || currentHeadline.text);
                 _log(`❌ Layout generation failed for: "${currentHeadline.filteredText || currentHeadline.text}"`);
             }
+                
+                captionAttempts++;
+            }
             
-            captionAttempts++;
-        }
-        
-        // If we still don't have a valid layout after trying multiple headlines
+            // If we still don't have a valid layout after trying multiple headlines
         if (crosswordLayout === null) {
             _log(`⚠️ Failed to generate valid layout after ${captionAttempts} attempts. Trying simple layout...`);
             
@@ -488,8 +529,9 @@ async function enhancedInitGame() {
                 }
             }
         }
+        } // End of RSS mode else block
         
-        // Final fallback check
+        // Final fallback check (applies to both custom and RSS modes)
         if (!crosswordLayout || !currentHeadline) {
             console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
             // Use a guaranteed working headline from mock data
@@ -767,6 +809,16 @@ window.enhancedInitGame = enhancedInitGame;
 
 // Skip to next headline function - saves as not solved
 async function skipToNextHeadline() {
+    // Check if we're in custom puzzle mode
+    if (window.CustomPuzzleLoader && window.CustomPuzzleLoader.isInCustomPuzzleMode()) {
+        _log('🔄 Exiting custom puzzle mode, returning to RSS mode...');
+        
+        // Clear URL parameters and reload to return to normal RSS mode
+        window.CustomPuzzleLoader.clearCustomPuzzleURL();
+        window.location.reload();
+        return;
+    }
+    
     // Save seen headline data (skipped)
     if (currentHeadline && currentHeadline.djb2Hash) {
         // Check if headline was already seen before saving
