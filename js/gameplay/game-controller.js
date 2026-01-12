@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {always:true}) {
+function _log(message, options = {}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('game-controller', message, options);
     } else {
@@ -574,7 +574,7 @@ async function enhancedInitGame() {
             hintSection.style.maxWidth = crosswordContainer.offsetWidth + 'px';
             
             // Set transition and trigger the fade-in animation
-            hintSection.style.transition = 'opacity 300ms ease-out';
+            hintSection.style.transition = 'opacity 400ms ease-out';
             hintSection.style.opacity = '1';
         }
     }, 200);
@@ -663,6 +663,7 @@ function displayHeadlineDescription() {
         // Initially hide the entire hint section
         const hintSection = document.querySelector('.hint-section');
         if (hintSection) {
+            hintSection.style.transition = 'none';
             hintSection.style.opacity = '0';
             hintSection.style.maxWidth = '0px';
         }

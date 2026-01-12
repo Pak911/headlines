@@ -1,7 +1,7 @@
 // Default language configuration
 const defaultLanguageConfig = {
     // Set to 'auto' to detect browser language, or specify 'en' or 'ru'
-    defaultLanguage: 'ru'
+    defaultLanguage: 'auto'
 };
 
 // RSS language configuration - controls which RSS sources to use
