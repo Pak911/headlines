@@ -79,6 +79,12 @@
     /* Legend responsiveness */
     .legend-item {
         font-size: var(--font-size-xs);
+        gap: 6px;
+    }
+
+    .legend-color {
+        width: 14px;
+        height: 14px;
     }
 
     .legend-text {
@@ -139,6 +145,17 @@
     .tutorial-button {
         padding: var(--spacing-xs) var(--spacing-lg);
         font-size: var(--font-size-xs);
+    }
+    
+    /* Legend responsiveness */
+    .legend-item {
+        gap: 4px;
+    }
+
+    .legend-color {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
     }
     
     /* Victory modal responsiveness */
@@ -287,10 +304,21 @@
     /* Legend responsiveness */
     .legend-item {
         font-size: var(--font-size-xxs);
+        gap: 3px;
+    }
+
+    .legend-color {
+        width: 12px;
+        height: 12px;
+        border-radius: 3px;
     }
 
     .legend-text {
         font-weight: 700;
+    }
+
+    .legend-list {
+        gap: 8px;
     }
     
     /* Victory modal responsiveness */

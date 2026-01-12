@@ -174,7 +174,7 @@ function updateLocalizedText() {
             const colorLegend = document.querySelector('.color-legend');
             if (colorLegend) {
                 const legendHeight = colorLegend.offsetHeight;
-                if (legendHeight > 110 && legendItems.length >= 4) {
+                if (legendHeight > 76 && legendItems.length >= 4) {
                     // Switch to shorter translations
                     legendItems[0].textContent = t('legend.correctShort');
                     legendItems[1].textContent = t('legend.wrongPositionShort');
