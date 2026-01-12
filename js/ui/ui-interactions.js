@@ -83,8 +83,6 @@ function renderCrossword() {
         container.appendChild(rowDiv);
     }
     
-    // Update color legend with localized text
-    updateColorLegend();
 }
 
 // Update color legend with localized text
@@ -92,6 +90,8 @@ function updateColorLegend() {
     // Call the main update function to handle all localization
     if (typeof updateLocalizedText === 'function') {
         updateLocalizedText();
+    } else {
+        console.warn('updateColorLegend: updateLocalizedText function not available');
     }
 }
 
@@ -425,5 +425,10 @@ function positionMovesCounter() {
 window.renderCrossword = renderCrossword;
 window.resetCompletedWords = resetCompletedWords;
 window.positionMovesCounter = positionMovesCounter;
+
+// Listen for new crossword creation events to update color legend
+window.addEventListener('headlines:newCrosswordCreated', () => {
+    updateColorLegend();
+});
 
 })();

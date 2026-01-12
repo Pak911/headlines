@@ -551,6 +551,9 @@ async function enhancedInitGame() {
         console.error('renderCrossword function not available');
     }
     
+    // Dispatch event that new crossword has been created and rendered
+    window.dispatchEvent(new CustomEvent('headlines:newCrosswordCreated'));
+    
     // Position the moves counter to avoid intersections
     setTimeout(() => {
         if (typeof positionMovesCounter === 'function') {

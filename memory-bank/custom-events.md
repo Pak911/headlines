@@ -80,6 +80,12 @@ All events use the `headlines:` prefix for game-specific events.
 - **Data Structure**: No additional data (empty event)
 - **Listeners**: `js/singletons/soundManager.js` - SoundManager module for swap completion audio feedback
 
+#### `headlines:newCrosswordCreated`
+- **Purpose**: Fired when a new crossword puzzle has been generated and rendered
+- **Dispatched From**: `js/gameplay/game-controller.js` - enhancedInitGame() function after crossword layout generation and rendering
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/ui/ui-interactions.js` - UI Interactions module for updating color legend text and sizing
+
 ## Event Production Logic
 
 ### Platform Ready Event
@@ -116,3 +122,8 @@ All events use the `headlines:` prefix for game-specific events.
 - Listens to `headlines:buttonPress` event
 - Plays button press sound effect using oscillator synthesis or sample playback
 - Provides audio feedback for UI interactions and grid cell selections
+
+### UI Interactions Module (`js/ui/ui-interactions.js`)
+- Listens to `headlines:newCrosswordCreated` event
+- Updates color legend text and performs height-based text shortening after new crossword rendering
+- Ensures legend text is properly localized and sized for the current grid layout
