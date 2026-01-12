@@ -86,6 +86,39 @@
     }
 }
 
+@media (max-width: 600px) {
+    /* Tutorial responsiveness */
+    .tutorial-overlay {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .tutorial-content {
+        width: 95%;
+        min-width: 320px;
+    }
+
+    .tutorial-title {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .tutorial-text {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-lg);
+        padding: 0 var(--spacing-sm);
+    }
+
+    .tutorial-close {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+
+    .tutorial-button {
+        padding: var(--spacing-xs) var(--spacing-lg);
+        font-size: var(--font-size-xs);
+    }
+}
+
 @media (max-width: 480px) {
     :root {
         --container-padding: 8px;
@@ -121,7 +154,7 @@
     
     /* Tutorial responsiveness */
     .tutorial-title {
-        font-size: var(--font-size-xl);
+        font-size: var(--font-size-lg);
         margin-bottom: var(--spacing-sm);
     }
     

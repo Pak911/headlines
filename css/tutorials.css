@@ -121,36 +121,3 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 8px rgba(59, 130, 246, 0.4);
 }
-
-/* Responsive design */
-@media (max-width: 600px) {
-    .tutorial-overlay {
-        padding: var(--spacing-lg) var(--spacing-sm);
-    }
-
-    .tutorial-content {
-        width: 95%;
-        min-width: 320px;
-    }
-
-    .tutorial-title {
-        font-size: var(--font-size-2xl);
-        margin-bottom: var(--spacing-md);
-    }
-
-    .tutorial-text {
-        font-size: var(--font-size-base);
-        margin-bottom: var(--spacing-xl);
-        padding: 0 var(--spacing-md);
-    }
-
-    .tutorial-close {
-        top: var(--spacing-sm);
-        right: var(--spacing-sm);
-    }
-
-    .tutorial-button {
-        padding: var(--spacing-sm) var(--spacing-xl);
-        font-size: var(--font-size-sm);
-    }
-}
