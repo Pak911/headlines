@@ -95,8 +95,8 @@ function validateHeadline(showUiErrors = false) {
     // 2. Strict Filtering: Remove everything EXCEPT letters (Eng/Rus) and spaces
     const cleanText = text.replace(/[^a-zA-Zа-яА-Я\s]/g, '');
 
-    // 3. Tokenize
-    cleanedWordsArray = cleanText.trim().split(/\s+/).filter(w => w.length > 0);
+    // 3. Capitalize all letters before tokenizing
+    cleanedWordsArray = cleanText.trim().toUpperCase().split(/\s+/).filter(w => w.length > 0);
 
     // 4. Update Visual Display (Colored Badges)
     if (cleanedWordsArray.length > 0) {
