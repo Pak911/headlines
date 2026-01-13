@@ -24,21 +24,9 @@ You can also create your own personalized crossword puzzle and share it with you
 **[Create Custom Puzzles](https://pak911.github.io/headlines/create-puzzle.html)**
 
 
-
-## 🎮 What Makes This Game Unique?
-
-Headlines combines engaging elements:
-- **Crossword Structure**: Words intersect at shared letters in a proper crossword layout
-- **Letter Manipulation**: Swap individual letters instead of solving clues
-- **Contextual Hints**: Use semantic clues from news descriptions to guide solving
-- **News Awareness**: Learn real headlines as you solve puzzles
-- **Multi-language Support**: Play in English or Russian with automatic language detection
-- **Real-time RSS Integration**: Current news headlines from multiple sources
+## 🎯 How to Play
 
 Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where contextual hints make the challenge engaging and solvable.
-
-
-## 🎯 How to Play
 
 1. **Observe the Grid**: Letters are arranged in a crossword pattern but scrambled
 2. **Read the Hint**: Check the description below the grid for contextual clues about the headline
