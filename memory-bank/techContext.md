@@ -19,14 +19,25 @@
 ```
 headlines/
 ├── index.html                          # Main game interface
+├── create-puzzle.html                  # Creator page interface
 ├── data.js                             # Configuration and data
 ├── data-audio.js                       # Audio system configuration
 ├── news-fetching-config.js             # RSS feed configuration
+├── build-utils.js                      # Build utilities
+├── build.js                            # Build script
+├── launch.bat                          # Windows launcher
+├── launch.sh                           # Unix launcher
+├── package.json                        # Node.js dependencies
 ├── README.md                           # Project documentation
+├── content/                            # Content assets
+│   ├── bgs/                            # Background images
+│   ├── images/                         # Game images
+│   └── prototypes/                     # Prototype files
 ├── css/                                # Stylesheets
 │   ├── base.css                        # Base styling and layout
 │   ├── theme.css                       # CSS custom properties and design tokens
 │   ├── game-board.css                  # Game board styling
+│   ├── create-puzzle.css               # Creator page styling
 │   ├── hamburger-menu.css              # Hamburger menu styling
 │   ├── debug-panel.css                 # Debug panel styling
 │   ├── hint-section.css                # Hint section styling
@@ -37,12 +48,10 @@ headlines/
 │   ├── loading.css                     # Loading animation and spinner styling
 │   └── responsive.css                  # Responsive design and media queries
 ├── fonts/                              # Font files
+├── imgs/                               # Image assets
 ├── js/                                 # Modular JavaScript architecture
 │   ├── main.js                         # Entry point and global state
-│   ├── ui/                             # User interface modules
-│   │   ├── hamburger-menu.js           # Hamburger menu functionality
-│   │   ├── ui-interactions.js          # User interface & rendering
-│   │   └── victory-animations.js       # Victory animations
+│   ├── create-puzzle.js                # Creator page logic
 │   ├── core/                           # Core engine modules
 │   │   ├── crossword-engine.js         # Smart backbone-first layout generation
 │   │   ├── grid-manager.js             # Grid management
@@ -59,25 +68,35 @@ headlines/
 │   │   └── webPlatform.js              # Web platform implementation
 │   ├── rss/                            # RSS and headline processing
 │   │   ├── async-rss-fetcher.js        # Parallel RSS fetching
+│   │   ├── custom-puzzle-loader.js     # Custom puzzle loading
 │   │   ├── headline-manager.js         # Headline pool management
 │   │   ├── headline-scorer.js          # Headline filtering & scoring
 │   │   ├── rss-parser.js               # RSS feed parsing
 │   │   └── html-processor.js           # HTML cleaning
 │   ├── singletons/                     # Singleton pattern modules
+│   │   ├── analytics.js                # Analytics tracking
 │   │   └── soundManager.js             # Audio system management
-│   └── utils/                          # Utilities
-│       ├── debug-utils.js              # Debug panel tools
-│       ├── gamestats.js                # Game statistics tracking
-│       └── utils.js                    # General utilities
-├── libs/                               # Third-party libraries
-│   └── pizzicato.min.js                # Web Audio API library
+│   ├── tutorials/                      # Tutorial system
+│   │   ├── popups.js                   # General popup/modal system
+│   │   └── tutorials.js                # Tutorial state management
+│   ├── ui/                             # User interface modules
+│   │   ├── hamburger-menu.js           # Hamburger menu functionality
+│   │   ├── ui-interactions.js          # User interface & rendering
+│   │   └── victory-animations.js       # Victory animations
+│   ├── utils/                          # Utilities
+│   │   ├── debug-utils.js              # Debug panel tools
+│   │   ├── gamestats.js                # Game statistics tracking
+│   │   └── utils.js                    # General utilities
+│   └── lib/                            # Third-party libraries
+│       └── lz-string.min.js            # LZ compression library
 ├── test/                               # Test framework and utilities
 │   └── [various test files]            # Test interfaces and utilities
 └── memory-bank/                        # Project documentation
     ├── activeContext.md                # Current development context
-    ├── custom-events.md                # Custom events documentation
+    ├── analyticsEvents.md              # Analytics events documentation
+    ├── customEvents.md                 # Custom events documentation
     ├── designGuidelines.md             # Design guidelines
-    ├── productContext.md               # Product specifications
+    ├── projectBrief.md                 # Project brief
     ├── projectOverview.md              # Project overview
     ├── systemPatterns.md               # System architecture patterns
     └── techContext.md                  # Technical documentation (this file)
@@ -210,10 +229,12 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 - **`webPlatform.js`**: Web platform implementation for local storage
 
 ### Singleton Modules (`js/singletons/`)
-- **`soundManager.js`**: Audio system management with Web Audio API and Pizzicato.js
+- **`analytics.js`**: Analytics tracking
+- **`soundManager.js`**: Audio system management with Web Audio API
 
 ### RSS Processing Modules (`js/rss/`)
 - **`async-rss-fetcher.js`**: Parallel RSS fetching with caching
+- **`custom-puzzle-loader.js`**: Custom puzzle loading
 - **`headline-manager.js`**: Headline selection and lifecycle tracking
 - **`headline-scorer.js`**: Headline scoring and filtering
 - **`rss-parser.js`**: RSS feed parsing and extraction
@@ -227,6 +248,9 @@ Also sets global `gridSize = { rows, cols }` for grid creation.
 ### Main Entry Point (`js/main.js`)
 - Global state variable declarations
 - Module coordination and initialization
+
+### Creator Page Module (`js/create-puzzle.js`)
+- **`create-puzzle.js`**: Creator page logic and interface
 
 ## Tutorial and Popup Systems
 
