@@ -288,6 +288,7 @@
     font-weight: 700;
     color: #6366f1;
     margin-bottom: 4px;
+    letter-spacing: 0.05em;
     -webkit-text-stroke: 1px currentColor;
     paint-order: stroke fill;
 }
