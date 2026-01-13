@@ -120,6 +120,11 @@ async function minifyFile(srcPath, destPath, filename, options = {}) {
             });
         }
 
+        // Comment out debug-only code blocks in release builds
+        if (release) {
+            processedContent = processedContent.replace(/\/\/ DEBUG_ONLY_START[\s\S]*?\/\/ DEBUG_ONLY_END/g, '/* Debug features disabled in release build */');
+        }
+
         if (ext === '.js') {
             // Special handling for data.js - inject build-time debug flag
             if (filename === 'data.js') {
@@ -175,18 +180,13 @@ async function minifyFile(srcPath, destPath, filename, options = {}) {
                 processedContent = htmlTransform(content, filename);
             }
 
-            if (shouldMinify(filename, minify)) {
-                minifiedContent = await minifyHTML(processedContent, {
-                    collapseWhitespace: true,
-                    removeComments: true,
-                    minifyJS: true,
-                    minifyCSS: true,
-                });
-                if (verbose) console.log(`  ✓ ${filename} (minified)`);
-            } else {
-                minifiedContent = processedContent;
-                if (verbose) console.log(`  ✓ ${filename} (transformed - no minification)`);
+            // Comment out debug-only HTML blocks in release builds
+            if (release) {
+                processedContent = processedContent.replace(/<!-- DEBUG_ONLY_START -->[\s\S]*?<!-- DEBUG_ONLY_END -->/g, '<!-- Debug features disabled in release build -->');
             }
+
+            minifiedContent = processedContent;
+            if (verbose) console.log(`  ✓ ${filename} (copied - no minification)`);
         } else {
             if (verbose) console.log(`  ✓ ${filename} (copied)`);
         }

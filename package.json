@@ -15,7 +15,7 @@
   "scripts": {
     "build:web": "node build.js",
     "build:web:minify": "node build.js --minify",
-    "build:release": "node build.js --release",
-    "clean": "node -e \"const fs = require('fs-extra'); fs.emptyDir('dist').then(() => console.log('dist/ cleaned')).catch(console.error);\""
+    "build:release": "node build.js --release",    "build:github-pages": "node build.js --github-pages",
+    "build:github-pages:dev": "node build.js --github-pages --dev",    "clean": "node -e \"const fs = require('fs-extra'); fs.emptyDir('dist').then(() => console.log('dist/ cleaned')).catch(console.error);\""
   }
 }

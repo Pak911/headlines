@@ -17,6 +17,8 @@ headlines-game/.env
 
 # Build outputs
 dist/
+!dist/github-pages/
+!dist/github-pages/**
 build/
 out/
 test/to_extract/

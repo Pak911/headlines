@@ -7,6 +7,8 @@ const { copyDirWithMinification, minifyFile, essentialFiles, essentialDirs } = r
 const args = minimist(process.argv.slice(2));
 const minify = args.minify || args.release || false;
 const release = args.release || false;
+const githubPages = args['github-pages'] || false;
+const dev = args.dev || false;
 
 // Debug mode: enabled by default, but forced to false in release builds
 const debugMode = release ? false : true;
@@ -88,12 +90,63 @@ async function buildWebStandalone() {
     console.log(`Output: ${outDir}`);
 }
 
-async function createZipArchive() {
-    const sourceDir = path.join(__dirname, 'dist', 'web-standalone');
-    const zipPath = path.join(__dirname, 'dist', 'headlines-webstandalone.zip');
+async function buildGitHubPages() {
+    const outDir = path.join(__dirname, 'dist', 'github-pages');
+    const buildRelease = !dev;
+    const buildMinify = buildRelease;
+    const buildDebugMode = dev;
+
+    console.log('Building Headlines GitHub Pages to:', outDir);
+    console.log(`Mode: ${buildRelease ? 'RELEASE' : 'DEVELOPMENT'}`);
+    console.log(`Minification: ${buildMinify ? 'ENABLED' : 'DISABLED'}\n`);
+
+    // Ensure output directory exists and is clean
+    await fs.emptyDir(outDir);
+
+    // Copy essential files (with optional minification)
+    console.log('Copying essential files...');
+    for (const file of essentialFiles) {
+        const srcPath = path.join(__dirname, file);
+        const destPath = path.join(outDir, file);
+
+        if (await fs.pathExists(srcPath)) {
+            await minifyFile(srcPath, destPath, file, {
+                minify: buildMinify,
+                release: buildRelease,
+                debugMode: buildDebugMode,
+                htmlTransform: htmlTransform,
+                verbose: true
+            });
+        } else {
+            console.warn(`  ⚠ ${file} not found, skipping`);
+        }
+    }
+
+    // Copy essential directories (with optional minification)
+    console.log('\nCopying essential directories...');
+    for (const dir of essentialDirs) {
+        const srcDir = path.join(__dirname, dir);
+        const destDir = path.join(outDir, dir);
+
+        await copyDirWithMinification(srcDir, destDir, dir, {
+            minify: buildMinify,
+            release: buildRelease,
+            debugMode: buildDebugMode,
+            htmlTransform: htmlTransform
+        });
+    }
+
+    // Note: No launcher scripts for GitHub Pages
+
+    console.log('\nBuild completed successfully!');
+    console.log(`Output: ${outDir}`);
+}
+
+async function createZipArchive(sourceDir, zipName) {
+    const zipPath = path.join(__dirname, 'dist', zipName);
 
     if (!(await fs.pathExists(sourceDir))) {
-        console.warn('Web standalone directory not found, skipping zip creation');
+        console.warn(`${path.basename(sourceDir)} directory not found, skipping zip creation`);
         return;
     }
 
@@ -106,7 +159,7 @@ async function createZipArchive() {
         });
 
         output.on('close', () => {
-            console.log(`  ✓ headlines-webstandalone.zip (${archive.pointer()} bytes)`);
+            console.log(`  ✓ ${zipName} (${archive.pointer()} bytes)`);
             resolve();
         });
 
@@ -115,7 +168,7 @@ async function createZipArchive() {
         });
 
         archive.pipe(output);
-        archive.directory(sourceDir, 'headlines-webstandalone');
+        archive.directory(sourceDir, path.basename(sourceDir));
         archive.finalize();
     });
 }
@@ -125,16 +178,31 @@ async function main() {
         // Ensure dist directory exists
         await fs.ensureDir(path.join(__dirname, 'dist'));
 
-        // Build web standalone
-        await buildWebStandalone();
+        if (githubPages) {
+            // Build GitHub Pages
+            await buildGitHubPages();
 
-        // Create zip archive
-        await createZipArchive();
+            // Create zip archive
+            const outDir = path.join(__dirname, 'dist', 'github-pages');
+            await createZipArchive(outDir, 'headlines-github-pages.zip');
 
-        console.log('\n🎉 Build completed successfully!');
-        console.log('Files created:');
-        console.log('  - dist/web-standalone/ (runnable game)');
-        console.log('  - dist/headlines-webstandalone.zip (distributable archive)');
+            console.log('\n🎉 GitHub Pages build completed successfully!');
+            console.log('Files created:');
+            console.log('  - dist/github-pages/ (GitHub Pages ready)');
+            console.log('  - dist/headlines-github-pages.zip (distributable archive)');
+        } else {
+            // Build web standalone
+            await buildWebStandalone();
+
+            // Create zip archive
+            const outDir = path.join(__dirname, 'dist', 'web-standalone');
+            await createZipArchive(outDir, 'headlines-webstandalone.zip');
+
+            console.log('\n🎉 Build completed successfully!');
+            console.log('Files created:');
+            console.log('  - dist/web-standalone/ (runnable game)');
+            console.log('  - dist/headlines-webstandalone.zip (distributable archive)');
+        }
 
     } catch (error) {
         console.error('Build failed:', error);

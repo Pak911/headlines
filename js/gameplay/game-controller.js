@@ -724,6 +724,7 @@ async function enhancedInitGame() {
     }
 }
 
+// DEBUG_ONLY_START
 // Keyboard event handler
 document.addEventListener('keydown', function(event) {
     // Toggle debug panel with 'D' key
@@ -740,6 +741,7 @@ document.addEventListener('keydown', function(event) {
         toggleDebugPanel();
     }
 });
+// DEBUG_ONLY_END
 
 // Function to display headline description as hint
 function displayHeadlineDescription() {
