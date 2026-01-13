@@ -213,21 +213,14 @@ async function initializeCustomPuzzle() {
             const savedLanguage = await Platform.loadGameLanguage();
             
             if (!savedLanguage) {
-                // No saved language - use puzzle language temporarily
-                _log(`Setting temporary language to: ${puzzleData.l}`);
+                // No saved language - use puzzle language and save it
+                _log(`Setting language to: ${puzzleData.l}`);
                 
-                // Set current language without saving to storage
-                // We set it directly instead of using setLanguage() to avoid saving
+                // Use setLanguage to properly set and save the language
                 if (typeof i18n !== 'undefined' && i18n.currentLanguage !== puzzleData.l) {
-                    i18n.currentLanguage = puzzleData.l;
-                    document.documentElement.lang = puzzleData.l;
+                    await i18n.setLanguage(puzzleData.l);
                     
-                    // Update UI with new language
-                    if (typeof i18n.updateUI === 'function') {
-                        i18n.updateUI();
-                    }
-                    
-                    _log(`Language set to: ${puzzleData.l} (temporary, not saved)`);
+                    _log(`Language set and saved to: ${puzzleData.l}`);
                     
                     // Dispatch event so tutorial can update its language
                     window.dispatchEvent(new CustomEvent('headlines:customPuzzle:languageChanged', {
