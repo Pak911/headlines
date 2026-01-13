@@ -399,3 +399,121 @@
         border-radius: 10px; /* Smaller border radius */
     }
 }
+
+@media (max-height: 800px) {
+    /* Tutorial responsiveness */
+    .tutorial-overlay {
+        padding: var(--spacing-lg) var(--spacing-sm);
+    }
+
+    .tutorial-content {
+        width: 95%;
+        min-width: 320px;
+    }
+
+    .tutorial-title {
+        font-size: var(--font-size-xl);
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .tutorial-text {
+        font-size: var(--font-size-sm);
+        margin-bottom: var(--spacing-lg);
+        padding: 0 var(--spacing-sm);
+    }
+
+    .tutorial-close {
+        top: var(--spacing-sm);
+        right: var(--spacing-sm);
+    }
+
+    .tutorial-button {
+        padding: var(--spacing-xs) var(--spacing-lg);
+        font-size: var(--font-size-xs);
+    }
+    
+    /* Legend responsiveness */
+    .legend-item {
+        gap: 4px;
+    }
+
+    .legend-color {
+        width: 13px;
+        height: 13px;
+        border-radius: 3px;
+    }
+    
+    /* Victory modal responsiveness */
+    .victory-content {
+        width: 95%; /* Use more screen width */
+        max-width: 450px; /* Narrower max-width */
+    }
+    
+    .victory-close {
+        width: 32px; /* Smaller close button */
+        height: 32px;
+        top: 14px;
+        right: 14px;
+    }
+    
+    .victory-close svg {
+        width: 18px; /* Smaller icon */
+        height: 18px;
+    }
+    
+    .victory-title {
+        font-size: 1.75rem; /* Smaller title */
+    }
+    
+    .victory-subtitle {
+        font-size: 0.9rem; /* Smaller subtitle */
+    }
+    
+    .victory-header {
+        padding: 24px 18px 18px; /* More reduced padding */
+    }
+    
+    .victory-body {
+        padding: 24px 18px; /* More reduced padding */
+    }
+    
+    .headline-card {
+        padding: 18px; /* Smaller padding */
+        margin-bottom: 20px; /* Smaller margin */
+    }
+    
+    .headline-reveal {
+        font-size: 1.15rem; /* Smaller headline text */
+    }
+    
+    .stat-value {
+        font-size: 1.75rem; /* Smaller stat numbers */
+    }
+    
+    .victory-actions {
+        padding: 0 18px 24px; /* More reduced padding */
+        flex-direction: column; /* Stack buttons vertically */
+        gap: 12px;
+    }
+    
+    .btn-primary, .btn-secondary {
+        padding: 10px 20px; /* Smaller padding */
+        font-size: 0.95rem; /* Smaller font */
+    }  
+    
+    /* Popup responsiveness */
+    .popup-body hr {
+        margin: var(--spacing-xs) var(--spacing-sm);
+    }
+    
+    .popup-body img {
+        margin: var(--spacing-none) auto;
+        max-width: 75%;
+    }
+    
+    .popup-top .popup-close {
+        width: 32px;
+        height: 32px;
+        font-size: var(--font-size-2xl);
+    }
+}
