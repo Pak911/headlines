@@ -9,6 +9,14 @@ Transform scrambled letters into news headlines using crossword-style logic! No 
 [![CSS3](https://img.shields.io/badge/CSS3-1572B6?logo=css3&logoColor=white)](https://developer.mozilla.org/en-US/docs/Web/CSS)
 [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Zero-green.svg)](https://github.com/Pak911/headlines)
 
+## 🎮 Play the Game
+
+Want to jump right in and try Headlines? Play the full game online right now:
+
+**[🎮 Play Headlines Now](https://pak911.github.io/headlines)**
+
+No downloads or setup required – just click and start solving crossword puzzles with real news headlines!
+
 ## 🎮 What Makes This Game Unique?
 
 Headlines combines engaging elements:
