@@ -173,8 +173,8 @@ const en = {
         createLinkButton: "Create Challenge Link",
         shareLabel: "Share this link:",
         copyButton: "Copy Link",
-        previewHeader: "Preview: One Possible Layout",
-        previewDisclaimer: "Note: This is one example layout generated for your device. The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.",
+        previewHeader: "Preview",
+        previewDisclaimer: "This is one example layout generated for your device. The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.",
         toastCopied: "Copied to Clipboard!",
         errors: {
             minWords: "Need at least {count} words (Current: {current}). Keep typing!",
