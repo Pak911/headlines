@@ -838,8 +838,7 @@ window.enhancedInitGame = enhancedInitGame;
 // Skip to next headline function - saves as not solved
 async function skipToNextHeadline() {
     // Check if we're in custom puzzle mode by checking URL parameter
-    const urlParams = new URLSearchParams(window.location.search);
-    const hasCustomParam = urlParams.has('p');
+    const hasCustomParam = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
     _log('skipToNextHeadline called. Custom puzzle mode:', hasCustomParam);
     
     if (hasCustomParam) {
