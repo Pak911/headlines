@@ -19,7 +19,7 @@ No downloads or setup required – just click and start solving crossword puzzle
 
 ## 🎨 Create Custom Puzzles
 
-You also can create your own personalized crossword puzzle and share it with your friends with a simple link
+You can also create your own personalized crossword puzzle and share it with your friends with a simple link
 
 **[Create Custom Puzzles](https://pak911.github.io/headlines/create-puzzle.html)**
 
