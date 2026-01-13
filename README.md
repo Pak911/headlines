@@ -29,20 +29,6 @@ Headlines combines engaging elements:
 
 Unlike traditional crosswords that require knowledge, this is a pure logic puzzle where contextual hints make the challenge engaging and solvable.
 
-## 🚀 Quick Start
-
-**Simple Setup - No Installation Required!**
-
-1. **Download**: Clone or download this repository
-2. **Open**: Double-click on `index.html` 
-3. **Play**: The game opens directly in your browser
-
-```bash
-# Optional: Clone the repository
-git clone https://github.com/Pak911/headlines.git
-```
-
-**That's it!** The game runs entirely in your browser with zero dependencies. Just download and open `index.html` in most modern browsers.
 
 ## 🎯 How to Play
 
