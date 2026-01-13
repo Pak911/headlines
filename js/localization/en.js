@@ -189,6 +189,13 @@ const en = {
             russian: "Russian",
             mixed: "MIXED/INVALID"
         }
+    },
+
+    // Puzzle Error (for custom puzzle loading failures)
+    puzzleError: {
+        title: "Puzzle Error",
+        corruptedLink: "The puzzle link may be corrupted or invalid.<br>Please ask the person who sent you to resend the link.<br>Until then, you can play the regular Headlines game.",
+        startRegularGame: "Start Regular Game"
     }
 };
 

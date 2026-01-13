@@ -809,12 +809,18 @@ window.enhancedInitGame = enhancedInitGame;
 
 // Skip to next headline function - saves as not solved
 async function skipToNextHeadline() {
-    // Check if we're in custom puzzle mode
-    if (window.CustomPuzzleLoader && window.CustomPuzzleLoader.isInCustomPuzzleMode()) {
+    // Check if we're in custom puzzle mode by checking URL parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const hasCustomParam = urlParams.has('p');
+    _log('skipToNextHeadline called. Custom puzzle mode:', hasCustomParam);
+    
+    if (hasCustomParam) {
         _log('🔄 Exiting custom puzzle mode, returning to RSS mode...');
         
         // Clear URL parameters and reload to return to normal RSS mode
-        window.CustomPuzzleLoader.clearCustomPuzzleURL();
+        if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.clearCustomPuzzleURL === 'function') {
+            window.CustomPuzzleLoader.clearCustomPuzzleURL();
+        }
         window.location.reload();
         return;
     }

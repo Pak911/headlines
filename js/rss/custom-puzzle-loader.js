@@ -117,44 +117,48 @@ function createCustomHeadlineObject(puzzleData) {
  */
 function clearCustomPuzzleURL() {
     const url = new URL(window.location.href);
+    const originalUrl = url.toString();
     url.searchParams.delete('p');
-    window.history.replaceState({}, '', url.toString());
+    const newUrl = url.toString();
+    _log(`URL change: ${originalUrl} -> ${newUrl}`);
+    window.history.replaceState({}, '', newUrl);
     isCustomPuzzleMode = false;
     customPuzzleData = null;
-    _log('Cleared custom puzzle URL parameters');
+    _log(`Cleared custom puzzle URL parameters: ${originalUrl} -> ${newUrl}`);
 }
 
 /**
  * Show error popup for custom puzzle loading failures
- * @param {string} errorMessage - Error message to display
+ * @param {string} errorMessage - Error message to display (logged to console only)
  */
 function showCustomPuzzleError(errorMessage) {
     // Use the popup system if available
     if (typeof showPopup === 'function' && typeof t === 'function') {
-        showPopup({
-            title: 'Custom Puzzle Error',
-            content: `
-                <p style="line-height: 1.6; margin-bottom: 16px;">
-                    ${errorMessage}
-                </p>
-                <p style="line-height: 1.6; color: #6b7280;">
-                    The puzzle link may be corrupted or invalid. You will be redirected to the regular game mode.
-                </p>
-            `,
+        const popupOptions = {
+            type: 'error',
+            closeOnBackdrop: false,
+            title: t('puzzleError.title'),
+            content: `<p style="line-height: 1.6;">${t('puzzleError.corruptedLink')}</p>`,
             buttons: [
                 {
-                    text: 'Continue to Game',
+                    text: t('puzzleError.startRegularGame'),
                     className: 'btn-primary',
-                    handler: () => {
-                        clearCustomPuzzleURL();
-                        window.location.reload();
+                    action: () => {
+                        if (typeof skipToNextHeadline === 'function') {
+                            skipToNextHeadline();
+                        } else {
+                            clearCustomPuzzleURL();
+                            window.location.reload();
+                        }
                     }
                 }
             ]
-        });
+        };
+        
+        showPopup(popupOptions);
     } else {
         // Fallback to alert
-        alert(errorMessage + '\n\nYou will be redirected to the regular game mode.');
+        alert(t('puzzleError.corruptedLink'));
         clearCustomPuzzleURL();
         window.location.reload();
     }
