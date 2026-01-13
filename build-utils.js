@@ -14,6 +14,7 @@ const { minify: minifyHTML } = require('html-minifier-terser');
  */
 const essentialFiles = [
     'index.html',
+    'create-puzzle.html',
     'data.js',
     'data-audio.js',
     'news-fetching-config.js',

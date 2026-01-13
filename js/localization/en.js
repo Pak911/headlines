@@ -152,6 +152,43 @@ const en = {
             content: "Unscramble the **headline** using the **description below the game board**. Letters turn **green** when placed **correctly**.\n![Reconstructed word](imgs/ex_green_en.png)\n\n---\n\nLetters belonging to the **current word** but in the **wrong position** appear **orange**.\nTo **swap two letters**, simply **tap** them one by one.\n![Tap two letters](imgs/ex_ornage_en.png)\n\n---\n\nLetters in an **intersecting word** appear **purple**. Letters in a **different word** remain **gray**.\n![Other colors](imgs/ex_misc_en.png)\n\n---\n\nUse **logic** and the **clue** to solve the headline with as few moves as possible.",
             buttonText: "Got it"
         }
+    },
+
+    // Create Puzzle Page
+    createPuzzle: {
+        title: "Create Challenge",
+        subtitle: "Design a custom puzzle for your friends.",
+        headlineLabel: "Hidden Headline (The Puzzle)",
+        headlineHint: "Min 5 words, 4+ letters each. Punctuation & emojis will be ignored.",
+        headlinePlaceholder: "e.g., Pirates of the Caribbean: The Curse of the Black Pearl",
+        wordAnalysisLabel: "WORD ANALYSIS:",
+        hintLabel: "Contextual Hint",
+        hintHint: "The clue displayed to the player. <strong>Must contain at least 2x the number of words in the headline.</strong>",
+        hintPlaceholder: "e.g., A swashbuckling adventure film about cursed pirates who must break an ancient curse by finding lost pieces of Aztec gold before the moon turns full",
+        verifyButton: "Verify & Generate Preview",
+        backButton: "Back to Game",
+        previewTitle: "✨ Grid Generated Successfully",
+        statsWords: "Words:",
+        statsLanguage: "Language:",
+        createLinkButton: "Create Challenge Link",
+        shareLabel: "Share this link:",
+        copyButton: "Copy Link",
+        previewHeader: "Preview: One Possible Layout",
+        previewDisclaimer: "Note: This is one example layout generated for your device. The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.",
+        toastCopied: "Copied to Clipboard!",
+        errors: {
+            minWords: "Need at least {count} words (Current: {current}). Keep typing!",
+            shortWords: "Found {count} word(s) that are too short (marked in RED above). All words must be 4+ letters.",
+            mixedLanguages: "Cannot mix English and Russian letters.",
+            noHint: "Please provide a hint.",
+            hintTooShort: "Hint too short: {hintWords} words. Needs at least {required} (2× headline).",
+            layoutFailed: "Failed to generate crossword layout. Try different words or word order."
+        },
+        language: {
+            english: "ENGLISH",
+            russian: "Russian",
+            mixed: "MIXED/INVALID"
+        }
     }
 };
 

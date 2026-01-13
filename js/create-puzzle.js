@@ -8,22 +8,10 @@ let grid = [];
 let gridSize = { rows: 0, cols: 0 };
 let crosswordLayout = null;
 
-// DOM Elements
-const headlineInput = document.getElementById('headlineInput');
-const cleanedWordsDisplay = document.getElementById('cleanedWordsDisplay');
-const hintInput = document.getElementById('hintInput');
-const headlineError = document.getElementById('headlineError');
-const hintError = document.getElementById('hintError');
-const langIndicator = document.getElementById('langIndicator');
-const previewBtn = document.getElementById('previewBtn');
-const previewArea = document.getElementById('previewArea');
-const linkArea = document.getElementById('linkArea');
-const previewGridContainer = document.getElementById('previewGridContainer');
-const generateLinkBtn = document.getElementById('generateLinkBtn');
-const shareLinkInput = document.getElementById('shareLinkInput');
-const copyBtn = document.getElementById('copyBtn');
-const statWords = document.getElementById('statWords');
-const statLang = document.getElementById('statLang');
+// DOM Elements (initialized later)
+let headlineInput, cleanedWordsDisplay, hintInput, headlineError, hintError, langIndicator;
+let previewBtn, previewArea, linkArea, previewGridContainer, generateLinkBtn;
+let shareLinkInput, copyBtn, statWords, statLang;
 
 // State
 let currentLang = null; // 'en' or 'ru'
@@ -38,9 +26,33 @@ const REGEX_EN = /^[a-zA-Z]+$/;
 const REGEX_RU = /^[а-яА-Я]+$/;
 
 /**
+ * Initialize DOM elements and event listeners
+ */
+function initializeDOMElements() {
+    headlineInput = document.getElementById('headlineInput');
+    cleanedWordsDisplay = document.getElementById('cleanedWordsDisplay');
+    hintInput = document.getElementById('hintInput');
+    headlineError = document.getElementById('headlineError');
+    hintError = document.getElementById('hintError');
+    langIndicator = document.getElementById('langIndicator');
+    previewBtn = document.getElementById('previewBtn');
+    previewArea = document.getElementById('previewArea');
+    linkArea = document.getElementById('linkArea');
+    previewGridContainer = document.getElementById('previewGridContainer');
+    generateLinkBtn = document.getElementById('generateLinkBtn');
+    shareLinkInput = document.getElementById('shareLinkInput');
+    copyBtn = document.getElementById('copyBtn');
+    statWords = document.getElementById('statWords');
+    statLang = document.getElementById('statLang');
+}
+
+/**
  * Initialize event listeners
  */
 function initializeEventListeners() {
+    // Initialize DOM elements first
+    initializeDOMElements();
+    
     headlineInput.addEventListener('input', () => {
         resetUI();
         validateHeadline();
@@ -92,7 +104,7 @@ function validateHeadline(showUiErrors = false) {
         }).join('');
 
         cleanedWordsDisplay.innerHTML = `
-            <span class="cleaned-label">WORD ANALYSIS:</span>
+            <span class="cleaned-label">${t('createPuzzle.wordAnalysisLabel')}</span>
             <div class="words-wrapper">${badgesHTML}</div>
         `;
         cleanedWordsDisplay.classList.add('visible');
@@ -103,7 +115,7 @@ function validateHeadline(showUiErrors = false) {
     // 5. Check Word Count
     if (cleanedWordsArray.length < MIN_WORDS) {
         if (showUiErrors) {
-            showError(headlineError, `Need at least ${MIN_WORDS} words (Current: ${cleanedWordsArray.length}). Keep typing!`);
+            showError(headlineError, t('createPuzzle.errors.minWords', cleanedWordsArray.length).replace('{count}', MIN_WORDS).replace('{current}', cleanedWordsArray.length));
         }
         return false;
     }
@@ -112,7 +124,7 @@ function validateHeadline(showUiErrors = false) {
     const shortWords = cleanedWordsArray.filter(w => w.length < MIN_WORD_LENGTH);
     if (shortWords.length > 0) {
         if (showUiErrors) {
-            showError(headlineError, `Found ${shortWords.length} word(s) that are too short (marked in RED above). All words must be 4+ letters.`);
+            showError(headlineError, t('createPuzzle.errors.shortWords', shortWords.length).replace('{count}', shortWords.length));
         }
         return false;
     }
@@ -124,15 +136,15 @@ function validateHeadline(showUiErrors = false) {
 
     if (isEn && !isRu) {
         currentLang = 'en';
-        langIndicator.textContent = 'ENGLISH';
+        if (langIndicator) langIndicator.textContent = t('createPuzzle.language.english');
     } else if (isRu && !isEn) {
         currentLang = 'ru';
-        langIndicator.textContent = 'РУССКИЙ';
+        if (langIndicator) langIndicator.textContent = t('createPuzzle.language.russian');
     } else if (!isEn && !isRu && joinedWords.length > 0) {
         if (showUiErrors) {
-            showError(headlineError, "Cannot mix English and Russian letters.");
+            showError(headlineError, t('createPuzzle.errors.mixedLanguages'));
         }
-        langIndicator.textContent = 'MIXED/INVALID';
+        if (langIndicator) langIndicator.textContent = t('createPuzzle.language.mixed');
         return false;
     } else {
         currentLang = null;
@@ -157,14 +169,14 @@ function validateHint(isStrictVerify = false) {
     // 1. Check Empty
     if (hintWords.length === 0) {
         if (isStrictVerify) {
-            showError(hintError, "Please provide a hint.");
+            showError(hintError, t('createPuzzle.errors.noHint'));
         }
         return false;
     }
 
     // 2. Check Length Ratio
     if (cleanedWordsArray.length > 0 && hintWords.length < requiredWords) {
-        showError(hintError, `Hint too short: ${hintWords.length} words. Needs at least ${requiredWords} (2× headline).`);
+        showError(hintError, t('createPuzzle.errors.hintTooShort').replace('{hintWords}', hintWords.length).replace('{required}', requiredWords));
         return false;
     }
 
@@ -191,8 +203,8 @@ function handlePreview() {
  * Simulate grid generation (mock for Phase 1)
  */
 function simulateGridGeneration() {
-    statWords.textContent = cleanedWordsArray.length;
-    statLang.textContent = currentLang === 'en' ? 'English' : 'Russian';
+    if (statWords) statWords.textContent = cleanedWordsArray.length;
+    if (statLang) statLang.textContent = currentLang === 'en' ? t('createPuzzle.language.english') : t('createPuzzle.language.russian');
 
     // Generate real crossword layout
     const normalizedWords = cleanedWordsArray.map(word => 
@@ -202,7 +214,7 @@ function simulateGridGeneration() {
     crosswordLayout = window.generateCrosswordLayout(normalizedWords);
     
     if (!crosswordLayout) {
-        showError(headlineError, "Failed to generate crossword layout. Try different words or word order.");
+        showError(headlineError, t('createPuzzle.errors.layoutFailed'));
         return;
     }
     
@@ -332,14 +344,16 @@ function generateLink() {
     const fullUrl = `${indexUrl}?p=${compressed}`;
 
     // 4. Show Result
-    shareLinkInput.value = fullUrl;
-    linkArea.style.display = 'block';
+    if (shareLinkInput) shareLinkInput.value = fullUrl;
+    if (linkArea) linkArea.style.display = 'block';
 }
 
 /**
  * Copy link to clipboard
  */
 async function copyToClipboard() {
+    if (!shareLinkInput) return;
+    
     const link = shareLinkInput.value;
     if (!link) return;
 
@@ -361,10 +375,12 @@ async function copyToClipboard() {
  */
 function showToast() {
     const toast = document.getElementById('toast');
-    toast.classList.add('visible');
-    setTimeout(() => {
-        toast.classList.remove('visible');
-    }, 3000);
+    if (toast) {
+        toast.classList.add('visible');
+        setTimeout(() => {
+            toast.classList.remove('visible');
+        }, 3000);
+    }
 }
 
 /**
@@ -386,11 +402,11 @@ function hideError(element) {
  * Reset UI state
  */
 function resetUI() {
-    previewArea.style.display = 'none';
-    linkArea.style.display = 'none';
-    previewGridContainer.style.display = 'none';
-    langIndicator.textContent = '';
-    hideError(headlineError);
+    if (previewArea) previewArea.style.display = 'none';
+    if (linkArea) linkArea.style.display = 'none';
+    if (previewGridContainer) previewGridContainer.style.display = 'none';
+    if (langIndicator) langIndicator.textContent = '';
+    if (headlineError) hideError(headlineError);
 }
 
 // Initialize when DOM is ready

@@ -15,18 +15,30 @@
 <body class="create-puzzle-page">
 
     <div class="header">
-        <h1>Create Challenge</h1>
-        <p class="subtitle">Design a custom puzzle for your friends.</p>
+        <h1 id="pageTitle">Create Challenge</h1>
+        <p class="subtitle" id="pageSubtitle">Design a custom puzzle for your friends.</p>
+    </div>
+
+    <!-- Language Switcher (Top Right) -->
+    <div class="language-switcher" id="languageSwitcher">
+        <div class="language-select">
+            <span class="language-text" id="languageText">English</span>
+            <div class="language-arrow">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                    <path d="M7 10l5 5 5-5z"/>
+                </svg>
+            </div>
+        </div>
     </div>
 
     <div class="creator-container">
         <!-- Input Form -->
         <div class="form-group">
-            <label for="headlineInput">
+            <label for="headlineInput" id="headlineLabel">
                 Hidden Headline (The Puzzle)
                 <span id="langIndicator" class="detected-lang"></span>
             </label>
-            <span class="input-hint">Min 5 words, 4+ letters each. Punctuation & emojis will be ignored.</span>
+            <span class="input-hint" id="headlineHint">Min 5 words, 4+ letters each. Punctuation & emojis will be ignored.</span>
             <textarea id="headlineInput" placeholder="e.g., The quick brown fox jumps over the lazy dog"></textarea>
             
             <!-- Cleaned Words Display -->
@@ -36,22 +48,22 @@
         </div>
 
         <div class="form-group">
-            <label for="hintInput">Contextual Hint</label>
-            <span class="input-hint">The clue displayed to the player. <strong>Must contain at least 2x the number of words in the headline.</strong></span>
+            <label for="hintInput" id="hintLabel">Contextual Hint</label>
+            <span class="input-hint" id="hintHint">The clue displayed to the player. <strong>Must contain at least 2x the number of words in the headline.</strong></span>
             <textarea id="hintInput" placeholder="e.g., A famous pangram about animals that contains every letter"></textarea>
             <div id="hintError" class="status-badge error"></div>
         </div>
 
         <!-- Action Buttons -->
         <button id="previewBtn" class="btn-primary">Verify & Generate Preview</button>
-        <button onclick="window.location.href='index.html'" class="btn-primary btn-secondary">Back to Game</button>
+        <button onclick="window.location.href='index.html'" class="btn-primary btn-secondary" id="backButton">Back to Game</button>
 
         <!-- Mock Preview Area -->
         <div id="previewArea" class="preview-area">
-            <div class="preview-title">✨ Grid Generated Successfully</div>
+            <div class="preview-title" id="previewTitle">✨ Grid Generated Successfully</div>
             <div class="preview-stats">
-                <span>Words: <strong id="statWords">0</strong></span>
-                <span>Language: <strong id="statLang">-</strong></span>
+                <span id="statsWords">Words: <strong id="statWords">0</strong></span>
+                <span id="statsLanguage">Language: <strong id="statLang">-</strong></span>
             </div>
             
             <button id="generateLinkBtn" class="btn-primary">
@@ -61,7 +73,7 @@
 
         <!-- Link Result Area (moved inside creator-container) -->
         <div id="linkArea" class="link-area">
-            <label>Share this link:</label>
+            <label id="shareLabel">Share this link:</label>
             <div class="link-box">
                 <input type="text" id="shareLinkInput" class="link-input" readonly>
                 <button id="copyBtn" class="btn-primary btn-copy">Copy Link</button>
@@ -72,8 +84,8 @@
     <!-- Preview Grid Container (separate, after creator-container) -->
     <div id="previewGridContainer" class="preview-grid-container">
         <div class="preview-grid-header">
-            <h2>Preview: One Possible Layout</h2>
-            <p class="preview-disclaimer">
+            <h2 id="previewHeader">Preview: One Possible Layout</h2>
+            <p class="preview-disclaimer" id="previewDisclaimer">
                 Note: This is one example layout generated for your device. 
                 The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.
             </p>
@@ -86,14 +98,216 @@
         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
             <polyline points="20 6 9 17 4 12"></polyline>
         </svg>
-        <span>Copied to Clipboard!</span>
+        <span id="toastMessage">Copied to Clipboard!</span>
     </div>
 
     <!-- Scripts -->
     <script src="data.js"></script>
+    <script src="data-audio.js"></script>
+    <script src="news-fetching-config.js"></script>
+    
+    <!-- Platform Support -->
+    <script src="js/platforms/webPlatform.js"></script>
+    <script src="js/platforms/platformAdapter.js"></script>
+    
+    <!-- External Libraries -->
     <script src="js/lib/lz-string.min.js"></script>
+    
+    <!-- Localization -->
+    <script src="js/localization/en.js"></script>
+    <script src="js/localization/ru.js"></script>
+    <script src="js/localization/i18n.js"></script>
+    
+    <!-- Core Engine -->
     <script src="js/core/crossword-engine.js"></script>
     <script src="js/core/grid-manager.js"></script>
+    
+    <!-- Initialize localized text -->
+    <script>
+        // Initialize platform and i18n
+        async function initializeApp() {
+            // Initialize platform first (like main game)
+            if (typeof Platform !== 'undefined') {
+                console.log('Initializing platform...');
+                const platformResult = await Platform.init();
+                if (!platformResult.success) {
+                    console.error('Platform initialization failed:', platformResult.error);
+                } else {
+                    console.log('Platform initialized successfully');
+                    // Signal that platform is ready
+                    window.dispatchEvent(new CustomEvent('headlines:platform:ready'));
+                }
+            } else {
+                console.error('Platform object not found');
+            }
+            
+            // Then initialize i18n
+            if (typeof i18n !== 'undefined') {
+                await i18n.init().then(() => {
+                    updateLocalizedText();
+                    initLanguageSwitcher();
+                });
+            }
+        }
+        
+        // Update all text content with translations
+        function updateLocalizedText() {
+            document.getElementById('pageTitle').textContent = t('createPuzzle.title');
+            document.getElementById('pageSubtitle').textContent = t('createPuzzle.subtitle');
+            document.getElementById('headlineLabel').textContent = t('createPuzzle.headlineLabel');
+            document.getElementById('headlineHint').textContent = t('createPuzzle.headlineHint');
+            document.getElementById('headlineInput').placeholder = t('createPuzzle.headlinePlaceholder');
+            document.getElementById('hintLabel').textContent = t('createPuzzle.hintLabel');
+            document.getElementById('hintHint').innerHTML = t('createPuzzle.hintHint');
+            document.getElementById('hintInput').placeholder = t('createPuzzle.hintPlaceholder');
+            document.getElementById('previewBtn').textContent = t('createPuzzle.verifyButton');
+            document.getElementById('backButton').textContent = t('createPuzzle.backButton');
+            document.getElementById('previewTitle').textContent = t('createPuzzle.previewTitle');
+            document.getElementById('statsWords').innerHTML = t('createPuzzle.statsWords') + ' <strong id="statWords">0</strong>';
+            document.getElementById('statsLanguage').innerHTML = t('createPuzzle.statsLanguage') + ' <strong id="statLang">-</strong>';
+            document.getElementById('generateLinkBtn').textContent = t('createPuzzle.createLinkButton');
+            document.getElementById('shareLabel').textContent = t('createPuzzle.shareLabel');
+            document.getElementById('copyBtn').textContent = t('createPuzzle.copyButton');
+            document.getElementById('previewHeader').textContent = t('createPuzzle.previewHeader');
+            document.getElementById('previewDisclaimer').textContent = t('createPuzzle.previewDisclaimer');
+            document.getElementById('toastMessage').textContent = t('createPuzzle.toastCopied');
+        }
+        
+        // Initialize when DOM is ready
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApp);
+        } else {
+            initializeApp();
+        }
+
+        // Language switcher functionality
+        let languageDropdown = null;
+
+        function initLanguageSwitcher() {
+            const languageSwitcher = document.getElementById('languageSwitcher');
+            const languageText = document.getElementById('languageText');
+            
+            if (!languageSwitcher || !languageText || typeof i18n === 'undefined') return;
+            
+            // Set initial language
+            updateLanguageDisplay();
+            
+            // Create dropdown panel
+            languageDropdown = document.createElement('div');
+            languageDropdown.className = 'language-dropdown-panel';
+            
+            // Language options
+            const languages = [
+                { code: 'en', name: 'English' },
+                { code: 'ru', name: 'Русский' }
+            ];
+            
+            languages.forEach(lang => {
+                const option = document.createElement('div');
+                option.className = 'language-dropdown-option';
+                option.dataset.langCode = lang.code;
+                
+                const optionText = document.createElement('span');
+                optionText.className = 'language-dropdown-option-text';
+                optionText.textContent = lang.name;
+                option.appendChild(optionText);
+                
+                const checkIcon = document.createElement('div');
+                checkIcon.className = 'language-dropdown-check';
+                checkIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+                option.appendChild(checkIcon);
+                
+                // Mark current language as selected
+                if (lang.code === i18n.currentLanguage) {
+                    option.classList.add('selected');
+                }
+                
+                option.addEventListener('click', () => {
+                    selectLanguage(lang.code, lang.name);
+                    closeLanguageDropdown();
+                });
+                
+                languageDropdown.appendChild(option);
+            });
+            
+            // Append to body
+            document.body.appendChild(languageDropdown);
+            
+            // Click handler for language switcher
+            languageSwitcher.addEventListener('click', (e) => {
+                e.stopPropagation();
+                if (languageSwitcher.classList.contains('open')) {
+                    closeLanguageDropdown();
+                } else {
+                    openLanguageDropdown();
+                }
+            });
+            
+            // Close on outside click
+            document.addEventListener('click', (e) => {
+                if (languageSwitcher.classList.contains('open') && 
+                    !languageSwitcher.contains(e.target) && 
+                    !languageDropdown.contains(e.target)) {
+                    closeLanguageDropdown();
+                }
+            });
+        }
+
+        function updateLanguageDisplay() {
+            const languageText = document.getElementById('languageText');
+            if (!languageText || typeof i18n === 'undefined') return;
+            
+            const currentLang = i18n.currentLanguage;
+            const displayName = currentLang === 'en' ? 'English' : 'Русский';
+            languageText.textContent = displayName;
+        }
+
+        function openLanguageDropdown() {
+            const languageSwitcher = document.getElementById('languageSwitcher');
+            if (!languageSwitcher || !languageDropdown) return;
+            
+            languageSwitcher.classList.add('open');
+            
+            // Position dropdown
+            const rect = languageSwitcher.getBoundingClientRect();
+            languageDropdown.style.right = `${window.innerWidth - rect.right}px`;
+            languageDropdown.style.top = `${rect.bottom + 5}px`;
+            
+            languageDropdown.classList.add('visible');
+        }
+
+        function closeLanguageDropdown() {
+            const languageSwitcher = document.getElementById('languageSwitcher');
+            if (!languageSwitcher || !languageDropdown) return;
+            
+            languageSwitcher.classList.remove('open');
+            languageDropdown.classList.remove('visible');
+        }
+
+        async function selectLanguage(langCode, langName) {
+            if (typeof i18n === 'undefined') return;
+            
+            const currentLang = i18n.currentLanguage;
+            if (langCode === currentLang) return;
+            
+            // Update i18n
+            await i18n.setLanguage(langCode);
+            
+            // Update display
+            updateLanguageDisplay();
+            
+            // Update selected state in dropdown
+            if (languageDropdown) {
+                languageDropdown.querySelectorAll('.language-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.langCode === langCode);
+                });
+            }
+            
+            // Update all text
+            updateLocalizedText();
+        }
+    </script>
+    
     <script src="js/create-puzzle.js"></script>
 </body>
 </html>
