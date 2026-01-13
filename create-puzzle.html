@@ -54,21 +54,38 @@
             <div id="hintError" class="status-badge error"></div>
         </div>
 
+        <!-- Difficulty Selector -->
+        <div class="form-group">
+            <label for="difficultySelect" id="difficultyLabel">Difficulty</label>
+            <span class="input-hint" id="difficultyHint">Choose how challenging the puzzle will be for the solver.</span>
+            <div class="difficulty-dropdown" id="difficultyDropdown">
+                <div class="difficulty-select" id="difficultySelectBtn">
+                    <span class="difficulty-text" id="difficultyText">Medium</span>
+                    <div class="difficulty-arrow">
+                        <svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor">
+                            <path d="M7 10l5 5 5-5z"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Action Buttons -->
         <button id="previewBtn" class="btn-primary">Verify & Generate Preview</button>
         <button onclick="window.location.href='index.html'" class="btn-primary btn-secondary" id="backButton">Back to Game</button>
 
         <!-- Mock Preview Area -->
         <div id="previewArea" class="preview-area">
-            <div class="preview-title" id="previewTitle">✨ Grid Generated Successfully</div>
+            <div class="preview-title" id="previewTitle">✨ Grid and Link Generated Successfully</div>
             <div class="preview-stats">
-                <span id="statsWords">Words: <strong id="statWords">0</strong></span>
-                <span id="statsLanguage">Language: <strong id="statLang">-</strong></span>
+                <div class="stats-row">
+                    <span id="statsWords">Words: <strong id="statWords">0</strong></span>
+                    <span id="statsLanguage">Language: <strong id="statLang">-</strong></span>
+                </div>
+                <div class="stats-row">
+                    <span id="statsDifficulty">Difficulty: <strong id="statDiff">-</strong></span>
+                </div>
             </div>
-            
-            <button id="generateLinkBtn" class="btn-primary">
-                Create Challenge Link
-            </button>
         </div>
 
         <!-- Link Result Area (moved inside creator-container) -->
@@ -90,7 +107,18 @@
                 The actual puzzle layout may vary on different devices depending on screen size and aspect ratio.
             </p>
         </div>
-        <div id="crosswordGrid" class="crossword-grid"></div>
+        
+        <!-- Unsolved Puzzle Grid -->
+        <div class="grid-section">
+            <h3 class="grid-section-title" id="unsolvedGridTitle">Unsolved Puzzle with Medium Difficulty</h3>
+            <div id="unsolvedGrid" class="crossword-grid"></div>
+        </div>
+        
+        <!-- Solved Puzzle Grid -->
+        <div class="grid-section">
+            <h3 class="grid-section-title" id="solvedGridTitle">Solved Puzzle</h3>
+            <div id="solvedGrid" class="crossword-grid"></div>
+        </div>
     </div>
 
     <!-- Center Toast Notification -->
@@ -121,6 +149,7 @@
     <!-- Core Engine -->
     <script src="js/core/crossword-engine.js"></script>
     <script src="js/core/grid-manager.js"></script>
+    <script src="js/core/color-logic.js"></script>
     
     <!-- Initialize localized text -->
     <script>
@@ -160,13 +189,16 @@
             document.getElementById('hintLabel').textContent = t('createPuzzle.hintLabel');
             document.getElementById('hintHint').innerHTML = t('createPuzzle.hintHint');
             document.getElementById('hintInput').placeholder = t('createPuzzle.hintPlaceholder');
+            document.getElementById('difficultyLabel').textContent = t('createPuzzle.difficultyLabel');
+            document.getElementById('difficultyHint').textContent = t('createPuzzle.difficultyHint');
             document.getElementById('previewBtn').textContent = t('createPuzzle.verifyButton');
             document.getElementById('backButton').textContent = t('createPuzzle.backButton');
-            document.getElementById('previewTitle').textContent = t('createPuzzle.previewTitle');
+            document.getElementById('previewTitle').textContent = '✨ ' + t('createPuzzle.previewTitle');
             document.getElementById('statsWords').innerHTML = t('createPuzzle.statsWords') + ' <strong id="statWords">0</strong>';
             document.getElementById('statsLanguage').innerHTML = t('createPuzzle.statsLanguage') + ' <strong id="statLang">-</strong>';
-            document.getElementById('generateLinkBtn').textContent = t('createPuzzle.createLinkButton');
+            document.getElementById('statsDifficulty').innerHTML = t('createPuzzle.statsDifficulty') + ' <strong id="statDiff">-</strong>';
             document.getElementById('shareLabel').textContent = t('createPuzzle.shareLabel');
+            document.getElementById('solvedGridTitle').textContent = t('createPuzzle.solvedGridTitle');
             document.getElementById('copyBtn').textContent = t('createPuzzle.copyButton');
             document.getElementById('previewHeader').textContent = t('createPuzzle.previewHeader');
             document.getElementById('previewDisclaimer').textContent = t('createPuzzle.previewDisclaimer');

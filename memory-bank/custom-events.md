@@ -25,6 +25,19 @@ All events use the `headlines:` prefix for game-specific events.
   - `js/utils/gamestats.js` - GameStats module waits for platform initialization before loading stats
   - `js/tutorials/tutorials.js` - Tutorials module waits for platform initialization before loading tutorial state
 
+#### `headlines:customPuzzle:languageChanged`
+- **Purpose**: Fired when a custom puzzle sets a temporary language (for players without saved language preference)
+- **Dispatched From**: `js/rss/custom-puzzle-loader.js` - When custom puzzle language is applied
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      language: string  // 'en' or 'ru' - the custom puzzle's language
+    }
+  }
+  ```
+- **Listeners**: `js/tutorials/tutorials.js` - Updates tutorial content to match custom puzzle language
+
 ## Game Events
 
 ### Core Game Events

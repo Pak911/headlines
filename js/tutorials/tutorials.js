@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {}) {
+function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('tutorials', message, options);
     } else {
@@ -47,6 +47,16 @@ class HeadlinesTutorial {
             await this.loadTutorialState();
             this.checkAndShowTutorial();
         });
+        
+        // Listen for custom puzzle language changes
+        window.addEventListener('headlines:customPuzzle:languageChanged', (event) => {
+            _log(`Custom puzzle language changed to: ${event.detail.language}`);
+            // If tutorial hasn't been seen yet, update it with the new language
+            if (!this.tutorialState.welcome) {
+                _log('Tutorial not yet seen, updating language...');
+                this.updateTutorialLanguage(event.detail.language);
+            }
+        });
     }
 
     /**
@@ -82,8 +92,42 @@ class HeadlinesTutorial {
     checkAndShowTutorial() {
         // For now, only show welcome tutorial if not seen
         if (!this.tutorialState.welcome) {
+            // Don't show immediately if custom puzzle is present - wait for language event
+            if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.checkForCustomPuzzle === 'function') {
+                if (window.CustomPuzzleLoader.checkForCustomPuzzle()) {
+                    _log('Custom puzzle detected, waiting for language event before showing tutorial');
+                    return; // Don't show now, language change event will trigger it
+                }
+            }
             this.showWelcomeTutorial();
         }
+    }
+    
+    /**
+     * Update tutorial content when language changes (for custom puzzles)
+     * @param {string} language - Optional language code to switch to before showing tutorial
+     */
+    updateTutorialLanguage(language) {
+        _log(`Updating tutorial language to: ${language || 'current'}`);
+        
+        // If language is provided, ensure i18n is using it
+        if (language && typeof i18n !== 'undefined' && i18n.currentLanguage !== language) {
+            i18n.currentLanguage = language;
+            document.documentElement.lang = language;
+            if (typeof i18n.updateUI === 'function') {
+                i18n.updateUI();
+            }
+        }
+        
+        // Close current popup if exists
+        const popupElement = document.querySelector('.popup-overlay');
+        if (popupElement) {
+            popupElement.remove();
+        }
+        
+        // Reset showing flag and show tutorial with updated language
+        this.showingTutorial = false;
+        this.showWelcomeTutorial();
     }
 
     /**

@@ -380,6 +380,7 @@ window.replayGame = replayGame;
 // Enhanced game initialization with RSS headline fetching
 async function enhancedInitGame() {
     const startTime = performance.now();
+    let customPuzzleDifficulty = null; // Store custom puzzle difficulty if loaded
     
     // Reset debug info
     window.debugInfo = {
@@ -435,6 +436,12 @@ async function enhancedInitGame() {
         if (customPuzzleHeadline) {
             _log('🎯 Loading custom puzzle from URL...');
             currentHeadline = customPuzzleHeadline;
+            
+            // Store custom difficulty if specified
+            if (customPuzzleHeadline.customDifficulty) {
+                customPuzzleDifficulty = customPuzzleHeadline.customDifficulty;
+                _log(`📊 Custom puzzle has difficulty: ${customPuzzleDifficulty}`);
+            }
             
             // Normalize Russian Ё → Е for crossword algorithm
             const normalizedWords = normalizeRussianWords(currentHeadline.words);
@@ -587,9 +594,21 @@ async function enhancedInitGame() {
     // Find word connections
     findWordConnections();
     
-    // Check if player has seen welcome tutorial - if not, use easy difficulty for first puzzle
+    // Determine puzzle difficulty with priority:
+    // 1. Custom puzzle difficulty (if custom puzzle loaded)
+    // 2. Easy difficulty (if first-time player in regular mode)
+    // 3. Current saved/default difficulty
     let puzzleDifficulty = currentDifficulty;
-    if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.hasSeenTutorial) {
+    
+    if (customPuzzleDifficulty) {
+        // Custom puzzle always uses its specified difficulty
+        puzzleDifficulty = customPuzzleDifficulty;
+        // Temporarily set currentDifficulty so UI (hamburger menu) reflects custom difficulty
+        // Note: This is NOT saved to storage, only for this session
+        currentDifficulty = customPuzzleDifficulty;
+        _log(`🎯 Using custom puzzle difficulty: ${puzzleDifficulty}`, {always: true});
+    } else if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.hasSeenTutorial) {
+        // For regular puzzles, check if first-time player
         try {
             const hasSeenWelcome = await Platform.hasSeenTutorial('welcome');
             if (!hasSeenWelcome) {

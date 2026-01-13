@@ -5,7 +5,7 @@
 'use strict';
 
 // Helper function to use flog from debug.js
-function _log(message, options = {}) {
+function _log(message, options = {always:true}) {
     if (window.__cosic && typeof window.__cosic.flog === 'function') {
         window.__cosic.flog('custom-puzzle-loader', message, options);
     } else {
@@ -16,6 +16,7 @@ function _log(message, options = {}) {
 // State
 let customPuzzleData = null;
 let isCustomPuzzleMode = false;
+let cachedHeadlineObject = null; // Cache the headline object to avoid re-processing
 
 /**
  * Check if URL contains custom puzzle parameter
@@ -74,6 +75,18 @@ function loadCustomPuzzle() {
             return null;
         }
         
+        // Extract and validate difficulty (optional field)
+        let customDifficulty = null;
+        if (puzzleData.dfc) {
+            // Check if difficulty is valid
+            if (typeof difficultySettings !== 'undefined' && difficultySettings[puzzleData.dfc]) {
+                customDifficulty = puzzleData.dfc;
+                _log(`Custom puzzle difficulty: ${customDifficulty}`);
+            } else {
+                _log(`Invalid difficulty '${puzzleData.dfc}' in custom puzzle, will use default`);
+            }
+        }
+        
         _log(`✅ Successfully loaded custom puzzle (${puzzleData.l})`);
         
         customPuzzleData = puzzleData;
@@ -97,11 +110,18 @@ function createCustomHeadlineObject(puzzleData) {
     // Split headline into words
     const words = puzzleData.h.split(/\s+/).filter(w => w.length > 0);
     
+    // Extract and validate difficulty
+    let customDifficulty = null;
+    if (puzzleData.dfc && typeof difficultySettings !== 'undefined' && difficultySettings[puzzleData.dfc]) {
+        customDifficulty = puzzleData.dfc;
+    }
+    
     return {
         text: puzzleData.h,
         words: words,
         description: puzzleData.d,
         language: puzzleData.l,
+        customDifficulty: customDifficulty, // Custom difficulty from URL (null if not specified/invalid)
         link: null, // Custom puzzles don't have article links
         source: 'custom',
         sourceName: 'Custom Puzzle',
@@ -124,6 +144,7 @@ function clearCustomPuzzleURL() {
     window.history.replaceState({}, '', newUrl);
     isCustomPuzzleMode = false;
     customPuzzleData = null;
+    cachedHeadlineObject = null; // Clear cache
     _log(`Cleared custom puzzle URL parameters: ${originalUrl} -> ${newUrl}`);
 }
 
@@ -169,6 +190,12 @@ function showCustomPuzzleError(errorMessage) {
  * @returns {Object|null} Custom headline object or null
  */
 async function initializeCustomPuzzle() {
+    // Return cached version if already initialized
+    if (cachedHeadlineObject) {
+        _log('Returning cached custom puzzle headline');
+        return cachedHeadlineObject;
+    }
+    
     if (!checkForCustomPuzzle()) {
         return null;
     }
@@ -180,6 +207,7 @@ async function initializeCustomPuzzle() {
     }
     
     // Set temporary language if player has no saved preference
+    // IMPORTANT: Do this BEFORE returning so language is set before tutorial checks
     if (typeof Platform !== 'undefined' && Platform.isAvailable()) {
         try {
             const savedLanguage = await Platform.loadGameLanguage();
@@ -189,14 +217,22 @@ async function initializeCustomPuzzle() {
                 _log(`Setting temporary language to: ${puzzleData.l}`);
                 
                 // Set current language without saving to storage
+                // We set it directly instead of using setLanguage() to avoid saving
                 if (typeof i18n !== 'undefined' && i18n.currentLanguage !== puzzleData.l) {
                     i18n.currentLanguage = puzzleData.l;
                     document.documentElement.lang = puzzleData.l;
                     
                     // Update UI with new language
-                    if (typeof updateLocalizedText === 'function') {
-                        updateLocalizedText();
+                    if (typeof i18n.updateUI === 'function') {
+                        i18n.updateUI();
                     }
+                    
+                    _log(`Language set to: ${puzzleData.l} (temporary, not saved)`);
+                    
+                    // Dispatch event so tutorial can update its language
+                    window.dispatchEvent(new CustomEvent('headlines:customPuzzle:languageChanged', {
+                        detail: { language: puzzleData.l }
+                    }));
                 }
             } else {
                 _log(`Player has saved language (${savedLanguage}), keeping it`);
@@ -206,7 +242,9 @@ async function initializeCustomPuzzle() {
         }
     }
     
-    return createCustomHeadlineObject(puzzleData);
+    // Create and cache the headline object
+    cachedHeadlineObject = createCustomHeadlineObject(puzzleData);
+    return cachedHeadlineObject;
 }
 
 /**

@@ -7,15 +7,19 @@
 let grid = [];
 let gridSize = { rows: 0, cols: 0 };
 let crosswordLayout = null;
+let previewGridSolved = []; // Separate grid for solved preview
+let previewGridUnsolved = []; // Separate grid for unsolved preview
 
 // DOM Elements (initialized later)
 let headlineInput, cleanedWordsDisplay, hintInput, headlineError, hintError, langIndicator;
-let previewBtn, previewArea, linkArea, previewGridContainer, generateLinkBtn;
-let shareLinkInput, copyBtn, statWords, statLang;
+let previewBtn, previewArea, linkArea, previewGridContainer;
+let shareLinkInput, copyBtn, statWords, statLang, statDiff;
+let difficultyDropdown, difficultySelectBtn, difficultyText, difficultyDropdownPanel;
 
 // State
 let currentLang = null; // 'en' or 'ru'
 let cleanedWordsArray = []; // Stores the final processed words
+let selectedDifficulty = typeof currentDifficulty !== 'undefined' ? currentDifficulty : 'medium'; // Default difficulty
 
 // Constants
 const MIN_WORDS = 5;
@@ -39,11 +43,14 @@ function initializeDOMElements() {
     previewArea = document.getElementById('previewArea');
     linkArea = document.getElementById('linkArea');
     previewGridContainer = document.getElementById('previewGridContainer');
-    generateLinkBtn = document.getElementById('generateLinkBtn');
     shareLinkInput = document.getElementById('shareLinkInput');
     copyBtn = document.getElementById('copyBtn');
     statWords = document.getElementById('statWords');
     statLang = document.getElementById('statLang');
+    statDiff = document.getElementById('statDiff');
+    difficultyDropdown = document.getElementById('difficultyDropdown');
+    difficultySelectBtn = document.getElementById('difficultySelectBtn');
+    difficultyText = document.getElementById('difficultyText');
 }
 
 /**
@@ -68,8 +75,10 @@ function initializeEventListeners() {
     });
 
     previewBtn.addEventListener('click', handlePreview);
-    generateLinkBtn.addEventListener('click', generateLink);
     copyBtn.addEventListener('click', copyToClipboard);
+    
+    // Initialize difficulty dropdown
+    initDifficultyDropdown();
 }
 
 /**
@@ -203,8 +212,15 @@ function handlePreview() {
  * Simulate grid generation (mock for Phase 1)
  */
 function simulateGridGeneration() {
-    if (statWords) statWords.textContent = cleanedWordsArray.length;
-    if (statLang) statLang.textContent = currentLang === 'en' ? t('createPuzzle.language.english') : t('createPuzzle.language.russian');
+    // Re-query DOM elements to ensure we have fresh references after localization
+    const freshStatWords = document.getElementById('statWords');
+    const freshStatLang = document.getElementById('statLang');
+    const freshStatDiff = document.getElementById('statDiff');
+    
+    // Update statistics with fresh references
+    if (freshStatWords) freshStatWords.textContent = cleanedWordsArray.length;
+    if (freshStatLang) freshStatLang.textContent = currentLang === 'en' ? t('createPuzzle.language.english') : t('createPuzzle.language.russian');
+    if (freshStatDiff) freshStatDiff.textContent = t(`difficulty.${selectedDifficulty}.name`);
 
     // Generate real crossword layout
     const normalizedWords = cleanedWordsArray.map(word => 
@@ -221,20 +237,280 @@ function simulateGridGeneration() {
     // Create grid from layout
     grid = window.placeWordsInGrid(normalizedWords, crosswordLayout);
     
-    // Show preview area and render grid
+    // Create SOLVED preview grid (deep copy)
+    previewGridSolved = createDeepCopyOfGrid(grid);
+    
+    // Create UNSOLVED preview grid (deep copy + scramble)
+    previewGridUnsolved = createDeepCopyOfGrid(grid);
+    applyDifficultyToPreviewGrid(previewGridUnsolved, selectedDifficulty);
+    
+    // Show preview area and render grids
     previewArea.style.display = 'block';
-    linkArea.style.display = 'none';
     previewGridContainer.style.display = 'block';
     
-    // Render the crossword grid
-    renderPreviewGrid();
+    // Render both crossword grids
+    renderPreviewGrids();
+    
+    // Automatically generate and show the link
+    generateLink();
+    
+    // Update unsolved grid title
+    updateUnsolvedGridTitle();
     
     // Scroll to preview
     previewArea.scrollIntoView({ behavior: 'smooth' });
 }
 
 /**
+ * Create a deep copy of the grid
+ */
+function createDeepCopyOfGrid(sourceGrid) {
+    const copy = [];
+    for (let r = 0; r < sourceGrid.length; r++) {
+        copy[r] = [];
+        for (let c = 0; c < sourceGrid[r].length; c++) {
+            if (sourceGrid[r][c].letter) {
+                copy[r][c] = {
+                    letter: sourceGrid[r][c].letter,
+                    currentLetter: sourceGrid[r][c].currentLetter,
+                    wordIndices: [...sourceGrid[r][c].wordIndices]
+                };
+            } else {
+                copy[r][c] = { letter: null, currentLetter: null, wordIndices: [] };
+            }
+        }
+    }
+    return copy;
+}
+
+/**
+ * Apply difficulty scrambling to preview grid
+ */
+function applyDifficultyToPreviewGrid(previewGrid, difficulty) {
+    // Get difficulty settings
+    const settings = typeof difficultySettings !== 'undefined' && difficultySettings[difficulty] 
+        ? difficultySettings[difficulty] 
+        : { minSwaps: 10, maxSwaps: 60 };
+    
+    // For easy difficulty, only scramble within words
+    if (difficulty === 'easy') {
+        scrambleEasyPreview(previewGrid, settings);
+    } else {
+        // For other difficulties, do random swaps
+        scrambleRandomPreview(previewGrid, settings);
+    }
+}
+
+/**
+ * Easy mode: Only swap within individual words, keep intersections intact
+ */
+function scrambleEasyPreview(previewGrid, settings) {
+    let swapsPerformed = 0;
+    const maxSwaps = settings.maxSwaps;
+    
+    // For each word, perform internal swaps
+    for (let wordIndex = 0; wordIndex < cleanedWordsArray.length; wordIndex++) {
+        const wordCells = getWordCellsForPreview(previewGrid, wordIndex);
+        const nonIntersectionCells = wordCells.filter(cell => 
+            previewGrid[cell.row][cell.col].wordIndices.length === 1
+        );
+        
+        if (nonIntersectionCells.length >= 2) {
+            // Perform 1-2 swaps within this word
+            const swapsInWord = Math.min(2, Math.floor(nonIntersectionCells.length / 2));
+            for (let i = 0; i < swapsInWord && swapsPerformed < maxSwaps; i++) {
+                const shuffled = [...nonIntersectionCells];
+                // Fisher-Yates shuffle
+                for (let j = shuffled.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
+                }
+                
+                if (shuffled.length >= 2) {
+                    const cell1 = shuffled[0];
+                    const cell2 = shuffled[1];
+                    
+                    // Swap currentLetter values
+                    const temp = previewGrid[cell1.row][cell1.col].currentLetter;
+                    previewGrid[cell1.row][cell1.col].currentLetter = previewGrid[cell2.row][cell2.col].currentLetter;
+                    previewGrid[cell2.row][cell2.col].currentLetter = temp;
+                    swapsPerformed++;
+                }
+            }
+        }
+    }
+}
+
+/**
+ * Random scrambling for medium/hard difficulties
+ */
+function scrambleRandomPreview(previewGrid, settings) {
+    // Collect all filled cells
+    const filledCells = [];
+    for (let r = 0; r < previewGrid.length; r++) {
+        for (let c = 0; c < previewGrid[r].length; c++) {
+            if (previewGrid[r][c].letter) {
+                filledCells.push({ row: r, col: c });
+            }
+        }
+    }
+    
+    if (filledCells.length < 2) return;
+    
+    const swapsNeeded = Math.max(settings.minSwaps, Math.floor(filledCells.length * 0.6));
+    let swapsPerformed = 0;
+    
+    for (let i = 0; i < swapsNeeded && swapsPerformed < settings.maxSwaps; i++) {
+        const idx1 = Math.floor(Math.random() * filledCells.length);
+        let idx2 = Math.floor(Math.random() * filledCells.length);
+        
+        let attempts = 0;
+        while (idx1 === idx2 && attempts < 10) {
+            idx2 = Math.floor(Math.random() * filledCells.length);
+            attempts++;
+        }
+        
+        if (idx1 !== idx2) {
+            const cell1 = filledCells[idx1];
+            const cell2 = filledCells[idx2];
+            
+            const temp = previewGrid[cell1.row][cell1.col].currentLetter;
+            previewGrid[cell1.row][cell1.col].currentLetter = previewGrid[cell2.row][cell2.col].currentLetter;
+            previewGrid[cell2.row][cell2.col].currentLetter = temp;
+            
+            swapsPerformed++;
+        }
+    }
+}
+
+/**
+ * Get all cells that belong to a specific word in preview grid
+ */
+function getWordCellsForPreview(previewGrid, wordIndex) {
+    const cells = [];
+    for (let r = 0; r < previewGrid.length; r++) {
+        for (let c = 0; c < previewGrid[r].length; c++) {
+            if (previewGrid[r][c].letter && previewGrid[r][c].wordIndices.includes(wordIndex)) {
+                cells.push({row: r, col: c});
+            }
+        }
+    }
+    return cells;
+}
+
+/**
+ * Build word connections map (which words intersect with which)
+ */
+function buildWordConnectionsForPreview(gridRef) {
+    const connections = {};
+    
+    for (let r = 0; r < gridRef.length; r++) {
+        for (let c = 0; c < gridRef[r].length; c++) {
+            const cell = gridRef[r][c];
+            if (cell.letter && cell.wordIndices.length > 1) {
+                // This is an intersection
+                for (let word1 of cell.wordIndices) {
+                    if (!connections[word1]) connections[word1] = [];
+                    for (let word2 of cell.wordIndices) {
+                        if (word1 !== word2 && !connections[word1].includes(word2)) {
+                            connections[word1].push(word2);
+                        }
+                    }
+                }
+            }
+        }
+    }
+    
+    return connections;
+}
+
+/**
+ * Render both preview grids (unsolved and solved)
+ */
+function renderPreviewGrids() {
+    renderSinglePreviewGrid(previewGridUnsolved, 'unsolvedGrid', true);  // Color-coded
+    renderSinglePreviewGrid(previewGridSolved, 'solvedGrid', false);     // All green
+}
+
+/**
+ * Render a single preview crossword grid
+ */
+function renderSinglePreviewGrid(gridData, containerId, useColorCoding = false) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    if (!gridData || !gridData.length) return;
+    
+    // Find the first and last rows that contain letters
+    let firstFilledRow = -1;
+    let lastFilledRow = -1;
+    
+    for (let r = 0; r < gridData.length; r++) {
+        for (let c = 0; c < gridData[r].length; c++) {
+            if (gridData[r][c].letter) {
+                if (firstFilledRow === -1) {
+                    firstFilledRow = r;
+                }
+                lastFilledRow = r;
+                break;
+            }
+        }
+    }
+    
+    // If no filled rows found, render normally
+    if (firstFilledRow === -1) {
+        firstFilledRow = 0;
+        lastFilledRow = gridData.length - 1;
+    }
+    
+    // Add a small buffer (1 row before and after)
+    const startRow = Math.max(0, firstFilledRow - 1);
+    const endRow = Math.min(gridData.length - 1, lastFilledRow + 1);
+    
+    // Create grid cells only for the relevant rows
+    for (let r = startRow; r <= endRow; r++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'grid-row';
+        
+        for (let c = 0; c < gridData[r].length; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            
+            if (gridData[r][c].letter) {
+                cell.className += ' filled';
+                
+                if (useColorCoding) {
+                    // Use the game's actual color determination function
+                    const wordConnectionsForPreview = buildWordConnectionsForPreview(gridData);
+                    const colorClass = window.getLetterColorClass(r, c, gridData, wordConnectionsForPreview);
+                    if (colorClass) {
+                        cell.className += ' ' + colorClass;
+                    }
+                } else {
+                    // All green for solved puzzle
+                    cell.className += ' correct';
+                }
+                
+                cell.textContent = gridData[r][c].currentLetter;
+            } else {
+                cell.className += ' empty';
+            }
+            
+            rowDiv.appendChild(cell);
+        }
+        
+        container.appendChild(rowDiv);
+    }
+    
+    // Fit grid to screen
+    fitGridToScreen();
+}
+
+/**
  * Render preview crossword grid (all cells shown as correct/green)
+ * DEPRECATED - keeping for backwards compatibility
  */
 function renderPreviewGrid() {
     const container = document.getElementById('crosswordGrid');
@@ -330,7 +606,8 @@ function generateLink() {
     const puzzleData = {
         h: finalHeadline,              // Headline (Cleaned)
         d: hintInput.value.trim(),     // Description/Hint
-        l: currentLang                 // Language
+        l: currentLang,                // Language
+        dfc: selectedDifficulty        // Difficulty
     };
 
     // 2. Serialize & Compress
@@ -346,6 +623,171 @@ function generateLink() {
     // 4. Show Result
     if (shareLinkInput) shareLinkInput.value = fullUrl;
     if (linkArea) linkArea.style.display = 'block';
+}
+
+/**
+ * Initialize difficulty dropdown
+ */
+function initDifficultyDropdown() {
+    if (!difficultyDropdown || !difficultySelectBtn) return;
+    
+    // Create dropdown panel
+    difficultyDropdownPanel = document.createElement('div');
+    difficultyDropdownPanel.className = 'difficulty-dropdown-panel';
+    
+    // Difficulty options
+    const difficulties = [
+        { id: 'easy', key: 'difficulty.easy' },
+        { id: 'mediumEasy', key: 'difficulty.mediumEasy' },
+        { id: 'medium', key: 'difficulty.medium' },
+        { id: 'mediumHard', key: 'difficulty.mediumHard' },
+        { id: 'hard', key: 'difficulty.hard' }
+    ];
+    
+    difficulties.forEach(diff => {
+        const option = document.createElement('div');
+        option.className = 'difficulty-dropdown-option';
+        option.dataset.difficultyId = diff.id;
+        
+        const optionText = document.createElement('span');
+        optionText.className = 'difficulty-dropdown-option-text';
+        // Show "Name - Description" in dropdown
+        if (typeof t !== 'undefined') {
+            const name = t(`${diff.key}.name`);
+            const description = t(`${diff.key}.description`);
+            optionText.textContent = `${name} - ${description}`;
+        } else {
+            optionText.textContent = diff.id;
+        }
+        option.appendChild(optionText);
+        
+        const checkIcon = document.createElement('div');
+        checkIcon.className = 'difficulty-dropdown-check';
+        checkIcon.innerHTML = '<svg viewBox=\"0 0 24 24\" fill=\"currentColor\"><path d=\"M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z\"/></svg>';
+        option.appendChild(checkIcon);
+        
+        // Mark current difficulty as selected
+        if (diff.id === selectedDifficulty) {
+            option.classList.add('selected');
+        }
+        
+        option.addEventListener('click', (e) => {
+            e.stopPropagation();
+            selectDifficulty(diff.id);
+            closeDifficultyDropdown();
+        });
+        
+        difficultyDropdownPanel.appendChild(option);
+    });
+    
+    // Append to difficulty dropdown container
+    difficultyDropdown.appendChild(difficultyDropdownPanel);
+    
+    // Click handler for difficulty select button
+    difficultySelectBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (difficultyDropdown.classList.contains('open')) {
+            closeDifficultyDropdown();
+        } else {
+            openDifficultyDropdown();
+        }
+    });
+    
+    // Close on outside click
+    document.addEventListener('click', (e) => {
+        if (difficultyDropdown.classList.contains('open') && 
+            !difficultyDropdown.contains(e.target)) {
+            closeDifficultyDropdown();
+        }
+    });
+    
+    // Set initial difficulty text
+    updateDifficultyText();
+}
+
+/**
+ * Open difficulty dropdown
+ */
+function openDifficultyDropdown() {
+    if (!difficultyDropdown || !difficultyDropdownPanel) return;
+    
+    difficultyDropdown.classList.add('open');
+    difficultyDropdownPanel.classList.add('visible');
+}
+
+/**
+ * Close difficulty dropdown
+ */
+function closeDifficultyDropdown() {
+    if (!difficultyDropdown || !difficultyDropdownPanel) return;
+    
+    difficultyDropdown.classList.remove('open');
+    difficultyDropdownPanel.classList.remove('visible');
+}
+
+/**
+ * Select a difficulty
+ */
+function selectDifficulty(difficultyId) {
+    if (difficultyId === selectedDifficulty) return;
+    
+    selectedDifficulty = difficultyId;
+    
+    // Update display text
+    updateDifficultyText();
+    
+    // Update selected state in dropdown
+    if (difficultyDropdownPanel) {
+        difficultyDropdownPanel.querySelectorAll('.difficulty-dropdown-option').forEach(option => {
+            option.classList.toggle('selected', option.dataset.difficultyId === difficultyId);
+        });
+    }
+    
+    // If grids are already generated, update them in real-time
+    if (previewGridUnsolved.length > 0) {
+        // Regenerate unsolved grid with new difficulty
+        previewGridUnsolved = createDeepCopyOfGrid(grid);
+        applyDifficultyToPreviewGrid(previewGridUnsolved, selectedDifficulty);
+        
+        // Re-render unsolved grid
+        renderSinglePreviewGrid(previewGridUnsolved, 'unsolvedGrid', true);
+        
+        // Update unsolved grid title
+        updateUnsolvedGridTitle();
+        
+        // Update difficulty stat
+        const freshStatDiff = document.getElementById('statDiff');
+        if (freshStatDiff) freshStatDiff.textContent = t(`difficulty.${selectedDifficulty}.name`);
+        
+        // Regenerate link with new difficulty
+        generateLink();
+    }
+}
+
+/**
+ * Update difficulty text display
+ */
+function updateDifficultyText() {
+    if (!difficultyText) return;
+    
+    if (typeof t !== 'undefined') {
+        difficultyText.textContent = t(`difficulty.${selectedDifficulty}.name`);
+    } else {
+        difficultyText.textContent = selectedDifficulty;
+    }
+}
+
+/**
+ * Update unsolved grid title with current difficulty
+ */
+function updateUnsolvedGridTitle() {
+    const unsolvedGridTitle = document.getElementById('unsolvedGridTitle');
+    if (!unsolvedGridTitle) return;
+    
+    if (typeof t !== 'undefined') {
+        const difficultyName = t(`difficulty.${selectedDifficulty}.name`);
+        unsolvedGridTitle.textContent = t('createPuzzle.unsolvedGridTitle').replace('{difficulty}', difficultyName);
+    }
 }
 
 /**

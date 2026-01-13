@@ -266,6 +266,109 @@ body.create-puzzle-page {
     min-height: 150px;
 }
 
+/* Difficulty Dropdown */
+.difficulty-dropdown {
+    position: relative;
+}
+
+.difficulty-select {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 12px 16px;
+    background: var(--color-surface-light);
+    border: 2px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: var(--shadow-sm);
+}
+
+.difficulty-select:hover {
+    border-color: var(--color-primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.difficulty-text {
+    font-weight: 600;
+    color: var(--color-text-primary);
+    font-size: 0.95rem;
+    flex: 1;
+}
+
+.difficulty-arrow {
+    color: var(--color-text-secondary);
+    transition: transform 0.2s ease;
+    display: flex;
+    align-items: center;
+}
+
+.difficulty-dropdown.open .difficulty-arrow {
+    transform: rotate(180deg);
+}
+
+/* Difficulty Dropdown Panel */
+.difficulty-dropdown-panel {
+    position: absolute;
+    background: var(--color-surface-light);
+    border: 2px solid var(--color-border-light);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 100%;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-10px);
+    transition: all 0.2s ease;
+    margin-top: 4px;
+}
+
+.difficulty-dropdown-panel.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.difficulty-dropdown-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+    border-bottom: 1px solid var(--color-border-light);
+}
+
+.difficulty-dropdown-option:last-child {
+    border-bottom: none;
+}
+
+.difficulty-dropdown-option:hover {
+    background-color: var(--color-bg-light);
+}
+
+.difficulty-dropdown-option.selected {
+    background-color: rgba(59, 130, 246, 0.1);
+    color: var(--color-primary);
+}
+
+.difficulty-dropdown-option-text {
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+.difficulty-dropdown-check {
+    width: 20px;
+    height: 20px;
+    color: var(--color-primary);
+    opacity: 0;
+}
+
+.difficulty-dropdown-option.selected .difficulty-dropdown-check {
+    opacity: 1;
+}
+
 /* Textarea Placeholder Colors */
 #headlineInput::placeholder,
 #hintInput::placeholder {
@@ -313,7 +416,7 @@ body.create-puzzle-page {
 /* Preview Area */
 .preview-area {
     margin-top: 32px;
-    padding: 20px;
+    padding: 8px;
     background: #f0f9ff;
     border: 2px dashed #bae6fd;
     border-radius: var(--radius-md);
@@ -330,11 +433,18 @@ body.create-puzzle-page {
 
 .preview-stats {
     display: flex;
-    justify-content: center;
-    gap: 16px;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
     margin-bottom: 16px;
     font-size: 0.9rem;
     color: #0c4a6e;
+}
+
+.stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 16px;
 }
 
 .preview-area .btn-primary {
@@ -449,8 +559,20 @@ body.create-puzzle-page {
     font-size: 0.9rem;
     color: var(--color-text-secondary);
     line-height: 1.6;
-    max-width: 600px;
     margin: 0 auto;
+}
+
+/* Grid Sections */
+.grid-section {
+    margin: 32px 0;
+}
+
+.grid-section-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--color-text-primary);
+    text-align: center;
+    margin-bottom: 16px;
 }
 
 /* Crossword Grid Styles (from game-board.css) */
@@ -499,11 +621,29 @@ body.create-puzzle-page {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 1px 2px rgba(0, 0, 0, 0.06);
 }
 
-/* Color coding for letters - preview shows all correct */
+/* Color coding for letters */
 .grid-cell.correct {
     background-color: #4CAF50;
     color: white;
     box-shadow: 0 2px 4px rgba(76, 175, 80, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.grid-cell.wrong-position {
+    background-color: #FF9800;
+    color: white;
+    box-shadow: 0 2px 4px rgba(255, 152, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.grid-cell.connected-word {
+    background-color: #9C27B0;
+    color: white;
+    box-shadow: 0 2px 4px rgba(156, 39, 176, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
+}
+
+.grid-cell.wrong-word {
+    background-color: #9E9E9E;
+    color: white;
+    box-shadow: 0 2px 4px rgba(158, 158, 158, 0.3), 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Responsive for preview grid */
