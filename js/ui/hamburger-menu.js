@@ -92,6 +92,12 @@ class HamburgerMenu {
                 window.__headlines_sound;
                 // Dispatch sound toggle event
                 window.dispatchEvent(new CustomEvent('headlines:soundToggle'));
+                
+                // Dispatch analytics event for sound setting change
+                const isEnabled = soundToggle.classList.contains('active');
+                window.dispatchEvent(new CustomEvent('headlines:soundSettingChanged', {
+                    detail: { enabled: isEnabled }
+                }));
             });
         }
         
@@ -493,6 +499,11 @@ class HamburgerMenu {
             await Platform.saveGameLanguage(langCode);
         }
         
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:languageChanged', {
+            detail: { newLanguage: langCode }
+        }));
+        
         // Update all UI
         if (typeof updateLocalizedText === 'function') {
             updateLocalizedText();
@@ -638,6 +649,11 @@ class HamburgerMenu {
         } else {
             window.currentDifficulty = difficultyId;
         }
+        
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:difficultyChanged', {
+            detail: { newDifficulty: difficultyId }
+        }));
         
         // Update display text - show only name
         const difficultyText = document.getElementById('menuDifficultyText');

@@ -138,6 +138,9 @@ class HeadlinesTutorial {
 
         this.showingTutorial = true;
 
+        // Dispatch analytics event for help opened
+        window.dispatchEvent(new CustomEvent('headlines:helpOpened'));
+
         await showPopup({
             title: t('tutorial.welcome.title'),
             content: `<div style="line-height: 1.6;">

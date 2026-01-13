@@ -259,6 +259,16 @@ function simulateGridGeneration() {
     
     // Scroll to preview
     previewArea.scrollIntoView({ behavior: 'smooth' });
+
+    // Dispatch analytics event for custom puzzle previewed
+    window.dispatchEvent(new CustomEvent('headlines:customPuzzlePreviewed', {
+        detail: {
+            headlineLength: headlineInput.value.length,
+            wordCount: cleanedWordsArray.length,
+            difficulty: selectedDifficulty,
+            language: currentLang
+        }
+    }));
 }
 
 /**
@@ -803,12 +813,32 @@ async function copyToClipboard() {
         await navigator.clipboard.writeText(link);
         showToast();
         shareLinkInput.select();
+
+        // Dispatch analytics event for custom puzzle link copied
+        window.dispatchEvent(new CustomEvent('headlines:customPuzzleLinkCopied', {
+            detail: {
+                headlineLength: headlineInput.value.length,
+                wordCount: cleanedWordsArray.length,
+                difficulty: selectedDifficulty,
+                language: currentLang
+            }
+        }));
     } catch (err) {
         console.error('Failed to copy: ', err);
         // Fallback for older browsers
         shareLinkInput.select();
         document.execCommand('copy');
         showToast();
+
+        // Dispatch analytics event for custom puzzle link copied (fallback)
+        window.dispatchEvent(new CustomEvent('headlines:customPuzzleLinkCopied', {
+            detail: {
+                headlineLength: headlineInput.value.length,
+                wordCount: cleanedWordsArray.length,
+                difficulty: selectedDifficulty,
+                language: currentLang
+            }
+        }));
     }
 }
 

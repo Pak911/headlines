@@ -15,6 +15,23 @@ const debugConfig = {
     enabled: false  // Set to true to enable debug mode and logging
 };
 
+// Analytics configuration - controls analytics tracking and services
+const analyticsConfig = {
+    // Google Analytics 4 configuration
+    googleAnalytics: {
+        // Enable/disable Google Analytics tracking
+        enabled: true,
+        // Google Analytics measurement ID (G-XXXXXXXXXX format)
+        measurementId: "G-MKG0QPC9ZG"
+    },
+    // Analytics debug mode: controls whether analytics events are also logged to console
+    // When true, all analytics events will be logged using the debug system's flog function
+    analyticsDebug: false
+    // Future analytics services can be added here:
+    // plausible: { enabled: false, domain: "yourdomain.com" },
+    // fathom: { enabled: false, siteId: "ABC123" }
+};
+
 // Crossword Engine Configuration (Smart Backbone-First Algorithm)
 const crosswordEngineConfig = {
     // Phase 1: Matchmaker - Find best word pairs for backbone
@@ -173,3 +190,15 @@ const victoryAnimationConfig = {
     intensity: 'subtle',        // Options: 'subtle', 'moderate', 'strong'
     easing: 'ease-out'          // CSS easing function
 };
+
+// Expose configurations globally for use by other modules
+if (typeof window !== 'undefined') {
+    window.analyticsConfig = analyticsConfig;
+    window.debugConfig = debugConfig;
+    window.defaultLanguageConfig = defaultLanguageConfig;
+    window.rssLanguageConfig = rssLanguageConfig;
+    window.crosswordEngineConfig = crosswordEngineConfig;
+    window.headlineScoringConfig = headlineScoringConfig;
+    window.difficultySettings = difficultySettings;
+    window.victoryAnimationConfig = victoryAnimationConfig;
+}

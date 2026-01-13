@@ -140,3 +140,161 @@ All events use the `headlines:` prefix for game-specific events.
 - Listens to `headlines:newCrosswordCreated` event
 - Updates color legend text and performs height-based text shortening after new crossword rendering
 - Ensures legend text is properly localized and sized for the current grid layout
+
+## Analytics Events
+
+### Core Analytics Events
+
+#### `headlines:puzzleStart`
+- **Purpose**: Fired when a player begins a new puzzle (either daily news or custom challenge)
+- **Dispatched From**: `js/gameplay/game-controller.js` - `enhancedInitGame()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      mode: string,        // 'news' or 'challenge'
+      difficulty: string,  // current difficulty level ('easy', 'medium', etc.)
+      language: string     // current language ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks puzzle start events
+
+#### `headlines:puzzleSolved`
+- **Purpose**: Fired when a player successfully completes a puzzle
+- **Dispatched From**: `js/gameplay/game-controller.js` - `showVictory()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      mode: string,        // 'news' or 'challenge'
+      movesUsed: number,   // number of moves taken to solve
+      starRating: number,  // 1-5 stars earned
+      difficulty: string,  // difficulty level used
+      language: string     // language used ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks puzzle completion events
+
+#### `headlines:puzzleGiveUp`
+- **Purpose**: Fired when a player gives up on a puzzle and reveals the solution via the hamburger menu
+- **Dispatched From**: `js/gameplay/game-controller.js` - `giveUp()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      mode: string,        // 'news' or 'challenge'
+      movesUsed: number,   // number of moves attempted before giving up
+      difficulty: string,  // difficulty level used
+      language: string     // language used ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks puzzle give up events
+
+#### `headlines:puzzleSkipped`
+- **Purpose**: Fired when a player skips to the next puzzle without attempting it (via toolbar button or after giving up)
+- **Dispatched From**: `js/gameplay/game-controller.js` - `skipToNextHeadline()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      mode: string,        // 'news' or 'challenge'
+      difficulty: string,  // difficulty level used
+      language: string     // language used ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks puzzle skip events
+
+#### `headlines:customPuzzlePreviewed`
+- **Purpose**: Fired when a player successfully previews a custom puzzle (hits verify/preview button and puzzle generates successfully)
+- **Dispatched From**: `js/create-puzzle.js` - `handlePreview()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      headlineLength: number,  // length of the headline text
+      wordCount: number,       // number of words in the puzzle
+      difficulty: string,      // difficulty level set
+      language: string         // language used ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks custom puzzle preview events
+
+#### `headlines:customPuzzleLinkCopied`
+- **Purpose**: Fired when a player copies the custom puzzle link to clipboard
+- **Dispatched From**: `js/create-puzzle.js` - `copyToClipboard()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      headlineLength: number,  // length of the headline text
+      wordCount: number,       // number of words in the puzzle
+      difficulty: string,      // difficulty level set
+      language: string         // language used ('en' or 'ru')
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks custom puzzle link copy events
+
+#### `headlines:createOwnPuzzleClicked`
+- **Purpose**: Fired when a player clicks the "Create Own Puzzle" button in challenge mode
+- **Dispatched From**: `js/gameplay/game-controller.js` - `handleArticleClick()` function when in custom mode
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks challenge creation interest
+
+#### `headlines:articleRead`
+- **Purpose**: Fired when a player clicks the "Read Full Article" link in the victory modal (news mode only)
+- **Dispatched From**: `js/gameplay/game-controller.js` - `handleArticleClick()` function
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks article read events
+
+#### `headlines:helpOpened`
+- **Purpose**: Fired when the help/tutorial system is opened (either manually via help button or automatically for first-time users)
+- **Dispatched From**: 
+  - `js/tutorials/tutorials.js` - `showWelcomeTutorial()` function (automatic and manual)
+  - Manual triggers: toolbar help button and hamburger menu help button both call the same function
+- **Data Structure**: No additional data (empty event)
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks help/tutorial openings
+
+#### `headlines:languageChanged`
+- **Purpose**: Fired when a player changes the language setting in the hamburger menu
+- **Dispatched From**: `js/ui/hamburger-menu.js` - `selectLanguage()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      newLanguage: string  // 'en' or 'ru'
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks language setting changes
+
+#### `headlines:difficultyChanged`
+- **Purpose**: Fired when a player changes the difficulty level in the hamburger menu
+- **Dispatched From**: `js/ui/hamburger-menu.js` - `selectDifficulty()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      newDifficulty: string  // 'easy', 'mediumEasy', 'medium', 'mediumHard', 'hard'
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks difficulty setting changes
+
+#### `headlines:soundSettingChanged`
+- **Purpose**: Fired when a player toggles the sound setting on/off in the hamburger menu
+- **Dispatched From**: `js/ui/hamburger-menu.js` - Sound toggle click handler in `initMenuItems()`
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      enabled: boolean  // true for sound on, false for sound off
+    }
+  }
+  ```
+- **Listeners**: `js/singletons/analytics.js` - Analytics module tracks sound setting changes

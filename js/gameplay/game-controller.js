@@ -304,7 +304,7 @@ function showVictory() {
     // Add hover listeners for tooltips
     addStarHoverListeners(starCount, swapCount, letterCount);
     
-    // Save seen headline data (solved)
+    // Save seen headline data (solved) - only for regular headlines with hashes
     if (currentHeadline && currentHeadline.djb2Hash) {
         Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
             isSolved: true,
@@ -315,7 +315,7 @@ function showVictory() {
             console.error('Failed to save seen headline data:', err);
         });
 
-        // Dispatch puzzle solved event
+        // Dispatch puzzle solved event (for internal use)
         window.dispatchEvent(new CustomEvent('headlines:puzzle:solved', {
             detail: {
                 puzzleHash: currentHeadline.djb2Hash,
@@ -325,12 +325,53 @@ function showVictory() {
         }));
     }
     
+    // Dispatch analytics puzzle solved event (always, for both regular and custom puzzles)
+    const analyticsMode = isCustomMode ? 'challenge' : 'news';
+    const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+    
+    window.dispatchEvent(new CustomEvent('headlines:puzzleSolved', {
+        detail: {
+            mode: analyticsMode,
+            movesUsed: swapCount,
+            starRating: starCount,
+            difficulty: currentDifficulty || 'medium',
+            language: analyticsLanguage
+        }
+    }));
+    
     // Switch menu item to Next Puzzle mode
     if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
         window.HamburgerMenu.switchToNextPuzzleMode();
     }
     
     document.getElementById('victoryModal').style.display = 'flex';
+    
+    // Add analytics event listeners for victory modal buttons
+    setupVictoryModalAnalytics();
+}
+
+// Set up analytics event listeners for victory modal buttons
+function setupVictoryModalAnalytics() {
+    const articleLink = document.getElementById('articleLink');
+    if (articleLink) {
+        // Remove existing listeners to avoid duplicates
+        articleLink.removeEventListener('click', handleArticleClick);
+        articleLink.addEventListener('click', handleArticleClick);
+    }
+}
+
+// Handle article link clicks for analytics
+function handleArticleClick(event) {
+    // Check if we're in custom link mode (challenge mode)
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+    
+    if (isCustomMode) {
+        // Dispatch create own puzzle clicked event
+        window.dispatchEvent(new CustomEvent('headlines:createOwnPuzzleClicked'));
+    } else {
+        // Dispatch article read event
+        window.dispatchEvent(new CustomEvent('headlines:articleRead'));
+    }
 }
 
 // Function to close the victory modal
@@ -668,6 +709,15 @@ async function enhancedInitGame() {
     
     _log(`🎮 Game initialization completed in ${debugInfo.generationTime}ms`);
     
+    // Dispatch puzzle start analytics event
+    const mode = window.headlinesAnalytics ? window.headlinesAnalytics.getCurrentMode() : (window.Utils && window.Utils.isInCustomLinkMode && window.Utils.isInCustomLinkMode() ? 'challenge' : 'news');
+    const difficulty = puzzleDifficulty || currentDifficulty || 'medium';
+    const language = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+    
+    window.dispatchEvent(new CustomEvent('headlines:puzzleStart', {
+        detail: { mode, difficulty, language }
+    }));
+    
     // Update debug panel if visible
     if (debugPanelVisible) {
         updateDebugInfo();
@@ -820,7 +870,7 @@ async function giveUp() {
         window.HamburgerMenu.switchToNextPuzzleMode();
     }
     
-    // Save seen headline data (gave up)
+    // Save seen headline data (gave up) - only for regular headlines with hashes
     if (currentHeadline && currentHeadline.djb2Hash) {
         // Check if headline was already seen before saving
         const wasAlreadySeen = await Platform.loadSeenHeadline(currentHeadline.djb2Hash);
@@ -843,6 +893,20 @@ async function giveUp() {
             }));
         }
     }
+    
+    // Dispatch analytics puzzle give up event (always, for both regular and custom puzzles)
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+    const analyticsMode = isCustomMode ? 'challenge' : 'news';
+    const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+    
+    window.dispatchEvent(new CustomEvent('headlines:puzzleGiveUp', {
+        detail: {
+            mode: analyticsMode,
+            movesUsed: swapCount,
+            difficulty: currentDifficulty || 'medium',
+            language: analyticsLanguage
+        }
+    }));
     
     _log('✅ Solution revealed!');
 }
@@ -893,6 +957,18 @@ async function skipToNextHeadline() {
                 }
             }));
         }
+
+        // Dispatch analytics puzzle skipped event
+        const analyticsMode = hasCustomParam ? 'challenge' : 'news';
+        const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+        
+        window.dispatchEvent(new CustomEvent('headlines:puzzleSkipped', {
+            detail: {
+                mode: analyticsMode,
+                difficulty: currentDifficulty || 'medium',
+                language: analyticsLanguage
+            }
+        }));
     }
     
     // Start new game and wait for completion - call enhanced version directly
