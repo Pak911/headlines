@@ -13,7 +13,7 @@ Transform scrambled letters into news headlines using crossword-style logic! No 
 
 Want to jump right in and try Headlines? Play the full game online right now:
 
-**[🎮 Play Headlines Now](https://pak911.github.io/headlines)**
+**[Play Headlines Now](https://pak911.github.io/headlines)**
 
 No downloads or setup required – just click and start solving crossword puzzles with real news headlines!
 
