@@ -41,6 +41,8 @@ const en = {
         subtitle: "You've reconstructed the headline!",
         headlineLabel: "RECONSTRUCTED HEADLINE",
         articlePrompt: "Please read the full article for complete headline",
+        customPuzzlePrompt: "You may test your friend by creating your own puzzle",
+        createOwnPuzzle: "Create Own Puzzle",
         stats: {
             swaps: {
                 one: "SWAP",

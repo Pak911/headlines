@@ -213,7 +213,14 @@ function showVictory() {
         if (victoryTitle) victoryTitle.textContent = t('victory.title');
         if (victorySubtitle) victorySubtitle.textContent = t('victory.subtitle');
         if (headlineLabel) headlineLabel.textContent = t('victory.headlineLabel');
-        if (articlePrompt) articlePrompt.textContent = t('victory.articlePrompt');
+        
+        // Check if we're in custom link mode to show different text/button
+        const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+        
+        if (articlePrompt) {
+            articlePrompt.textContent = isCustomMode ? t('victory.customPuzzlePrompt') : t('victory.articlePrompt');
+        }
+        
         if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
         if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
         
@@ -223,7 +230,12 @@ function showVictory() {
         }
         
         if (readArticleBtn) {
-            readArticleBtn.textContent = t('ui.readFullArticle');
+            if (isCustomMode) {
+                readArticleBtn.textContent = t('victory.createOwnPuzzle') || 'Create Own Puzzle';
+                readArticleBtn.href = 'create-puzzle.html';
+            } else {
+                readArticleBtn.textContent = t('ui.readFullArticle');
+            }
         }
         
         if (nextHeadlineBtn) {
@@ -233,6 +245,9 @@ function showVictory() {
     
     document.getElementById('headlineReveal').textContent = currentHeadline.text;
     document.getElementById('finalSwaps').textContent = swapCount;
+    
+    // Check if we're in custom link mode for link handling
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
     
     // Calculate performance rating using new function
     const letterCount = currentHeadline.words.reduce((sum, word) => sum + word.length, 0);
@@ -246,8 +261,13 @@ function showVictory() {
     }
     
     document.getElementById('performanceRating').textContent = localizedRating;
-    document.getElementById('articleLink').href = currentHeadline.link || '#';
     
+    // Set article link based on mode
+    if (isCustomMode) {
+        document.getElementById('articleLink').href = 'create-puzzle.html';
+    } else {
+        document.getElementById('articleLink').href = currentHeadline.link || '#';
+    }    
     // Generate star display
     const starsContainer = document.getElementById('victoryStars');
     starsContainer.innerHTML = '';
@@ -691,8 +711,16 @@ function displayHeadlineDescription() {
         
         // Build the hint text with optional source link
         let hintHTML = cleanDescription;
+        
+        // Check if we're in custom link mode
+        const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+        
         if (sourceName) {
-            if (sourceLink) {
+            if (isCustomMode) {
+                // In custom link mode, show "Create Own Puzzle" link
+                const createText = (typeof t !== 'undefined') ? t('victory.createOwnPuzzle') : 'Create Own Puzzle';
+                hintHTML += ` <a href="create-puzzle.html" target="_blank" rel="noopener noreferrer" style="opacity: 0.7;">[${createText}]</a>`;
+            } else if (sourceLink) {
                 hintHTML += ` <a href="${sourceLink}" target="_blank" rel="noopener noreferrer">[${sourceName}]</a>`;
             } else {
                 hintHTML += ` <span style="opacity: 0.7;">[${sourceName}]</span>`;

@@ -6,12 +6,21 @@
 'use strict';
 
 /**
- * Creates a djb2 hash for content identification
- * @param {string} headline - The headline text
- * @param {string} description - The description text (optional)
- * @returns {string} Base36 encoded hash string
+ * Check if we're currently in custom puzzle link mode
+ * @returns {boolean} True if URL contains custom puzzle parameter (p=)
  */
-function createDjb2Hash(headline, description = '') {
+function isInCustomLinkMode() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('p');
+}
+
+/**
+ * Create a djb2 hash from headline and description content
+ * @param {string} headline - The headline text
+ * @param {string} description - The description text
+ * @returns {string} Base36 hash string
+ */
+function createDjb2Hash(headline, description) {
     // Normalize content: lowercase, remove punctuation, normalize whitespace
     // Include Cyrillic characters in the allowed character set
     const content = (headline + ' ' + description).toLowerCase()
@@ -31,7 +40,8 @@ function createDjb2Hash(headline, description = '') {
 
 // Export functions to global scope
 window.Utils = {
-    createDjb2Hash: createDjb2Hash
+    createDjb2Hash: createDjb2Hash,
+    isInCustomLinkMode: isInCustomLinkMode
 };
 
 })();
