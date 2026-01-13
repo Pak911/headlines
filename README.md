@@ -17,6 +17,14 @@ Want to jump right in and try Headlines? Play the full game online right now:
 
 No downloads or setup required – just click and start solving crossword puzzles with real news headlines!
 
+## 🎨 Create Custom Puzzles
+
+You also can create your own personalized crossword puzzle and share it with your friends with a simple link
+
+**[Create Custom Puzzles](https://pak911.github.io/headlines/create-puzzle.html)**
+
+
+
 ## 🎮 What Makes This Game Unique?
 
 Headlines combines engaging elements:
@@ -82,71 +90,95 @@ The hint system is crucial - descriptions provide semantic clues that help you t
 ### Modular Design
 
 ```
-js/
-                    # Modular JavaScript architecture
-├── main.js                      # Entry point & global state
-├── core/                        # Foundation algorithms
-│   ├── crossword-engine.js      # Layout generation
-│   ├── grid-manager.js          # Grid & word management
-│   └── color-logic.js           # Wordle-style feedback
-├── gameplay/                    # User-facing features
-│   ├── difficulty-system.js     # Strategic scrambling
-│   ├── game-controller.js       # Game flow control
-│   ├── ui-interactions.js       # User interface
-│   └── victory-animations.js    # Victory celebration animations
-├── localization/                # Localization system
-│   ├── en.js                    # English translations
-│   ├── ru.js                    # Russian translations
-│   └── i18n.js                  # Localization manager
-├── platforms/                   # Platform abstraction layer
-│   ├── platformAdapter.js       # Platform interface
-│   └── webPlatform.js           # Web platform implementation
-├── rss/                         # RSS processing modules
-│   ├── headline-manager.js      # Headline lifecycle
-│   ├── headline-scorer.js       # Scoring algorithms
-│   ├── async-rss-fetcher.js     # RSS feed processing
-│   ├── rss-parser.js            # RSS parsing utilities
-│   └── html-processor.js        # HTML content processing
-└── utils/                       # Supporting functionality
-    ├── debug-utils.js           # Development tools
-    ├── gamestats.js             # Game statistics tracking
-    └── utils.js                 # General utilities
+js/                                 # Modular JavaScript architecture
+├── main.js                         # Entry point and global state
+├── create-puzzle.js                # Creator page logic
+├── core/                           # Core engine modules
+│   ├── crossword-engine.js         # Smart backbone-first layout generation
+│   ├── grid-manager.js             # Grid management
+│   └── color-logic.js              # Color feedback logic
+├── gameplay/                       # Game features
+│   ├── difficulty-system.js        # Letter scrambling algorithms
+│   └── game-controller.js          # Game flow control
+├── localization/                   # Localization system
+│   ├── en.js                       # English translations
+│   ├── ru.js                       # Russian translations
+│   └── i18n.js                     # Localization manager
+├── platforms/                      # Platform abstraction layer
+│   ├── platformAdapter.js          # Platform adapter interface
+│   └── webPlatform.js              # Web platform implementation
+├── rss/                            # RSS and headline processing
+│   ├── async-rss-fetcher.js        # Parallel RSS fetching
+│   ├── custom-puzzle-loader.js     # Custom puzzle loading
+│   ├── headline-manager.js         # Headline pool management
+│   ├── headline-scorer.js          # Headline filtering & scoring
+│   ├── rss-parser.js               # RSS feed parsing
+│   └── html-processor.js           # HTML cleaning
+├── singletons/                     # Singleton pattern modules
+│   ├── analytics.js                # Analytics tracking
+│   └── soundManager.js             # Audio system management
+├── tutorials/                      # Tutorial system
+│   ├── popups.js                   # General popup/modal system
+│   └── tutorials.js                # Tutorial state management
+├── ui/                             # User interface modules
+│   ├── hamburger-menu.js           # Hamburger menu functionality
+│   ├── ui-interactions.js          # User interface & rendering
+│   └── victory-animations.js       # Victory animations
+├── utils/                          # Utilities
+│   ├── debug-utils.js              # Debug panel tools
+│   ├── gamestats.js                # Game statistics tracking
+│   └── utils.js                    # General utilities
+└── lib/                            # Third-party libraries
+    └── lz-string.min.js            # LZ compression library
 ```
 
 ## 📁 Project Structure
 
 ```
 headlines/
-├── index.html                   # Main game interface
-├── data.js                      # Headlines data and configuration
-├── news-fetching-config.js      # RSS feed configuration
-├── css/                         # Stylesheets
-│   ├── base.css                 # Base styling and layout
-│   ├── game-board.css           # Game board styling
-│   ├── debug-panel.css          # Debug panel styling
-│   ├── hint-section.css         # Hint section styling
-│   ├── moves-counter.css        # Moves counter styling
-│   ├── responsive.css           # Responsive design
-│   └── victory-modal.css        # Victory modal styling
-├── fonts/                       # Font files
-├── js/                          # See Modular Design section above
-├── test/                        # Test files and utilities
-│   └── [various test files]     # Test interfaces and utilities
-└── memory-bank/                 # Project documentation & guidelines
-    ├── activeContext.md         # Current development context
-    ├── custom-events.md         # Custom events documentation
-    ├── designGuidelines.md      # Design guidelines
-    ├── productContext.md        # Product specifications
-    ├── projectOverview.md       # Project overview
-    ├── systemPatterns.md        # System architecture patterns
-    └── techContext.md           # Technical documentation
-```
-    ├── projectbrief.md          # Project scope and requirements
-    ├── productContext.md        # User experience and goals
-    ├── systemPatterns.md        # Architecture and design patterns
-    ├── techContext.md           # Technology stack and setup
-    ├── designGuidelines.md      # Visual design and UI guidelines
-    └── activeContext.md         # Working log and current status
+├── index.html                          # Main game interface
+├── create-puzzle.html                  # Creator page interface
+├── data.js                             # Configuration and data
+├── data-audio.js                       # Audio system configuration
+├── news-fetching-config.js             # RSS feed configuration
+├── build-utils.js                      # Build utilities
+├── build.js                            # Build script
+├── launch.bat                          # Windows launcher
+├── launch.sh                           # Unix launcher
+├── package.json                        # Node.js dependencies
+├── README.md                           # Project documentation
+├── content/                            # Content assets
+│   ├── bgs/                            # Background images
+│   ├── images/                         # Game images
+│   └── prototypes/                     # Prototype files
+├── css/                                # Stylesheets
+│   ├── base.css                        # Base styling and layout
+│   ├── theme.css                       # CSS custom properties and design tokens
+│   ├── game-board.css                  # Game board styling
+│   ├── create-puzzle.css               # Creator page styling
+│   ├── hamburger-menu.css              # Hamburger menu styling
+│   ├── debug-panel.css                 # Debug panel styling
+│   ├── hint-section.css                # Hint section styling
+│   ├── moves-counter.css               # Moves counter styling
+│   ├── victory-modal.css               # Victory modal styling
+│   ├── popups.css                      # General popup/modal styling
+│   ├── tutorials.css                   # Tutorial overlay and content styling
+│   ├── loading.css                     # Loading animation and spinner styling
+│   └── responsive.css                  # Responsive design and media queries
+├── fonts/                              # Font files
+├── imgs/                               # Image assets
+├── js/                                 # See Modular Design section above
+├── test/                               # Test framework and utilities
+│   └── [various test files]            # Test interfaces and utilities
+└── memory-bank/                        # Project documentation
+    ├── activeContext.md                # Current development context
+    ├── analyticsEvents.md              # Analytics events documentation
+    ├── customEvents.md                 # Custom events documentation
+    ├── designGuidelines.md             # Design guidelines
+    ├── projectBrief.md                 # Project brief
+    ├── projectOverview.md              # Project overview
+    ├── systemPatterns.md               # System architecture patterns
+    └── techContext.md                  # Technical documentation
 ```
 
 ## 🔧 Development
@@ -162,8 +194,8 @@ This project uses a comprehensive **memory-bank** system for development guidanc
 
 **For developers**: Start by reading the memory-bank files to understand the project's design philosophy and technical decisions.
 
-### Debug Panel
-Press **'D'** during gameplay to access:
+### Debug Panel (made off in the release version)
+Press **'D'** during to access:
 - Current game state analysis
 - Layout generation details
 - Difficulty system information
