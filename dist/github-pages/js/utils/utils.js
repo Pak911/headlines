@@ -1,0 +1,1 @@
+!function(){"use strict";window.Utils={createDjb2Hash:function(t,e){const n=(t+" "+e).toLowerCase().replace(/[^a-zа-яё0-9\s]/g,"").replace(/\s+/g," ").trim();let r=5381;for(let t=0;t<n.length;t++)r=(r<<5)+r+n.charCodeAt(t);return(r>>>0).toString(36)},isInCustomLinkMode:function(){return new URLSearchParams(window.location.search).has("p")}}}();

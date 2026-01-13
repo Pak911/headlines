@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Headlines - Letter Swap Crossword Game</title>
+    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="css/theme.css">
+    <link rel="stylesheet" href="css/game-board.css">
+    <link rel="stylesheet" href="css/moves-counter.css">
+    <link rel="stylesheet" href="css/hint-section.css">
+    <link rel="stylesheet" href="css/victory-modal.css">
+    <link rel="stylesheet" href="css/debug-panel.css">
+    <link rel="stylesheet" href="css/popups.css">
+    <link rel="stylesheet" href="css/tutorials.css">
+    <link rel="stylesheet" href="css/hamburger-menu.css">
+    <link rel="stylesheet" href="css/loading.css">
+    <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+    <!-- Hamburger Menu -->
+    <div class="menu-overlay" id="menuOverlay">
+        <div class="menu-panel">
+            <div class="menu-header">
+                <h2 class="menu-title" id="menuTitle">Menu</h2>
+                <button class="menu-close" id="menuClose">&times;</button>
+            </div>
+            <div class="menu-content">
+                <!-- Language -->
+                <div class="menu-item menu-item-dropdown" id="menuLanguage">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12.87 15.07l-2.54-2.51.03-.03c1.74-1.94 2.98-4.17 3.71-6.53H17V4h-7V2H8v2H1v1.99h11.17C11.5 7.92 10.44 9.75 9 11.35 8.07 10.32 7.3 9.19 6.69 8h-2c.73 1.63 1.73 3.17 2.98 4.56l-5.09 5.02L4 19l5-5 3.11 3.11.76-2.04zM18.5 10h-2L12 22h2l1.12-3h4.75L21 22h2l-4.5-12zm-2.62 7l1.62-4.33L19.12 17h-3.24z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuLanguageLabel">Language</div>
+                    </div>
+                    <div class="menu-dropdown-select">
+                        <span class="menu-dropdown-text" id="menuLanguageText">English</span>
+                        <div class="menu-dropdown-arrow">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Difficulty -->
+                <div class="menu-item menu-item-dropdown" id="menuDifficulty">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuDifficultyLabel">Difficulty</div>
+                        <div class="menu-item-value" id="menuDifficultyValue">30% Green Max</div>
+                    </div>
+                    <div class="menu-dropdown-select">
+                        <span class="menu-dropdown-text" id="menuDifficultyText">Medium</span>
+                        <div class="menu-dropdown-arrow">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path d="M7 10l5 5 5-5z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Statistics -->
+                <div class="menu-item" id="menuStatistics">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M16 11V3H8v6H2v12h20V11h-6zm-6-6h4v14h-4V5zm-6 6h4v8H4v-8zm16 8h-4v-6h4v6z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuStatisticsLabel">Statistics</div>
+                    </div>
+                </div>
+                
+                <!-- Sound -->
+                <div class="menu-item" id="menuSound">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuSoundLabel">Sound</div>
+                    </div>
+                    <div class="menu-item-toggle active" id="menuSoundToggle"></div>
+                </div>
+                
+                <!-- Help -->
+                <div class="menu-item" id="menuHelp">
+                    <div class="menu-item-icon">
+                        <span class="menu-help-icon text-stroke-thin">?</span>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuHelpLabel">Help</div>
+                    </div>
+                </div>
+                
+                <!-- Give Up -->
+                <div class="menu-item danger" id="menuGiveUp">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuGiveUpLabel">Give Up</div>
+                        <div class="menu-item-value" id="menuGiveUpValue">Reveals the puzzle</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Background overlay for dimming the background image -->
+    <div class="background-overlay"></div>
+    <div class="header" style="display: none;">
+        <h1 id="gameTitle">Headlines</h1>
+        <p class="instructions" id="gameInstructions">
+            Swap letters to reconstruct the news headline!<br>Click two letters to swap their positions.<br>The tip below is a hint about the article's headline.
+        </p>
+    </div>
+
+    <div class="main-game-container">
+        <div class="crossword-container">
+            <!-- Top Toolbar with buttons and legend -->
+            <div class="top-toolbar">
+                <!-- Left: Hamburger menu button -->
+                <button class="toolbar-btn hamburger-btn" id="hamburgerBtn" aria-label="Menu" title="Menu">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
+                        <line x1="3" y1="6" x2="21" y2="6"></line>
+                        <line x1="3" y1="12" x2="21" y2="12"></line>
+                        <line x1="3" y1="18" x2="21" y2="18"></line>
+                    </svg>
+                </button>
+                
+                <!-- Center: Color Legend -->
+                <div class="color-legend">
+                    <ul class="legend-list">
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #4CAF50;"></div>
+                            <span class="legend-text">Correct position</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #FF9800;"></div>
+                            <span class="legend-text">Wrong position</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #9C27B0;"></div>
+                            <span class="legend-text">Connected word</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #9E9E9E;"></div>
+                            <span class="legend-text">Other word</span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Right: Help and Next buttons -->
+                <div class="toolbar-right-buttons">
+                    <button class="toolbar-btn help-btn" id="helpBtn" aria-label="Help" title="How to Play">
+                        <span class="help-icon-text text-stroke-medium">?</span>
+                    </button>
+                    <button class="toolbar-btn next-puzzle-btn" id="nextPuzzleBtn" aria-label="Next Puzzle" title="Next Puzzle">
+                        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor" stroke="currentColor" stroke-width="1.0" stroke-linejoin="round" stroke-linecap="round">
+                            <path d="M6 6l6 6-6 6V6z"/>
+                            <path d="M13 6l6 6-6 6V6z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Main crossword content area -->
+            <div class="main-crossword-content">
+                <!-- Moves counter circle overlaid on grid -->
+                <div class="moves-counter-circle">
+                    <div class="moves-number" id="swapCount">0</div>
+                    <div class="moves-label">moves</div>
+                </div>
+                
+                <div id="crosswordGrid" class="crossword-grid"></div>
+            </div>
+        </div>
+        
+        <!-- Hint section integrated with playing field -->
+        <div class="hint-section">
+            <div class="hint-title" id="hintTitle">News Description</div>
+            <div class="hint-content-wrapper">
+                <div class="hint-icon">💡</div>
+                <div id="headlineDescription" class="hint-text">
+                    <!-- Description will be displayed here as a hint -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug features disabled in release build -->
+
+    <div id="debugPanel" class="debug-panel" style="display: none;">
+        <div class="debug-header">
+            <h3>🔧 Debug Information</h3>
+            <button class="debug-close" onclick="toggleDebugPanel()">×</button>
+        </div>
+        <div class="debug-content">
+            <div class="debug-section">
+                <h4>Current Headline</h4>
+                <div id="debugCurrentHeadline" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Layout Generation</h4>
+                <div id="debugLayoutInfo" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Shuffle & Difficulty</h4>
+                <div id="debugShuffleInfo" class="debug-info"></div>
+                <div style="margin-top: 10px;">
+                    <label for="difficultySelect" style="font-weight: bold; margin-right: 10px;">Difficulty:</label>
+                    <select id="difficultySelect" onchange="changeDifficulty(this.value)" style="padding: 5px; border: 1px solid #ccc; border-radius: 3px;">
+                        <option value="easy">Easy - Word Shuffle Only</option>
+                        <option value="mediumEasy">Medium-Easy - 40% Green Max</option>
+                        <option value="medium">Medium - 30% Green Max</option>
+                        <option value="mediumHard">Medium-Hard - 20% Green Max</option>
+                        <option value="hard">Hard - 15% Green Max</option>
+                    </select>
+                </div>
+                <div id="difficultyInfo" style="margin-top: 10px; padding: 8px; background-color: #f0f8ff; border: 1px solid #ccc; border-radius: 3px; font-size: 12px;"></div>
+                <div style="margin-top: 10px;">
+                    <button id="autoWinBtn" onclick="autoWinGame()" style="padding: 8px 16px; background: #FF5722; color: white; border: none; border-radius: 3px; cursor: pointer; font-weight: bold;">🏆 Auto-Win (Debug)</button>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>Headline Management</h4>
+                <div id="debugHeadlineManagement" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Alternative Headlines</h4>
+                <div id="debugAlternatives" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Compatibility Analysis</h4>
+                <div id="debugCompatibility" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Variant Selection</h4>
+                <div id="debugVariantSelection" class="debug-info"></div>
+            </div>
+            <div class="debug-section">
+                <h4>Test Case HTML Code</h4>
+                <div id="debugGridState" class="debug-info">
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                        <strong>Where to place:</strong> Add this HTML code to test.html in the main content area, after the existing test cases (before the closing &lt;/body&gt; tag).
+                    </p>
+                    <textarea id="gridStateCode" readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; background: #f5f5f5; border: 1px solid #ccc; padding: 10px;"></textarea>
+                    <button onclick="copyGridState()" style="margin-top: 10px; padding: 5px 10px; background: #4CAF50; color: white; border: none; border-radius: 3px; cursor: pointer;">Copy HTML Code to Clipboard</button>
+                </div>
+            </div>
+            <div class="debug-section">
+                <h4>Test Case JavaScript Code</h4>
+                <div id="debugGridStateJS" class="debug-info">
+                    <p style="font-size: 12px; color: #666; margin-bottom: 8px;">
+                        <strong>Where to place:</strong> Add this JavaScript code to test.html inside the window.onload function, after the existing test case setups (before the closing }; of window.onload).
+                    </p>
+                    <textarea id="gridStateJSCode" readonly style="width: 100%; height: 200px; font-family: monospace; font-size: 12px; background: #f5f5f5; border: 1px solid #ccc; padding: 10px;"></textarea>
+                    <button onclick="copyGridStateJS()" style="margin-top: 10px; padding: 5px 10px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer;">Copy JavaScript Code to Clipboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="victoryModal" class="victory-modal">
+        <div class="victory-content">
+            <button class="victory-close" onclick="closeVictoryModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                </svg>
+            </button>
+            
+            <div class="victory-header">
+                <div class="victory-stars" id="victoryStars">
+                    <!-- Stars will be dynamically inserted here -->
+                </div>
+                <h2 class="victory-title">Congratulations!</h2>
+                <p class="victory-subtitle">You've reconstructed the headline!</p>
+            </div>
+            
+            <div class="victory-body">
+                <div class="headline-card">
+                    <div class="headline-label">RECONSTRUCTED HEADLINE</div>
+                    <div id="headlineReveal" class="headline-reveal"></div>
+                    <div class="article-prompt" id="articlePrompt"></div>
+                </div>
+                
+                <div class="stats-container">
+                    <div class="stat-card">
+                        <div class="stat-value" id="finalSwaps">0</div>
+                        <div class="stat-label">SWAPS</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="performanceRating">-</div>
+                        <div class="stat-label">RATING</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="victory-actions">
+                <button class="btn-secondary" onclick="replayGame()">
+                    Replay
+                </button>
+                <a id="articleLink" href="#" class="btn-primary" target="_blank">
+                    Read Full Article
+                </a>
+                <button class="btn-secondary" onclick="skipToNextHeadline()">Next Headline</button>
+            </div>
+        </div>
+        
+        <div class="victory-confetti">
+            <span></span><span></span><span></span><span></span><span></span>
+            <span></span><span></span><span></span><span></span><span></span>
+        </div>
+    </div>
+
+    <!-- Data -->
+    <script src="news-fetching-config.js"></script>
+    <script src="data.js"></script>
+    <script src="data-audio.js"></script>
+
+    <!-- Platform Support -->
+    <script src="js/platforms/webPlatform.js"></script>
+    <script src="js/platforms/platformAdapter.js"></script>
+
+    <!-- External Libraries -->
+    <script src="js/lib/lz-string.min.js"></script>
+    
+    <!-- Utils -->
+    <script src="js/utils/debug-utils.js"></script>
+    <script src="js/utils/utils.js"></script>
+    <script src="js/utils/gamestats.js"></script>
+    
+    <!-- Localization -->
+    <script src="js/localization/en.js"></script>
+    <script src="js/localization/ru.js"></script>
+    <script src="js/localization/i18n.js"></script>
+    
+    <!-- Core Engine -->
+    <script src="js/core/crossword-engine.js"></script>
+    <script src="js/core/grid-manager.js"></script>
+    <script src="js/core/color-logic.js"></script>
+    
+    <!-- Singletons -->
+    <script src="js/singletons/soundManager.js"></script>
+    <script src="js/singletons/analytics.js"></script>
+    <script src="js/tutorials/popups.js"></script>
+    <script src="js/tutorials/tutorials.js"></script>
+    <script src="js/ui/hamburger-menu.js"></script>
+    
+    <!-- Gameplay -->
+    <script src="js/gameplay/difficulty-system.js"></script>
+    <script src="js/ui/ui-interactions.js"></script>
+    <script src="js/gameplay/game-controller.js"></script>
+    <script src="js/ui/victory-animations.js"></script>
+    
+    <!-- Utilities -->
+    <script src="js/rss/html-processor.js"></script>
+    <script src="js/rss/rss-parser.js"></script>
+    <script src="js/rss/headline-scorer.js"></script>
+    <script src="js/rss/async-rss-fetcher.js"></script>
+    <script src="js/rss/headline-manager.js"></script>
+    <script src="js/rss/custom-puzzle-loader.js"></script>
+    
+    <!-- Main Entry Point -->
+    <script src="js/main.js"></script>
+</body>
+</html>
