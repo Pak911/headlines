@@ -292,11 +292,11 @@ document.addEventListener('DOMContentLoaded', async function() {
     }
 });
 
-// BUILD_RELEASE_START
 // // Disable the right-click context menu
 // document.addEventListener('contextmenu', function(event) {
 //   event.preventDefault();
 // }, false);
+// BUILD_RELEASE_START
 // 
 // // Disable dragging of images and links
 // document.addEventListener('dragstart', function(event) {
