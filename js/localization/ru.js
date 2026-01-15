@@ -128,7 +128,8 @@ const ru = {
     toolbar: {
         menu: "Меню",
         howToPlay: "Как играть",
-        nextPuzzle: "Следующий пазл"
+        nextPuzzle: "Следующий пазл",
+        createOwnPuzzle: "Создать свой пазл"
     },
     
     // Menu items
@@ -142,7 +143,9 @@ const ru = {
         giveUp: "Сдаться",
         giveUpDescription: "Открывает решение",
         nextPuzzle: "Следующий пазл",
-        nextPuzzleDescription: "Загрузить следующий заголовок"
+        nextPuzzleDescription: "Загрузить следующий заголовок",
+        createOwnPuzzle: "Создай свой пазл",
+        createOwnPuzzleDescription: "Испытай друга"
     },
     
     // Loading messages

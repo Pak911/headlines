@@ -169,6 +169,13 @@
     line-height: 1;
 }
 
+/* Left buttons container */
+.toolbar-left-buttons {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+}
+
 /* Right buttons container */
 .toolbar-right-buttons {
     display: flex;
@@ -176,7 +183,14 @@
     flex-shrink: 0;
 }
 
-/* Color Legend - updated for toolbar */
+/* Crossword Footer - invisible container for legend */
+.crossword-footer {
+    display: flex;
+    justify-content: center;
+    margin-top: 16px;
+}
+
+/* Color Legend - now in footer */
 .color-legend {
     flex: 1;
     min-width: 0;

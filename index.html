@@ -114,6 +114,20 @@
                         <div class="menu-item-value" id="menuGiveUpValue">Reveals the puzzle</div>
                     </div>
                 </div>
+                
+                <!-- Create Own Puzzle -->
+                <div class="menu-item" id="menuCreateOwnPuzzle">
+                    <div class="menu-item-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </div>
+                    <div class="menu-item-content">
+                        <div class="menu-item-label" id="menuCreateOwnPuzzleLabel">Create Own Puzzle</div>
+                        <div class="menu-item-value" id="menuCreateOwnPuzzleValue">Challenge your friend</div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -129,37 +143,23 @@
 
     <div class="main-game-container">
         <div class="crossword-container">
-            <!-- Top Toolbar with buttons and legend -->
+            <!-- Top Toolbar with buttons -->
             <div class="top-toolbar">
-                <!-- Left: Hamburger menu button -->
-                <button class="toolbar-btn hamburger-btn" id="hamburgerBtn" aria-label="Menu" title="Menu">
-                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
-                        <line x1="3" y1="6" x2="21" y2="6"></line>
-                        <line x1="3" y1="12" x2="21" y2="12"></line>
-                        <line x1="3" y1="18" x2="21" y2="18"></line>
-                    </svg>
-                </button>
-                
-                <!-- Center: Color Legend -->
-                <div class="color-legend">
-                    <ul class="legend-list">
-                        <li class="legend-item">
-                            <div class="legend-color" style="background-color: #4CAF50;"></div>
-                            <span class="legend-text">Correct position</span>
-                        </li>
-                        <li class="legend-item">
-                            <div class="legend-color" style="background-color: #FF9800;"></div>
-                            <span class="legend-text">Wrong position</span>
-                        </li>
-                        <li class="legend-item">
-                            <div class="legend-color" style="background-color: #9C27B0;"></div>
-                            <span class="legend-text">Connected word</span>
-                        </li>
-                        <li class="legend-item">
-                            <div class="legend-color" style="background-color: #9E9E9E;"></div>
-                            <span class="legend-text">Other word</span>
-                        </li>
-                    </ul>
+                <!-- Left: Hamburger menu and Create Own Puzzle buttons -->
+                <div class="toolbar-left-buttons">
+                    <button class="toolbar-btn hamburger-btn" id="hamburgerBtn" aria-label="Menu" title="Menu">
+                        <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round">
+                            <line x1="3" y1="6" x2="21" y2="6"></line>
+                            <line x1="3" y1="12" x2="21" y2="12"></line>
+                            <line x1="3" y1="18" x2="21" y2="18"></line>
+                        </svg>
+                    </button>
+                    <button class="toolbar-btn create-puzzle-btn" id="createPuzzleBtn" aria-label="Create Own Puzzle" title="Create Own Puzzle">
+                        <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                    </button>
                 </div>
                 
                 <!-- Right: Help and Next buttons -->
@@ -185,6 +185,30 @@
                 </div>
                 
                 <div id="crosswordGrid" class="crossword-grid"></div>
+            </div>
+            
+            <!-- Crossword Footer with Color Legend -->
+            <div class="crossword-footer">
+                <div class="color-legend">
+                    <ul class="legend-list">
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #4CAF50;"></div>
+                            <span class="legend-text">Correct position</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #FF9800;"></div>
+                            <span class="legend-text">Wrong position</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #9C27B0;"></div>
+                            <span class="legend-text">Connected word</span>
+                        </li>
+                        <li class="legend-item">
+                            <div class="legend-color" style="background-color: #9E9E9E;"></div>
+                            <span class="legend-text">Other word</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
         </div>
         

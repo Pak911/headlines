@@ -45,6 +45,15 @@ function initToolbarButtons() {
             }
         });
     }
+    
+    // Create Own Puzzle button - opens create-puzzle.html in new tab
+    const createPuzzleBtn = document.getElementById('createPuzzleBtn');
+    if (createPuzzleBtn) {
+        createPuzzleBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            window.open('create-puzzle.html', '_blank');
+        });
+    }
 }
 
 // Helper function to use flog from debug
@@ -211,6 +220,11 @@ function updateLocalizedText() {
         const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
         if (nextPuzzleBtn) {
             nextPuzzleBtn.setAttribute('title', t('toolbar.nextPuzzle'));
+        }
+        
+        const createPuzzleBtn = document.getElementById('createPuzzleBtn');
+        if (createPuzzleBtn) {
+            createPuzzleBtn.setAttribute('title', t('toolbar.createOwnPuzzle'));
         }
         
         // Update menu language

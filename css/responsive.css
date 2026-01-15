@@ -508,7 +508,7 @@
     
     .popup-body img {
         margin: var(--spacing-none) auto;
-        max-width: 75%;
+        max-width: 50%;
     }
     
     .popup-top .popup-close {

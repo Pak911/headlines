@@ -124,7 +124,8 @@ const en = {
     toolbar: {
         menu: "Menu",
         howToPlay: "How to Play",
-        nextPuzzle: "Next Puzzle"
+        nextPuzzle: "Next Puzzle",
+        createOwnPuzzle: "Create Own Puzzle"
     },
     
     // Menu items
@@ -138,7 +139,9 @@ const en = {
         giveUp: "Give Up",
         giveUpDescription: "Reveals the puzzle",
         nextPuzzle: "Next Puzzle",
-        nextPuzzleDescription: "Load next headline"
+        nextPuzzleDescription: "Load next headline",
+        createOwnPuzzle: "Create Own Puzzle",
+        createOwnPuzzleDescription: "Challenge your friend"
     },
     
     // Loading messages

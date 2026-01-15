@@ -137,6 +137,18 @@ class HamburgerMenu {
                 }
             });
         }
+        
+        // Create Own Puzzle
+        const createOwnPuzzleItem = document.getElementById('menuCreateOwnPuzzle');
+        if (createOwnPuzzleItem) {
+            createOwnPuzzleItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                _log('Create Own Puzzle menu item clicked');
+                this.close();
+                // Open create-puzzle.html in new tab
+                window.open('create-puzzle.html', '_blank');
+            });
+        }
     }
     
     /**
@@ -346,6 +358,16 @@ class HamburgerMenu {
         const menuGiveUpValue = document.getElementById('menuGiveUpValue');
         if (menuGiveUpValue) {
             menuGiveUpValue.textContent = t('menu.giveUpDescription');
+        }
+        
+        const menuCreateOwnPuzzleLabel = document.getElementById('menuCreateOwnPuzzleLabel');
+        if (menuCreateOwnPuzzleLabel) {
+            menuCreateOwnPuzzleLabel.textContent = t('menu.createOwnPuzzle');
+        }
+        
+        const menuCreateOwnPuzzleValue = document.getElementById('menuCreateOwnPuzzleValue');
+        if (menuCreateOwnPuzzleValue) {
+            menuCreateOwnPuzzleValue.textContent = t('menu.createOwnPuzzleDescription');
         }
         
         // Update difficulty dropdown language
