@@ -317,7 +317,7 @@ function removeDuplicateHeadlines(headlines) {
  * @returns {Promise<Array>} Headlines from the specified source
  */
 async function testSingleSource(sourceName) {
-    const source = rssNewsSources.find(s => s.name === sourceName);
+    const source = englishRssNewsSources.find(s => s.name === sourceName);
     
     if (!source) {
         console.error(`❌ Source "${sourceName}" not found`);
@@ -333,8 +333,8 @@ async function testSingleSource(sourceName) {
  * @returns {Promise<Array>} Headlines from all sources
  */
 async function testAllSources() {
-    _log(`🧪 Testing all ${rssNewsSources.length} RSS sources...`);
-    return await fetchFromMultipleSources(rssNewsSources, 3, 'en');
+    _log(`🧪 Testing all ${englishRssNewsSources.length} RSS sources...`);
+    return await fetchFromMultipleSources(englishRssNewsSources, 3, 'en');
 }
 
 /**

@@ -86,6 +86,7 @@ headlines/
 │   ├── utils/                          # Utilities
 │   │   ├── debug-utils.js              # Debug panel tools
 │   │   ├── gamestats.js                # Game statistics tracking
+│   │   ├── settings-integrity-checker.js # Configuration validation
 │   │   └── utils.js                    # General utilities
 │   └── lib/                            # Third-party libraries
 │       └── lz-string.min.js            # LZ compression library

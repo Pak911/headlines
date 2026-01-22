@@ -109,7 +109,7 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     
     // Fallback to mock headlines
     stopLoadingProcess();
-    const mockHeadlinesWithMetadata = mockHeadlines.map(headline => ({
+    const mockHeadlinesWithMetadata = englishMockHeadlines.map(headline => ({
         ...headline,
         source: 'mock',
         sourceName: 'Mock Data',
@@ -132,11 +132,20 @@ async function fetchFromRSSWithTimeout() {
     return await fetchFromRSSSourcesSequentially();
 }
 
+// Cache for validated sources to avoid re-validation
+let validatedSourcesCache = null;
+
 /**
  * Gets the appropriate RSS sources based on RSS language configuration
  * @returns {Array} Array of RSS source objects
  */
 function getRSSSourcesForCurrentLanguage() {
+    // Run integrity checks once and cache results
+    if (!validatedSourcesCache && typeof window.SettingsIntegrityChecker !== 'undefined') {
+        _log('🔍 Running initial settings integrity validation...');
+        validatedSourcesCache = window.SettingsIntegrityChecker.validateAllRSSSources();
+    }
+
     // Check RSS language configuration first
     let rssLanguage = 'en'; // default fallback
     
@@ -156,14 +165,16 @@ function getRSSSourcesForCurrentLanguage() {
     }
     
     // Return Russian sources if language is Russian
-    if (rssLanguage === 'ru' && typeof russianRssNewsSources !== 'undefined') {
-        _log(`🇷🇺 Using Russian RSS sources (${russianRssNewsSources.length} sources)`);
-        return russianRssNewsSources;
+    if (rssLanguage === 'ru') {
+        const sources = validatedSourcesCache?.russianSources || russianRssNewsSources || [];
+        _log(`🇷🇺 Using Russian RSS sources (${sources.length} sources)`);
+        return sources;
     }
     
     // Default to English sources
-    _log(`🇺🇸 Using English RSS sources (${rssNewsSources.length} sources)`);
-    return rssNewsSources;
+    const sources = validatedSourcesCache?.englishSources || englishRssNewsSources || [];
+    _log(`🇺🇸 Using English RSS sources (${sources.length} sources)`);
+    return sources;
 }
 
 /**
@@ -181,18 +192,23 @@ async function fetchFromRSSSourcesSequentially() {
     // Get appropriate RSS sources based on current language
     const currentRSSSources = getRSSSourcesForCurrentLanguage();
 
-    // For Russian language, fetch 3x more articles to compensate for shorter descriptions
+    // Determine language for article count configuration
     const isRussian = currentRSSSources === russianRssNewsSources;
-    const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
+    const languageCode = isRussian ? 'ru' : 'en';
+    
+    // Get articles per source from config, with fallback
+    let articlesPerSource = rssFetchingConfig?.articlesPerSource?.[languageCode];
+    if (articlesPerSource === undefined) {
+        articlesPerSource = isRussian ? 15 : 5; // Fallback values
+        console.warn(`⚠️ RSS fetching config not available for articles per source (${languageCode}), falling back to ${articlesPerSource} articles per source`);
+    }
+    _log(`📊 Fetching ${articlesPerSource} articles per source for ${languageCode.toUpperCase()}`);
 
     const batchDelay = rssFetchingConfig?.batchDelayMs;
     if (batchDelay === undefined) {
         console.warn('⚠️ RSS fetching config not available, falling back to default batch delay of 10ms');
     }
     _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources with max ${MAX_CONCURRENT_REQUESTS} concurrent requests and ${batchDelay || 10}ms batch delay...`);
-    if (isRussian) {
-        _log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
-    }
 
     const workingSources = [];
     const failedSources = [];

@@ -603,7 +603,7 @@ async function enhancedInitGame() {
         if (!crosswordLayout || !currentHeadline) {
             console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
             // Use a guaranteed working headline from mock data
-            currentHeadline = mockHeadlines[0];
+            currentHeadline = englishMockHeadlines[0];
             const normalizedWords = normalizeRussianWords(currentHeadline.words);
             crosswordLayout = generateSimpleLayout(normalizedWords);
             normalizeLayout(crosswordLayout, normalizedWords);
@@ -616,7 +616,7 @@ async function enhancedInitGame() {
         
         // Emergency fallback to old system
         _log('🔄 Falling back to legacy headline system');
-        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        currentHeadline = englishMockHeadlines[Math.floor(Math.random() * englishMockHeadlines.length)];
         const normalizedWords = normalizeRussianWords(currentHeadline.words);
         crosswordLayout = generateCrosswordLayout(normalizedWords);
         

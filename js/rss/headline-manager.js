@@ -57,7 +57,7 @@ async function initializeHeadlineManagement() {
         console.warn('  - Headline processing pipeline error');
         console.warn('  - No valid headlines met crossword requirements');
         _log('🔄 Using emergency fallback to mock headlines');
-        const mockHeadlinesWithMetadata = mockHeadlines.map(headline => ({
+        const mockHeadlinesWithMetadata = englishMockHeadlines.map(headline => ({
             ...headline,
             source: 'mock',
             sourceName: 'Mock Data',
@@ -214,7 +214,7 @@ function generateAlternativeHeadlines() {
     debugInfo.compatibilityScores = {};
     
     // Analyze each headline for compatibility with current layout
-    mockHeadlines.forEach(headline => {
+    englishMockHeadlines.forEach(headline => {
         if (headline.text === currentHeadline.text) return;
         
         const compatibility = calculateHeadlineCompatibility(headline, currentHeadline);
