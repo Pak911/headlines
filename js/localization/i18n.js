@@ -188,7 +188,7 @@ class LocalizationManager {
                     _log(`🔄 Refreshing headlines for language change to: ${lang}`);
                     // Reset headline management system
                     if (typeof window.HeadlineManager.refreshHeadlinePools === 'function') {
-                        window.HeadlineManager.refreshHeadlinePools();
+                        window.HeadlineManager.refreshHeadlinePools(true);
                     }
                     // Reinitialize game to fetch new headlines
                     if (typeof enhancedInitGame === 'function') {

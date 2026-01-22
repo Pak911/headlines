@@ -69,6 +69,9 @@ class HamburgerMenu {
         // Difficulty dropdown
         this.initDifficultyDropdown();
         
+        // Category dropdown
+        this.initCategoryDropdown();
+        
         // Statistics
         const statisticsItem = document.getElementById('menuStatistics');
         if (statisticsItem) {
@@ -287,6 +290,21 @@ class HamburgerMenu {
                 });
             }
         }
+        
+        // Update category name and description
+        const categoryText = document.getElementById('menuCategoryText');
+        const categoryValue = document.getElementById('menuCategoryValue');
+        if (categoryText && categoryValue && typeof currentCategory !== 'undefined' && typeof t !== 'undefined') {
+            categoryText.textContent = t(`category.${currentCategory}.name`);
+            categoryValue.textContent = t(`category.${currentCategory}.description`);
+            
+            // Also update the selected state of category dropdown options
+            if (this.categoryDropdown) {
+                this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.categoryId === currentCategory);
+                });
+            }
+        }
     }
     
     /**
@@ -317,6 +335,23 @@ class HamburgerMenu {
     }
 
     /**
+     * Update category dropdown text when language changes
+     */
+    updateCategoryDropdownLanguage() {
+        if (!this.categoryDropdown) return;
+        
+        this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+            const catId = option.dataset.categoryId;
+            const optionText = option.querySelector('.menu-dropdown-option-text');
+            if (optionText && catId && typeof t !== 'undefined') {
+                const name = t(`category.${catId}.name`);
+                const description = t(`category.${catId}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            }
+        });
+    }
+
+    /**
      * Update menu text when language changes
      */
     updateLanguage() {
@@ -333,6 +368,11 @@ class HamburgerMenu {
         const menuDifficultyLabel = document.getElementById('menuDifficultyLabel');
         if (menuDifficultyLabel) {
             menuDifficultyLabel.textContent = t('menu.difficulty');
+        }
+        
+        const menuCategoryLabel = document.getElementById('menuCategoryLabel');
+        if (menuCategoryLabel) {
+            menuCategoryLabel.textContent = t('menu.category');
         }
         
         const menuStatisticsLabel = document.getElementById('menuStatisticsLabel');
@@ -372,6 +412,9 @@ class HamburgerMenu {
         
         // Update difficulty dropdown language
         this.updateDifficultyDropdownLanguage();
+        
+        // Update category dropdown language
+        this.updateCategoryDropdownLanguage();
         
         // Update values as well
         this.updateMenuValues();
@@ -438,6 +481,7 @@ class HamburgerMenu {
                 this.closeLanguageDropdown();
             } else {
                 this.closeDifficultyDropdown(); // Close other dropdown
+                this.closeCategoryDropdown();
                 this.openLanguageDropdown();
             }
         });
@@ -604,6 +648,7 @@ class HamburgerMenu {
                 this.closeDifficultyDropdown();
             } else {
                 this.closeLanguageDropdown(); // Close other dropdown
+                this.closeCategoryDropdown();
                 this.openDifficultyDropdown();
             }
         });
@@ -693,6 +738,171 @@ class HamburgerMenu {
         if (this.difficultyDropdown) {
             this.difficultyDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
                 option.classList.toggle('selected', option.dataset.difficultyId === difficultyId);
+            });
+        }
+    }
+
+    /**
+     * Initialize category dropdown
+     */
+    initCategoryDropdown() {
+        const categoryItem = document.getElementById('menuCategory');
+        const categoryText = document.getElementById('menuCategoryText');
+        
+        if (!categoryItem || !categoryText) return;
+        
+        // Create dropdown panel
+        const dropdownPanel = document.createElement('div');
+        dropdownPanel.className = 'menu-dropdown-panel';
+        dropdownPanel.id = 'categoryDropdownPanel';
+        
+        // Category options
+        const categories = [
+            { id: 'all', key: 'category.all' },
+            { id: 'general', key: 'category.general' },
+            { id: 'economy', key: 'category.economy' },
+            { id: 'technology', key: 'category.technology' },
+            { id: 'sports', key: 'category.sports' }
+        ];
+        
+        categories.forEach(cat => {
+            const option = document.createElement('div');
+            option.className = 'menu-dropdown-option';
+            option.dataset.categoryId = cat.id;
+            
+            const optionText = document.createElement('span');
+            optionText.className = 'menu-dropdown-option-text';
+            // Show "Name - Description" in dropdown
+            if (typeof t !== 'undefined') {
+                const name = t(`${cat.key}.name`);
+                const description = t(`${cat.key}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            } else {
+                optionText.textContent = cat.id;
+            }
+            option.appendChild(optionText);
+            
+            const checkIcon = document.createElement('div');
+            checkIcon.className = 'menu-dropdown-check';
+            checkIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+            option.appendChild(checkIcon);
+            
+            // Mark current category as selected
+            if (typeof currentCategory !== 'undefined' && cat.id === currentCategory) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                e.stopPropagation();
+                this.selectCategory(cat.id);
+                this.closeCategoryDropdown();
+            });
+            
+            dropdownPanel.appendChild(option);
+        });
+        
+        // Append to body
+        document.body.appendChild(dropdownPanel);
+        
+        // Click handler for category item
+        categoryItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            e.stopPropagation();
+            if (categoryItem.classList.contains('open')) {
+                this.closeCategoryDropdown();
+            } else {
+                this.closeLanguageDropdown(); // Close other dropdowns
+                this.closeDifficultyDropdown();
+                this.openCategoryDropdown();
+            }
+        });
+        
+        // Store references
+        this.categoryDropdown = dropdownPanel;
+        this.categoryItem = categoryItem;
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (categoryItem.classList.contains('open') && 
+                !categoryItem.contains(e.target) && 
+                !dropdownPanel.contains(e.target)) {
+                this.closeCategoryDropdown();
+            }
+        });
+    }
+    
+    /**
+     * Open category dropdown
+     */
+    openCategoryDropdown() {
+        if (!this.categoryItem || !this.categoryDropdown) return;
+        
+        this.categoryItem.classList.add('open');
+        
+        // Position dropdown
+        const rect = this.categoryItem.getBoundingClientRect();
+        const dropdownSelect = this.categoryItem.querySelector('.menu-dropdown-select');
+        const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
+        
+        this.categoryDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.categoryDropdown.style.top = `${selectRect.bottom}px`;
+        
+        this.categoryDropdown.classList.add('visible');
+        
+        _log('Category dropdown opened');
+    }
+    
+    /**
+     * Close category dropdown
+     */
+    closeCategoryDropdown() {
+        if (!this.categoryItem || !this.categoryDropdown) return;
+        
+        this.categoryItem.classList.remove('open');
+        this.categoryDropdown.classList.remove('visible');
+        
+        _log('Category dropdown closed');
+    }
+    
+    /**
+     * Select a category
+     */
+    selectCategory(categoryId) {
+        if (typeof currentCategory === 'undefined') return;
+        
+        if (categoryId === currentCategory) return;
+        
+        _log(`Category changed to: ${categoryId}`);
+        
+        // Update global category
+        if (typeof changeCategory === 'function') {
+            changeCategory(categoryId);
+        } else {
+            window.currentCategory = categoryId;
+        }
+        
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:categoryChanged', {
+            detail: { newCategory: categoryId }
+        }));
+        
+        // Update display text - show only name
+        const categoryText = document.getElementById('menuCategoryText');
+        if (categoryText && typeof t !== 'undefined') {
+            categoryText.textContent = t(`category.${categoryId}.name`);
+        }
+        
+        // Update description text
+        const categoryValue = document.getElementById('menuCategoryValue');
+        if (categoryValue && typeof t !== 'undefined') {
+            categoryValue.textContent = t(`category.${categoryId}.description`);
+        }
+        
+        // Update selected state in dropdown
+        if (this.categoryDropdown) {
+            this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.categoryId === categoryId);
             });
         }
     }

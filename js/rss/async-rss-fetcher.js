@@ -85,7 +85,7 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
     try {
         // Try to fetch from RSS sources
         _log('📡 Attempting to fetch headlines from RSS sources...');
-        const rssHeadlines = await fetchFromRSSWithTimeout();
+        const rssHeadlines = await fetchFromRSSWithTimeout(forceRefresh);
         
         if (rssHeadlines && rssHeadlines.length > 0) {
             _log(`✅ Successfully fetched ${rssHeadlines.length} headlines from RSS`);
@@ -125,11 +125,11 @@ async function fetchHeadlinesWithFallback(forceRefresh = false) {
  * Fetches from RSS sources with controlled concurrency
  * @returns {Promise<Array>} Headlines from RSS
  */
-async function fetchFromRSSWithTimeout() {
+async function fetchFromRSSWithTimeout(forceRefresh = false) {
     // Removed timeout - let the process complete naturally
     // Individual RSS fetches will timeout via browser's fetch if needed
-    _log('🚀 Starting RSS fetch without global timeout...');
-    return await fetchFromRSSSourcesSequentially();
+    _log(`🚀 Starting RSS fetch without global timeout...${forceRefresh ? ' (force refresh)' : ''}`);
+    return await fetchFromRSSSourcesSequentially(forceRefresh);
 }
 
 // Cache for validated sources to avoid re-validation
@@ -181,7 +181,7 @@ function getRSSSourcesForCurrentLanguage() {
  * Fetches from all RSS sources with controlled concurrency
  * @returns {Promise<Array>} Combined headlines from working sources
  */
-async function fetchFromRSSSourcesSequentially() {
+async function fetchFromRSSSourcesSequentially(forceRefresh = false) {
     // Apply fetch delay if configured (for debugging)
     const fetchDelay = headlineScoringConfig?.rssConfig?.fetchDelay || 0;
     if (fetchDelay > 0) {
@@ -225,8 +225,8 @@ async function fetchFromRSSSourcesSequentially() {
             _log(`📡 Starting fetch from source ${globalIndex + 1}/${currentRSSSources.length}: ${source.name}`);
 
             try {
-                // Check if we have valid cached headlines for this source
-                if (typeof Platform !== 'undefined' && Platform.isCacheExpired) {
+                // Check if we have valid cached headlines for this source (skip if force refresh)
+                if (!forceRefresh && typeof Platform !== 'undefined' && Platform.isCacheExpired) {
                     const isExpired = await Platform.isCacheExpired(source.name);
                     if (!isExpired) {
                         _log(`🎯 Using cached headlines for ${source.name}`);

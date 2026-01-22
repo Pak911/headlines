@@ -99,6 +99,30 @@ const ru = {
         }
     },
     
+    // News categories
+    category: {
+        all: {
+            name: "Все",
+            description: "Все категории новостей"
+        },
+        general: {
+            name: "Общие",
+            description: "Общие новости"
+        },
+        economy: {
+            name: "Экономика",
+            description: "Бизнес и финансы"
+        },
+        technology: {
+            name: "Технологии",
+            description: "Технологии и инновации"
+        },
+        sports: {
+            name: "Спорт",
+            description: "Спортивные новости"
+        }
+    },
+    
     // Debug panel
     debug: {
         toggleHint: "Нажмите 'D' чтобы переключить отладку",
@@ -137,6 +161,7 @@ const ru = {
         title: "Меню",
         language: "Язык",
         difficulty: "Сложность",
+        category: "Категория",
         statistics: "Статистика",
         sound: "Звук",
         help: "Помощь",

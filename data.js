@@ -114,6 +114,9 @@ const headlineScoringConfig = {
 // Difficulty system configuration
 let currentDifficulty = 'medium'; // Default difficulty - hardest level with big hint (description)
 
+// Category system configuration
+let currentCategory = 'general'; // Default category - general news
+
 // Difficulty Settings:
 // - minSwaps: Minimum number of swaps to ensure puzzle complexity
 // - maxSwaps: Hard limit (60) - algorithm stops here even if maxGreenPercentage not reached, but usually stops earlier when target is achieved

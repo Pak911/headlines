@@ -203,6 +203,48 @@
         }
 
         /**
+         * Save game category setting
+         * @param {string} category - Category key ('all', 'general', 'economy', 'technology', 'sports')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameCategory(category) {
+            try {
+                const key = 'headline_settings_gameCategory';
+                localStorage.setItem(key, category);
+
+                this._log(`Saved game category: ${category}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveGameCategory failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game category setting
+         * @returns {Promise<string|null>} Category key or null if not found
+         */
+        async loadGameCategory() {
+            try {
+                const key = 'headline_settings_gameCategory';
+                const category = localStorage.getItem(key);
+
+                if (category) {
+                    this._log(`Loaded game category: ${category}`);
+                } else {
+                    this._log('No saved game category found');
+                }
+
+                return category;
+
+            } catch (err) {
+                console.error('[Web Platform] loadGameCategory failed:', err);
+                return null;
+            }
+        }
+
+        /**
          * Save sound enabled setting
          * @param {boolean} enabled - Whether sound is enabled
          * @returns {Promise<{success: boolean, error?: Error}>}

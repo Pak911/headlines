@@ -276,6 +276,11 @@ document.addEventListener('DOMContentLoaded', async function() {
         await initDifficultySystem();
     }
     
+    // Initialize category system
+    if (typeof initCategorySystem === 'function') {
+        await initCategorySystem();
+    }
+    
     // Initialize language selector
     initLanguageSelector();
     

@@ -95,6 +95,30 @@ const en = {
         }
     },
     
+    // News categories
+    category: {
+        all: {
+            name: "All",
+            description: "All news categories"
+        },
+        general: {
+            name: "General",
+            description: "General news"
+        },
+        economy: {
+            name: "Economy",
+            description: "Business and finance"
+        },
+        technology: {
+            name: "Technology",
+            description: "Tech and innovation"
+        },
+        sports: {
+            name: "Sports",
+            description: "Sports news"
+        }
+    },
+    
     // Debug panel
     debug: {
         toggleHint: "Press 'D' to toggle debug info",
@@ -133,6 +157,7 @@ const en = {
         title: "Menu",
         language: "Language",
         difficulty: "Difficulty",
+        category: "Category",
         statistics: "Statistics",
         sound: "Sound",
         help: "Help",
