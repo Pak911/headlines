@@ -356,5 +356,11 @@ const mockRussianHeadlines = [
 // RSS Fetching Configuration
 const rssFetchingConfig = {
     maxConcurrentRequests: 2,  // Maximum concurrent RSS requests in a batch
-    batchDelayMs: 10         // Delay between batches in milliseconds (to avoid rate limiting)
+    batchDelayMs: 10,         // Delay between batches in milliseconds (to avoid rate limiting)
+    fetchTimeoutMs: 3000      // Timeout for each individual RSS fetch call in milliseconds (3 seconds)
 };
+
+// Expose RSS fetching configuration globally for use by other modules
+if (typeof window !== 'undefined') {
+    window.rssFetchingConfig = rssFetchingConfig;
+}

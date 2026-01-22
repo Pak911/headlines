@@ -18,7 +18,14 @@ function _log(message, options = {always:true}) {
 
 // Configuration
 const CACHE_DURATION = headlineScoringConfig?.rssConfig?.cacheTimeout || 300000; // Cache duration from config, default 5 minutes
-const MAX_CONCURRENT_REQUESTS = rssFetchingConfig?.maxConcurrentRequests || 3; // Maximum concurrent requests to avoid rate limiting
+const MAX_CONCURRENT_REQUESTS = (() => {
+    const configValue = rssFetchingConfig?.maxConcurrentRequests;
+    if (configValue === undefined) {
+        console.warn('⚠️ RSS fetching config not available, falling back to default max concurrent requests of 3');
+        return 3;
+    }
+    return configValue;
+})(); // Maximum concurrent requests to avoid rate limiting
 
 // Cache for headlines to avoid repeated API calls
 let headlineCache = {
@@ -178,7 +185,11 @@ async function fetchFromRSSSourcesSequentially() {
     const isRussian = currentRSSSources === russianRssNewsSources;
     const articlesPerSource = isRussian ? 15 : 5; // 3x more for Russian
 
-    _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources with max ${MAX_CONCURRENT_REQUESTS} concurrent requests and ${rssFetchingConfig?.batchDelayMs || 10}ms batch delay...`);
+    const batchDelay = rssFetchingConfig?.batchDelayMs;
+    if (batchDelay === undefined) {
+        console.warn('⚠️ RSS fetching config not available, falling back to default batch delay of 10ms');
+    }
+    _log(`🚀 Fetching from ${currentRSSSources.length} RSS sources with max ${MAX_CONCURRENT_REQUESTS} concurrent requests and ${batchDelay || 10}ms batch delay...`);
     if (isRussian) {
         _log(`🇷🇺 Loading 3x more articles per source for Russian (${articlesPerSource} per source)`);
     }
@@ -256,9 +267,12 @@ async function fetchFromRSSSourcesSequentially() {
 
         // Add delay between batches to avoid rate limiting (except for the last batch)
         if (i + MAX_CONCURRENT_REQUESTS < currentRSSSources.length) {
-            const delay = rssFetchingConfig?.batchDelayMs || 10;
-            _log(`⏳ Waiting ${delay}ms before next batch to avoid rate limiting`);
-            await new Promise(resolve => setTimeout(resolve, delay));
+            const delay = rssFetchingConfig?.batchDelayMs;
+            if (delay === undefined) {
+                console.warn('⚠️ RSS fetching config not available, falling back to default batch delay of 10ms');
+            }
+            await new Promise(resolve => setTimeout(resolve, delay || 10));
+            _log(`⏳ Waiting ${delay || 10}ms before next batch to avoid rate limiting`);
         }
     }
 

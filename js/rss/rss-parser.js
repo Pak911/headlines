@@ -48,8 +48,17 @@ async function fetchLatestHeadlines(rssUrl, count, language = 'en') {
         // Construct RSS2JSON API URL (without count parameter for better compatibility)
         const apiUrl = `${RSS_API_BASE}?rss_url=${encodeURIComponent(rssUrl)}`;
         
-        // Fetch data from RSS2JSON API
-        const response = await fetch(apiUrl);
+        // Set up timeout using AbortController
+        const controller = new AbortController();
+        const fetchTimeout = rssFetchingConfig?.fetchTimeoutMs;
+        if (fetchTimeout === undefined) {
+            console.warn('⚠️ RSS fetching config not available, falling back to default timeout of 3000ms');
+        }
+        const timeoutId = setTimeout(() => controller.abort(), fetchTimeout || 3000);
+        
+        // Fetch data from RSS2JSON API with timeout
+        const response = await fetch(apiUrl, { signal: controller.signal });
+        clearTimeout(timeoutId);
         
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
@@ -71,7 +80,11 @@ async function fetchLatestHeadlines(rssUrl, count, language = 'en') {
         return processedHeadlines;
         
     } catch (error) {
-        console.error(`❌ Error fetching headlines from ${rssUrl}:`, error);
+        if (error.name === 'AbortError') {
+            console.error(`⏰ Timeout fetching headlines from ${rssUrl} after ${rssFetchingConfig?.fetchTimeoutMs || 3000}ms`);
+        } else {
+            console.error(`❌ Error fetching headlines from ${rssUrl}:`, error);
+        }
         return [];
     }
 }
