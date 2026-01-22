@@ -310,3 +310,26 @@ The styling system uses a modular, theme-based approach:
 - Event delegation where possible
 - CSS transitions for animations
 - No external resource loading
+
+## Deployment and Build System
+
+### GitHub Pages Deployment
+- **Source**: Repository root serves as live deployment (GitHub Pages serves from `/`)
+- **Build**: `npm run build:github-pages` creates optimized versions in `dist/github-pages/`
+- **Method**: Build output committed to repository for GitHub Pages
+
+### Deployment Verification Script (`check-deployment.ps1`)
+PowerShell script in project root that verifies deployment readiness by checking:
+- Essential files: `index.html`, `create-puzzle.html`, `data.js`, `data-audio.js`, `news-fetching-config.js`, `README.md`
+- Essential directories: `css/`, `js/`, `fonts/`, `imgs/` (with file counts)
+- Build output: Verifies `dist/github-pages/` contains processed files
+
+**Usage**:
+```powershell
+.\check-deployment.ps1                    # Check readiness
+npm run build:github-pages               # Rebuild after changes
+.\check-deployment.ps1                    # Verify build
+git status                               # Check commits needed
+```
+
+**Purpose**: Prevents deployment issues by catching missing files (e.g., `category-system.js` incident), ensures build completeness, provides pass/fail status, and documents verification process for maintainers.
