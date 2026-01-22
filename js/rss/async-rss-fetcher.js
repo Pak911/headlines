@@ -150,16 +150,24 @@ function getRSSSourcesForCurrentLanguage() {
     const rssLanguage = window.i18n.getCurrentRSSLanguage();
     _log(`📡 RSS language: ${rssLanguage}`);
     
+    let sources;
     // Return Russian sources if language is Russian
     if (rssLanguage === 'ru') {
-        const sources = validatedSourcesCache?.russianSources || russianRssNewsSources || [];
+        sources = validatedSourcesCache?.russianSources || russianRssNewsSources || [];
         _log(`🇷🇺 Using Russian RSS sources (${sources.length} sources)`);
-        return sources;
+    } else {
+        // Default to English sources
+        sources = validatedSourcesCache?.englishSources || englishRssNewsSources || [];
+        _log(`🇺🇸 Using English RSS sources (${sources.length} sources)`);
     }
     
-    // Default to English sources
-    const sources = validatedSourcesCache?.englishSources || englishRssNewsSources || [];
-    _log(`🇺🇸 Using English RSS sources (${sources.length} sources)`);
+    // Filter by category if not 'all'
+    if (typeof currentCategory !== 'undefined' && currentCategory !== 'all') {
+        const filteredSources = sources.filter(source => source.category === currentCategory);
+        _log(`🏷️ Filtering by category '${currentCategory}': ${sources.length} → ${filteredSources.length} sources`);
+        return filteredSources;
+    }
+    
     return sources;
 }
 

@@ -286,6 +286,23 @@ All events use the `headlines:` prefix for game-specific events.
   ```
 - **Listeners**: `js/singletons/analytics.js` - Analytics module tracks difficulty setting changes
 
+#### `headlines:categoryChanged`
+- **Purpose**: Fired when a player changes the news category filter in the hamburger menu
+- **Dispatched From**: 
+  - `js/ui/hamburger-menu.js` - `selectCategory()` function
+  - `js/gameplay/category-system.js` - `changeCategory()` function
+- **Data Structure**:
+  ```javascript
+  {
+    detail: {
+      newCategory: string  // 'all', 'general', 'economy', 'technology', 'sports'
+    }
+  }
+  ```
+- **Listeners**: 
+  - `js/singletons/analytics.js` - Analytics module tracks category setting changes
+  - `js/gameplay/category-system.js` - Category system triggers headline refetch when category changes
+
 #### `headlines:soundSettingChanged`
 - **Purpose**: Fired when a player toggles the sound setting on/off in the hamburger menu
 - **Dispatched From**: `js/ui/hamburger-menu.js` - Sound toggle click handler in `initMenuItems()`

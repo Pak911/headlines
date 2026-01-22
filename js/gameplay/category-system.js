@@ -48,6 +48,23 @@ async function initCategorySystem() {
     } else {
         _log(`Platform not available, using default category: ${currentCategory}`);
     }
+
+    // Listen for category changes to trigger headline refetch
+    window.addEventListener('headlines:categoryChanged', async (event) => {
+        const newCategory = event.detail.newCategory;
+        _log(`🔄 Category changed to '${newCategory}', refreshing headlines...`);
+        
+        // Refresh headline pools and reinitialize game
+        if (typeof window.HeadlineManager !== 'undefined' && 
+            typeof window.HeadlineManager.refreshHeadlinePools === 'function') {
+            await window.HeadlineManager.refreshHeadlinePools(true); // Force refresh
+        }
+        
+        // Reinitialize game to fetch new headlines with new category
+        if (typeof enhancedInitGame === 'function') {
+            enhancedInitGame();
+        }
+    });
 }
 
 // Expose functions globally
