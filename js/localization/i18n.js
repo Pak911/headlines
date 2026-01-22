@@ -210,6 +210,25 @@ class LocalizationManager {
         ];
     }
 
+    // Get current RSS language (respects rssLanguageConfig, falls back to UI language)
+    getCurrentRSSLanguage() {
+        // Check RSS language configuration first
+        if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage) {
+            const configLang = rssLanguageConfig.rssLanguage;
+            
+            // If set to 'auto', use current UI language
+            if (configLang === 'auto') {
+                return this.currentLanguage;
+            }
+            
+            // Otherwise use the configured language
+            return configLang;
+        }
+        
+        // Fallback to current UI language
+        return this.currentLanguage;
+    }
+
     // Update UI with current language
     updateUI() {
         // This will be called when language changes

@@ -146,23 +146,9 @@ function getRSSSourcesForCurrentLanguage() {
         validatedSourcesCache = window.SettingsIntegrityChecker.validateAllRSSSources();
     }
 
-    // Check RSS language configuration first
-    let rssLanguage = 'en'; // default fallback
-    
-    if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage) {
-        rssLanguage = rssLanguageConfig.rssLanguage;
-        _log(`📡 RSS language configuration: ${rssLanguage}`);
-        
-        // If set to 'auto', detect from UI language
-        if (rssLanguage === 'auto' && typeof window !== 'undefined' && window.i18n) {
-            rssLanguage = window.i18n.currentLanguage;
-            _log(`🌐 Auto-detected RSS language from UI: ${rssLanguage}`);
-        }
-    } else if (typeof window !== 'undefined' && window.i18n) {
-        // Fallback to UI language if no RSS config
-        rssLanguage = window.i18n.currentLanguage;
-        _log(`🌐 Using UI language as RSS language: ${rssLanguage}`);
-    }
+    // Get current RSS language from centralized i18n system
+    const rssLanguage = window.i18n.getCurrentRSSLanguage();
+    _log(`📡 RSS language: ${rssLanguage}`);
     
     // Return Russian sources if language is Russian
     if (rssLanguage === 'ru') {
@@ -192,17 +178,16 @@ async function fetchFromRSSSourcesSequentially(forceRefresh = false) {
     // Get appropriate RSS sources based on current language
     const currentRSSSources = getRSSSourcesForCurrentLanguage();
 
-    // Determine language for article count configuration
-    const isRussian = currentRSSSources === russianRssNewsSources;
-    const languageCode = isRussian ? 'ru' : 'en';
+    // Determine language for article count configuration using centralized i18n logic
+    const rssLanguage = window.i18n.getCurrentRSSLanguage();
     
     // Get articles per source from config, with fallback
-    let articlesPerSource = rssFetchingConfig?.articlesPerSource?.[languageCode];
+    let articlesPerSource = rssFetchingConfig?.articlesPerSource?.[rssLanguage];
     if (articlesPerSource === undefined) {
-        articlesPerSource = isRussian ? 15 : 5; // Fallback values
-        console.warn(`⚠️ RSS fetching config not available for articles per source (${languageCode}), falling back to ${articlesPerSource} articles per source`);
+        articlesPerSource = rssLanguage === 'ru' ? 15 : 5; // Fallback values
+        console.warn(`⚠️ RSS fetching config not available for articles per source (${rssLanguage}), falling back to ${articlesPerSource} articles per source`);
     }
-    _log(`📊 Fetching ${articlesPerSource} articles per source for ${languageCode.toUpperCase()}`);
+    _log(`📊 Fetching ${articlesPerSource} articles per source for ${rssLanguage.toUpperCase()}`);
 
     const batchDelay = rssFetchingConfig?.batchDelayMs;
     if (batchDelay === undefined) {
@@ -244,7 +229,7 @@ async function fetchFromRSSSourcesSequentially(forceRefresh = false) {
                 }
 
                 // No valid cache, fetch from RSS
-                const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource, isRussian ? 'ru' : 'en');
+                const headlines = await RSSParser.fetchLatestHeadlines(source.url, articlesPerSource, rssLanguage);
 
                 if (headlines && headlines.length > 0) {
                     headlines.forEach(headline => {

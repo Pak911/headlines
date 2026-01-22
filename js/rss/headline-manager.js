@@ -91,7 +91,7 @@ async function getNextHeadline() {
             console.warn('  - Russian headlines were filtered out during processing');
             console.warn('  - Network issues specific to Russian RSS sources');
             // Use Russian fallback headlines if RSS language is Russian
-            if (typeof rssLanguageConfig !== 'undefined' && rssLanguageConfig.rssLanguage === 'ru') {
+            if (window.i18n.getCurrentRSSLanguage() === 'ru') {
                 _log('🇷🇺 Using Russian fallback headlines...');
                 const mockHeadlinesWithMetadata = mockRussianHeadlines.map(headline => ({
                     ...headline,
