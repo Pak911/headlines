@@ -28,23 +28,69 @@ const rssNewsSources = [
     {
         name: "The Guardian",
         url: "https://www.theguardian.com/world/rss",
-        category: "world"
+        category: "general"
     },
     {
         name: "BBC Technology",
         url: "http://feeds.bbci.co.uk/news/technology/rss.xml",
         category: "technology"
     },
-    // {
-    //     name: "BBC Sport",
-    //     url: "http://feeds.bbci.co.uk/sport/rss.xml",
-    //     category: "sports"
-    // },
+    {
+        name: "BBC Sport",
+        url: "http://feeds.bbci.co.uk/sport/rss.xml",
+        category: "sports"
+    },
     {
         name: "Sky News",
         url: "http://feeds.skynews.com/feeds/rss/home.xml",
         category: "general"
-    }
+    },
+    {
+        name: "The Independent UK",
+        url: "http://www.independent.co.uk/news/uk/rss",
+        category: "general"
+    },
+    {
+        name: "Politico Economy",
+        url: "https://rss.politico.com/economy.xml",
+        category: "economy"
+    },
+    {
+        name: "FoxNews Sports",
+        url: "https://moxie.foxnews.com/google-publisher/sports.xml",
+        category: "sports"
+    },
+    {
+        name: "FoxNews Tech",
+        url: "https://moxie.foxnews.com/google-publisher/tech.xml",
+        category: "technology"
+    },
+    {
+        name: "FoxNews",
+        url: "https://moxie.foxnews.com/google-publisher/latest.xml",
+        category: "general"
+    },
+    {
+        name: "Washington Post",
+        url: "https://feeds.washingtonpost.com/rss/world",
+        category: "general"
+    },
+    {
+        name: "Huffpost Sports",
+        url: "https://chaski.huffpost.com/us/auto/vertical/sports",
+        category: "sports"
+    },
+    {
+        name: "Independent Sports",
+        url: "https://www.independent.co.uk/sport/rss",
+        category: "sports"
+    },
+    {
+        name: "Independent Economy",
+        url: "https://www.independent.co.uk/news/business/rss",
+        category: "economy"
+    },
+    
 ];
 
 // Russian RSS News Sources
@@ -62,7 +108,7 @@ const russianRssNewsSources = [
     {
         name: "РБК",
         url: "https://rssexport.rbc.ru/rbcnews/news/30/full.rss",
-        category: "general"
+        category: "economy"
     },
     {
         name: "ТАСС",
@@ -90,14 +136,9 @@ const russianRssNewsSources = [
         category: "general"
     },
     {
-        name: "News Info",
-        url: "https://www.newsinfo.ru/rss",
-        category: "general"
-    },
-    {
         name: "Манитаймс",
         url: "https://www.moneytimes.ru/rss",
-        category: "general"
+        category: "economy"
     },
     {
         name: "3DNews",
