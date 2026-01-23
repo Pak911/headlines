@@ -235,6 +235,15 @@ function hideStarTooltip() {
 }
 
 function showVictory() {
+    // Check if this puzzle was given up
+    const wasGivenUp = currentHeadline &&
+                       currentHeadline.djb2Hash &&
+                       givenUpPuzzles.has(currentHeadline.djb2Hash);
+
+    if (wasGivenUp) {
+        _log('🏳️ Showing victory for previously given-up puzzle - hiding stats/stars');
+    }
+
     // Update victory modal content with localization
     const victoryTitle = document.querySelector('.victory-title');
     const victorySubtitle = document.querySelector('.victory-subtitle');
@@ -283,68 +292,90 @@ function showVictory() {
     }
     
     document.getElementById('headlineReveal').textContent = currentHeadline.text;
-    document.getElementById('finalSwaps').textContent = swapCount;
-    
+
     // Check if we're in custom link mode for link handling
     const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
-    
-    // Calculate performance rating using new function
-    const letterCount = currentHeadline.words.reduce((sum, word) => sum + word.length, 0);
-    const { rating, starCount } = calculateStarRating(swapCount, letterCount);
-    
-    // Get localized rating text
-    let localizedRating = rating;
-    if (typeof t !== 'undefined') {
-        const ratingKey = rating.toLowerCase();
-        localizedRating = t(`victory.ratings.${ratingKey}`) || rating;
+
+    // Declare these variables early so they're accessible throughout the function
+    let letterCount, rating, starCount;
+
+    // Conditionally display or hide stat values
+    if (wasGivenUp) {
+        // Hide the actual numbers but keep the labels/structure
+        document.getElementById('finalSwaps').textContent = '—';
+        document.getElementById('performanceRating').textContent = '—';
+    } else {
+        // Normal flow: calculate and display stats
+        document.getElementById('finalSwaps').textContent = swapCount;
+
+        // Calculate performance rating using new function
+        letterCount = currentHeadline.words.reduce((sum, word) => sum + word.length, 0);
+        const ratingData = calculateStarRating(swapCount, letterCount);
+        rating = ratingData.rating;
+        starCount = ratingData.starCount;
+
+        // Get localized rating text
+        let localizedRating = rating;
+        if (typeof t !== 'undefined') {
+            const ratingKey = rating.toLowerCase();
+            localizedRating = t(`victory.ratings.${ratingKey}`) || rating;
+        }
+
+        document.getElementById('performanceRating').textContent = localizedRating;
     }
-    
-    document.getElementById('performanceRating').textContent = localizedRating;
-    
+
     // Set article link based on mode
     if (isCustomMode) {
         document.getElementById('articleLink').href = 'create-puzzle.html';
     } else {
         document.getElementById('articleLink').href = currentHeadline.link || '#';
-    }    
-    // Generate star display
+    }
+
+    // Generate star display (only for non-given-up puzzles)
     const starsContainer = document.getElementById('victoryStars');
     starsContainer.innerHTML = '';
-    
-    for (let i = 1; i <= 5; i++) {
-        const starDiv = document.createElement('div');
-        starDiv.className = 'victory-star' + (i <= starCount ? ' filled' : ' empty');
-        starDiv.setAttribute('data-star-index', i);
-        
-        const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-        svg.setAttribute('width', '40');
-        svg.setAttribute('height', '40');
-        svg.setAttribute('viewBox', '0 0 40 40');
-        svg.setAttribute('fill', 'none');
-        
-        const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-        path.setAttribute('d', 'M20 3L25 13L36 15L28 23L30 34L20 29L10 34L12 23L4 15L15 13L20 3Z');
-        
-        if (i <= starCount) {
-            path.setAttribute('fill', '#FFD700');
-            path.setAttribute('stroke', '#FFA500');
-            starDiv.style.animationDelay = `${i * 0.1}s`;
-        } else {
-            path.setAttribute('fill', 'transparent');
-            path.setAttribute('stroke', '#D1D5DB');
+
+    if (!wasGivenUp) {
+        // Normal flow: display stars (reset display style in case it was hidden before)
+        starsContainer.style.display = '';
+        for (let i = 1; i <= 5; i++) {
+            const starDiv = document.createElement('div');
+            starDiv.className = 'victory-star' + (i <= starCount ? ' filled' : ' empty');
+            starDiv.setAttribute('data-star-index', i);
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '40');
+            svg.setAttribute('height', '40');
+            svg.setAttribute('viewBox', '0 0 40 40');
+            svg.setAttribute('fill', 'none');
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M20 3L25 13L36 15L28 23L30 34L20 29L10 34L12 23L4 15L15 13L20 3Z');
+
+            if (i <= starCount) {
+                path.setAttribute('fill', '#FFD700');
+                path.setAttribute('stroke', '#FFA500');
+                starDiv.style.animationDelay = `${i * 0.1}s`;
+            } else {
+                path.setAttribute('fill', 'transparent');
+                path.setAttribute('stroke', '#D1D5DB');
+            }
+            path.setAttribute('stroke-width', '2');
+
+            svg.appendChild(path);
+            starDiv.appendChild(svg);
+            starsContainer.appendChild(starDiv);
         }
-        path.setAttribute('stroke-width', '2');
-        
-        svg.appendChild(path);
-        starDiv.appendChild(svg);
-        starsContainer.appendChild(starDiv);
+
+        // Add hover listeners for tooltips
+        addStarHoverListeners(starCount, swapCount, letterCount);
+    } else {
+        // For given-up puzzles: hide stars completely
+        starsContainer.style.display = 'none';
     }
-    
-    // Add hover listeners for tooltips
-    addStarHoverListeners(starCount, swapCount, letterCount);
-    
-    // Save seen headline data (solved) - only for regular headlines with hashes
-    if (currentHeadline && currentHeadline.djb2Hash) {
+
+    // Save seen headline data and dispatch events ONLY if not given-up
+    if (currentHeadline && currentHeadline.djb2Hash && !wasGivenUp) {
         Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
             isSolved: true,
             movesUsed: swapCount,
@@ -354,7 +385,7 @@ function showVictory() {
             console.error('Failed to save seen headline data:', err);
         });
 
-        // Dispatch puzzle solved event (for internal use)
+        // Dispatch puzzle solved event (for internal use) - triggers stats increment
         window.dispatchEvent(new CustomEvent('headlines:puzzle:solved', {
             detail: {
                 puzzleHash: currentHeadline.djb2Hash,
@@ -367,14 +398,15 @@ function showVictory() {
     // Dispatch analytics puzzle solved event (always, for both regular and custom puzzles)
     const analyticsMode = isCustomMode ? 'challenge' : 'news';
     const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
-    
+
     window.dispatchEvent(new CustomEvent('headlines:puzzleSolved', {
         detail: {
             mode: analyticsMode,
-            movesUsed: swapCount,
-            starRating: starCount,
+            movesUsed: wasGivenUp ? 0 : swapCount,
+            starRating: wasGivenUp ? 0 : starCount,
             difficulty: currentDifficulty || 'medium',
-            language: analyticsLanguage
+            language: analyticsLanguage,
+            wasGivenUp: wasGivenUp
         }
     }));
     
@@ -424,7 +456,15 @@ function closeVictoryModal() {
 function replayGame() {
     // Close the victory modal
     document.getElementById('victoryModal').style.display = 'none';
-    
+
+    // Clear the given-up status for this puzzle (allows earning stars/stats on replay)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        if (givenUpPuzzles.has(currentHeadline.djb2Hash)) {
+            givenUpPuzzles.delete(currentHeadline.djb2Hash);
+            _log(`🔄 Removed puzzle ${currentHeadline.djb2Hash} from given-up set for replay`);
+        }
+    }
+
     // Reset swap count
     swapCount = 0;
     selectedCell = null;
@@ -919,7 +959,13 @@ async function giveUp() {
     renderCrossword();
     
     fitGridToScreen();
-    
+
+    // Add to the given-up set
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        givenUpPuzzles.add(currentHeadline.djb2Hash);
+        _log(`Added puzzle ${currentHeadline.djb2Hash} to given-up set`);
+    }
+
     // Switch menu item to Next Puzzle mode
     if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
         window.HamburgerMenu.switchToNextPuzzleMode();

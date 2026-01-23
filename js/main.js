@@ -10,6 +10,8 @@ let swapCount = 0;
 let selectedCell = null;
 let gridSize = { rows: 0, cols: 0 };
 let wordConnections = {};
+// Track puzzles that have been given up (in-memory only, not persistent)
+let givenUpPuzzles = new Set();
 
 // Initialize toolbar buttons
 function initToolbarButtons() {
