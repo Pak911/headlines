@@ -97,6 +97,30 @@ const englishRssNewsSources = [
     
 ];
 
+// Portuguese RSS News Sources
+const portugueseRssNewsSources = [
+    {
+        name: "UOL",
+        url: "https://rss.uol.com.br/feed/noticias.xml",
+        category: "general"
+    },
+    {
+        name: "UOL Tech",
+        url: "https://rss.uol.com.br/feed/tecnologia.xml",
+        category: "technology"
+    },
+    {
+        name: "UOL Economy",
+        url: "https://rss.uol.com.br/feed/economia.xml",
+        category: "economy"
+    },
+    {
+        name: "Folha de S.Paulo Sport",
+        url: "https://feeds.folha.uol.com.br/esporte/rss091.xml",
+        category: "sports"
+    }
+];
+
 // Russian RSS News Sources
 const russianRssNewsSources = [
     {
@@ -430,6 +454,138 @@ const mockRussianHeadlines = [
     }
 ];
 
+// Portuguese mock headlines data - all with 4+ words and descriptions
+const mockPortugueseHeadlines = [
+    {
+        text: "ECONOMIA BRASILEIRA CRESCE RAPIDAMENTE",
+        words: ["ECONOMIA", "BRASILEIRA", "CRESCE", "RAPIDAMENTE"],
+        link: "https://example.com/economia-brasileira",
+        description: "Crescimento econômico acelera no último trimestre com investimentos em infraestrutura e desenvolvimento industrial.",
+        djb2Hash: "1a2b3c4",
+        category: "economy"
+    },
+    {
+        text: "TECNOLOGIA AVANÇA EM EDUCAÇÃO",
+        words: ["TECNOLOGIA", "AVANÇA", "EM", "EDUCAÇÃO"],
+        link: "https://example.com/tecnologia-educacao",
+        description: "Novas ferramentas digitais transformam salas de aula em todo o país com acesso expandido à internet.",
+        djb2Hash: "5d6e7f8",
+        category: "technology"
+    },
+    {
+        text: "PRESERVAÇÃO AMBIENTAL GANHA FORÇA",
+        words: ["PRESERVAÇÃO", "AMBIENTAL", "GANHA", "FORÇA"],
+        link: "https://example.com/preservacao-ambiental",
+        description: "Iniciativas de conservação da natureza recebem apoio crescente da população e investimentos governamentais.",
+        djb2Hash: "9g0h1i2",
+        category: "general"
+    },
+    {
+        text: "SAÚDE PÚBLICA RECEBE INVESTIMENTOS",
+        words: ["SAÚDE", "PÚBLICA", "RECEBE", "INVESTIMENTOS"],
+        link: "https://example.com/saude-publica",
+        description: "Sistema de saúde brasileiro recebe recursos para modernização de hospitais e contratação de profissionais.",
+        djb2Hash: "3j4k5l6",
+        category: "general"
+    },
+    {
+        text: "ESPORTE NACIONAL CONQUISTA MEDALHAS",
+        words: ["ESPORTE", "NACIONAL", "CONQUISTA", "MEDALHAS"],
+        link: "https://example.com/esporte-nacional",
+        description: "Atletas brasileiros demonstram excelência em competições internacionais trazendo glória ao país.",
+        djb2Hash: "7m8n9o0",
+        category: "sports"
+    },
+    {
+        text: "EDUCAÇÃO FUNDAMENTAL MELHORA QUALIDADE",
+        words: ["EDUCAÇÃO", "FUNDAMENTAL", "MELHORA", "QUALIDADE"],
+        link: "https://example.com/educacao-fundamental",
+        description: "Novas políticas educacionais elevam padrões de ensino nas escolas públicas de todo o território nacional.",
+        djb2Hash: "1p2q3r4",
+        category: "general"
+    },
+    {
+        text: "MERCADO FINANCEIRO ATINGE RECORDE",
+        words: ["MERCADO", "FINANCEIRO", "ATINGE", "RECORDE"],
+        link: "https://example.com/mercado-financeiro",
+        description: "Bolsa de valores alcança novos patamares com aumento da confiança dos investidores na economia.",
+        djb2Hash: "5s6t7u8",
+        category: "economy"
+    },
+    {
+        text: "INOVAÇÃO CIENTÍFICA AVANÇA RAPIDAMENTE",
+        words: ["INOVAÇÃO", "CIENTÍFICA", "AVANÇA", "RAPIDAMENTE"],
+        link: "https://example.com/inovacao-cientifica",
+        description: "Pesquisadores brasileiros desenvolvem soluções inovadoras em biotecnologia e engenharia sustentável.",
+        djb2Hash: "9v0w1x2",
+        category: "technology"
+    },
+    {
+        text: "AGRICULTURA SUSTENTÁVEL EXPANDE PRODUÇÃO",
+        words: ["AGRICULTURA", "SUSTENTÁVEL", "EXPANDE", "PRODUÇÃO"],
+        link: "https://example.com/agricultura-sustentavel",
+        description: "Práticas agrícolas modernas aumentam produtividade preservando recursos naturais e biodiversidade.",
+        djb2Hash: "3y4z5a6",
+        category: "economy"
+    },
+    {
+        text: "CULTURA BRASILEIRA GANHA DESTAQUE",
+        words: ["CULTURA", "BRASILEIRA", "GANHA", "DESTAQUE"],
+        link: "https://example.com/cultura-brasileira",
+        description: "Manifestações culturais do Brasil conquistam reconhecimento internacional em festivais e premiações.",
+        djb2Hash: "7b8c9d0",
+        category: "general"
+    },
+    {
+        text: "TRANSPORTE PÚBLICO RECEBE MELHORIAS",
+        words: ["TRANSPORTE", "PÚBLICO", "RECEBE", "MELHORIAS"],
+        link: "https://example.com/transporte-publico",
+        description: "Sistemas de transporte urbano são modernizados com investimentos em infraestrutura e tecnologia.",
+        djb2Hash: "1e2f3g4",
+        category: "general"
+    },
+    {
+        text: "ENERGIA RENOVÁVEL CRESCE ANUALMENTE",
+        words: ["ENERGIA", "RENOVÁVEL", "CRESCE", "ANUALMENTE"],
+        link: "https://example.com/energia-renovavel",
+        description: "Investimentos em fontes limpas de energia expandem capacidade de geração sustentável no país.",
+        djb2Hash: "5h6i7j8",
+        category: "technology"
+    },
+    {
+        text: "COMÉRCIO EXTERIOR BATE RECORDES",
+        words: ["COMÉRCIO", "EXTERIOR", "BATE", "RECORDES"],
+        link: "https://example.com/comercio-exterior",
+        description: "Exportações brasileiras alcançam valores históricos fortalecendo balança comercial e economia nacional.",
+        djb2Hash: "9k0l1m2",
+        category: "economy"
+    },
+    {
+        text: "CAMPEONATO NACIONAL ATRAI PÚBLICO",
+        words: ["CAMPEONATO", "NACIONAL", "ATRAI", "PÚBLICO"],
+        link: "https://example.com/campeonato-nacional",
+        description: "Competições esportivas mobilizam milhões de torcedores celebrando talentos e rivalidades históricas.",
+        djb2Hash: "3n4o5p6",
+        category: "sports"
+    },
+    {
+        text: "SEGURANÇA PÚBLICA IMPLEMENTA MEDIDAS",
+        words: ["SEGURANÇA", "PÚBLICA", "IMPLEMENTA", "MEDIDAS"],
+        link: "https://example.com/seguranca-publica",
+        description: "Novas estratégias de policiamento e prevenção são adotadas para reduzir criminalidade nas cidades.",
+        djb2Hash: "7q8r9s0",
+        category: "general"
+    },
+    {
+        text: "TURISMO NACIONAL CRESCE FORTEMENTE",
+        words: ["TURISMO", "NACIONAL", "CRESCE", "FORTEMENTE"],
+        link: "https://example.com/turismo-nacional",
+        description: "Destinos turísticos brasileiros atraem visitantes nacionais e estrangeiros impulsionando economia regional.",
+        djb2Hash: "1t2u3v4",
+        category: "economy"
+    }
+];
+
 // RSS Fetching Configuration
 const rssFetchingConfig = {
     maxConcurrentRequests: 2,  // Maximum concurrent RSS requests in a batch
@@ -437,11 +593,12 @@ const rssFetchingConfig = {
     fetchTimeoutMs: 3000,     // Timeout for each individual RSS fetch call in milliseconds (3 seconds)
     articlesPerSource: {      // Number of articles to fetch per source by language
         'en': 15,             // English: 15 articles per source
-        'ru': 15              // Russian: 15 articles per source
+        'ru': 15,             // Russian: 15 articles per source
+        'pt': 15              // Portuguese: 15 articles per source
     },
     validCategories: [        // Valid category values for RSS sources
         'general',
-        'economy', 
+        'economy',
         'technology',
         'sports'
     ]
