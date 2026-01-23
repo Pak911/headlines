@@ -62,6 +62,7 @@ const crosswordEngineConfig = {
     intersectionWeights: [10, 60, 100, 160, 160]
 };
 
+
 // Headline Scoring Configuration
 const headlineScoringConfig = {
     // Word count constraints
