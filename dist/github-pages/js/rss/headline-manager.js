@@ -1,1 +1,343 @@
-!function(){"use strict";function e(e,n={}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("headline-manager",e,n):console.log("[headline-manager]",e)}let n=null,o=[],t=[],i=!1;async function a(){if(i&&n&&n.totalValid>0)e("📋 Headline management already initialized");else{e("🚀 Initializing enhanced headline management system...");try{const a=await AsyncRSSFetcher.fetchHeadlinesWithFallback();n=await HeadlineScorer.processAndGroupHeadlines(a),o=[],t=[],i=!0,e(`✅ Headline management initialized with ${n.totalValid} valid headlines`),e(`📊 Score pools: ${n.sortedScores.join(", ")}`)}catch(o){console.error("❌ Failed to initialize headline management:",o),console.warn("⚠️ EMERGENCY FALLBACK: RSS initialization failed, using mock headlines"),console.warn("  Possible causes:"),console.warn("  - RSS fetch completely failed (network/API issues)"),console.warn("  - All headlines were filtered out during scoring"),console.warn("  - Headline processing pipeline error"),console.warn("  - No valid headlines met crossword requirements"),e("🔄 Using emergency fallback to mock headlines");const t=englishMockHeadlines.map(e=>({...e,source:"mock",sourceName:"Mock Data",category:"fallback",pubDate:(new Date).toISOString()}));n=await HeadlineScorer.processAndGroupHeadlines(t),i=!0}}}async function l(){if(await a(),!(n&&0!==n.totalValid||(e("❌ No headlines available, reinitializing..."),i=!1,await a(),n&&0!==n.totalValid))){console.error("❌ Failed to get any headlines after reinitialization"),console.warn("⚠️ RUSSIAN FALLBACK: No headlines available, using Russian mock headlines"),console.warn("  Possible causes:"),console.warn("  - RSS language set to Russian but no Russian sources available"),console.warn("  - All Russian RSS feeds failed or returned no content"),console.warn("  - Russian headlines were filtered out during processing"),console.warn("  - Network issues specific to Russian RSS sources");const o=window.i18n.getCurrentRSSLanguage();if("ru"===o){e("🇷🇺 Using Russian fallback headlines...");const o=mockRussianHeadlines.map(e=>({...e,source:"mock",sourceName:"Russian Mock Data",category:"fallback",pubDate:(new Date).toISOString()}));n=await HeadlineScorer.processAndGroupHeadlines(o)}else{if("pt"!==o)return null;{e("🇧🇷 Using Portuguese fallback headlines...");const o=mockPortugueseHeadlines.map(e=>({...e,source:"mock",sourceName:"Portuguese Mock Data",category:"fallback",pubDate:(new Date).toISOString()}));n=await HeadlineScorer.processAndGroupHeadlines(o)}}}const o=HeadlineScorer.selectBestHeadline(n);return o?(e(`🎯 Selected headline: "${o.filteredText}" (score: ${o.score})`),e(`📊 Remaining pools: ${n.sortedScores.map(e=>`${e}:${n.scoreGroups[e].length}`).join(", ")}`),o):(e("❌ No more headlines available in pools, reinitializing..."),i=!1,await l())}function s(t){o.some(e=>e.text===t.text)||(o.push(t),e(`✅ Marked headline as used: "${t.filteredText||t.text}"`),n&&HeadlineScorer.removeHeadlineFromGroups(n,t))}function r(o){t.some(e=>e.text===o.text)||(t.push(o),e(`❌ Marked headline as rejected: "${o.filteredText||o.text}"`),n&&HeadlineScorer.removeHeadlineFromGroups(n,o))}async function d(){e("🔄 Forcing headline pools refresh..."),i=!1,n=null,await a()}function c(){return n?{initialized:i,totalValid:n.totalValid,totalProcessed:n.totalProcessed,poolCount:n.sortedScores.length,bestScore:n.bestScore,worstScore:n.worstScore,usedCount:o.length,rejectedCount:t.length,scoreDistribution:n.sortedScores.map(e=>({score:e,count:n.scoreGroups[e].length}))}:{initialized:!1,totalValid:0,totalProcessed:0,poolCount:0,usedCount:o.length,rejectedCount:t.length}}function u(){return n?HeadlineScorer.getHeadlinePoolDebugInfo(n):null}function g(e,n){const o=e.split(""),t=n.split(""),i=[],a=new Set;for(let e=0;e<o.length;e++)for(let n=0;n<t.length;n++)if(o[e]===t[n]&&!a.has(n)){i.push(o[e]),a.add(n);break}return i}"undefined"!=typeof window&&(window.HeadlineManager={initializeHeadlineManagement:a,getNextHeadline:l,markHeadlineAsUsed:s,markHeadlineAsRejected:r,refreshHeadlinePools:d,getPoolStatistics:c,getDetailedPoolInfo:u},window.initializeHeadlineManagement=a,window.getNextHeadline=l,window.markHeadlineAsUsed=s,window.markHeadlineAsRejected=r,window.getPoolStatistics=c,window.getDetailedPoolInfo=u,window.refreshHeadlinePools=d,window.generateAlternativeHeadlines=function(){debugInfo.alternativeHeadlines=[],debugInfo.compatibilityScores={},englishMockHeadlines.forEach(e=>{if(e.text===currentHeadline.text)return;const n=function(e,n){let o=0,t=0;for(let i of e.words)for(let e of n.words)o+=g(i,e).length/Math.max(i.length,e.length),t++;const i=t>0?o/t:0,a=1-.1*Math.abs(e.words.length-n.words.length),l=e.words.join("").length,s=n.words.join("").length;return i*a*(1-.01*Math.abs(l-s))}(e,currentHeadline);if(debugInfo.compatibilityScores[e.text]=Math.round(100*n),n>.3){const o=function(e,n){const o=e.join("").split("").sort(),t=n.join("").split("").sort();let i=0,a=0,l=0;for(;a<o.length&&l<t.length;)o[a]===t[l]?(i++,a++,l++):o[a]<t[l]?a++:l++;return i}(e.words,currentHeadline.words);debugInfo.alternativeHeadlines.push({text:e.text,words:e.words,compatibility:Math.round(100*n),commonLetters:o})}}),debugInfo.alternativeHeadlines.sort((e,n)=>n.compatibility-e.compatibility),debugInfo.alternativeHeadlines=debugInfo.alternativeHeadlines.slice(0,8)})}();
+// Enhanced Headline Manager - Advanced headline selection with scoring and pool management
+// Integrates with HeadlineScorer and AsyncRSSFetcher for intelligent headline management
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('headline-manager', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[headline-manager]', message);
+    }
+}
+
+// Headline pool management system
+let headlinePools = null; // Will store grouped headlines by score
+let usedHeadlines = [];
+let rejectedHeadlines = [];
+let isInitialized = false;
+
+/**
+ * Initialize the enhanced headline management system
+ * Fetches headlines and sets up scoring pools
+ */
+async function initializeHeadlineManagement() {
+    if (isInitialized && headlinePools && headlinePools.totalValid > 0) {
+        _log('📋 Headline management already initialized');
+        return;
+    }
+    
+    _log('🚀 Initializing enhanced headline management system...');
+    
+    try {
+        // Fetch headlines with fallback mechanisms
+        const rawHeadlines = await AsyncRSSFetcher.fetchHeadlinesWithFallback();
+        
+        // Process and score headlines
+        headlinePools = await HeadlineScorer.processAndGroupHeadlines(rawHeadlines);
+        
+        // Clear tracking arrays when starting fresh
+        usedHeadlines = [];
+        rejectedHeadlines = [];
+        isInitialized = true;
+        
+        _log(`✅ Headline management initialized with ${headlinePools.totalValid} valid headlines`);
+        _log(`📊 Score pools: ${headlinePools.sortedScores.join(', ')}`);
+        
+    } catch (error) {
+        console.error('❌ Failed to initialize headline management:', error);
+        
+        console.warn('⚠️ EMERGENCY FALLBACK: RSS initialization failed, using mock headlines');
+        console.warn('  Possible causes:');
+        console.warn('  - RSS fetch completely failed (network/API issues)');
+        console.warn('  - All headlines were filtered out during scoring');
+        console.warn('  - Headline processing pipeline error');
+        console.warn('  - No valid headlines met crossword requirements');
+        _log('🔄 Using emergency fallback to mock headlines');
+        const mockHeadlinesWithMetadata = englishMockHeadlines.map(headline => ({
+            ...headline,
+            source: 'mock',
+            sourceName: 'Mock Data',
+            category: 'fallback',
+            pubDate: new Date().toISOString()
+        }));
+        
+        headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+        isInitialized = true;
+    }
+}
+
+/**
+ * Get next available headline using intelligent scoring system
+ * @returns {Object|null} Best available headline or null if none available
+ */
+async function getNextHeadline() {
+    await initializeHeadlineManagement();
+    
+    if (!headlinePools || headlinePools.totalValid === 0) {
+        _log('❌ No headlines available, reinitializing...');
+        isInitialized = false;
+        await initializeHeadlineManagement();
+        
+        if (!headlinePools || headlinePools.totalValid === 0) {
+            console.error('❌ Failed to get any headlines after reinitialization');
+            console.warn('⚠️ RUSSIAN FALLBACK: No headlines available, using Russian mock headlines');
+            console.warn('  Possible causes:');
+            console.warn('  - RSS language set to Russian but no Russian sources available');
+            console.warn('  - All Russian RSS feeds failed or returned no content');
+            console.warn('  - Russian headlines were filtered out during processing');
+            console.warn('  - Network issues specific to Russian RSS sources');
+            // Use fallback headlines based on RSS language
+            const rssLang = window.i18n.getCurrentRSSLanguage();
+            if (rssLang === 'ru') {
+                _log('🇷🇺 Using Russian fallback headlines...');
+                const mockHeadlinesWithMetadata = mockRussianHeadlines.map(headline => ({
+                    ...headline,
+                    source: 'mock',
+                    sourceName: 'Russian Mock Data',
+                    category: 'fallback',
+                    pubDate: new Date().toISOString()
+                }));
+                headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+            } else if (rssLang === 'pt') {
+                _log('🇧🇷 Using Portuguese fallback headlines...');
+                const mockHeadlinesWithMetadata = mockPortugueseHeadlines.map(headline => ({
+                    ...headline,
+                    source: 'mock',
+                    sourceName: 'Portuguese Mock Data',
+                    category: 'fallback',
+                    pubDate: new Date().toISOString()
+                }));
+                headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+            } else {
+                return null;
+            }
+        }
+    }
+    
+    // Select best available headline
+    const selectedHeadline = HeadlineScorer.selectBestHeadline(headlinePools);
+    
+    if (!selectedHeadline) {
+        _log('❌ No more headlines available in pools, reinitializing...');
+        isInitialized = false;
+        return await getNextHeadline(); // Recursive call to reinitialize
+    }
+    
+    _log(`🎯 Selected headline: "${selectedHeadline.filteredText}" (score: ${selectedHeadline.score})`);
+    _log(`📊 Remaining pools: ${headlinePools.sortedScores.map(s => `${s}:${headlinePools.scoreGroups[s].length}`).join(', ')}`);
+    
+    return selectedHeadline;
+}
+
+/**
+ * Mark headline as used and remove from pools
+ * @param {Object} headline - Headline to mark as used
+ */
+function markHeadlineAsUsed(headline) {
+    if (!usedHeadlines.some(used => used.text === headline.text)) {
+        usedHeadlines.push(headline);
+        _log(`✅ Marked headline as used: "${headline.filteredText || headline.text}"`);
+        
+        // Remove from pools
+        if (headlinePools) {
+            HeadlineScorer.removeHeadlineFromGroups(headlinePools, headline);
+        }
+    }
+}
+
+/**
+ * Mark headline as rejected and remove from pools
+ * @param {Object} headline - Headline to mark as rejected
+ */
+function markHeadlineAsRejected(headline) {
+    if (!rejectedHeadlines.some(rejected => rejected.text === headline.text)) {
+        rejectedHeadlines.push(headline);
+        _log(`❌ Marked headline as rejected: "${headline.filteredText || headline.text}"`);
+        
+        // Remove from pools
+        if (headlinePools) {
+            HeadlineScorer.removeHeadlineFromGroups(headlinePools, headline);
+        }
+    }
+}
+
+/**
+ * Force refresh of headline pools
+ * @returns {Promise<void>}
+ */
+async function refreshHeadlinePools() {
+    _log('🔄 Forcing headline pools refresh...');
+    isInitialized = false;
+    headlinePools = null;
+    await initializeHeadlineManagement();
+}
+
+/**
+ * Get current pool statistics for debugging
+ * @returns {Object} Pool statistics and debug information
+ */
+function getPoolStatistics() {
+    if (!headlinePools) {
+        return {
+            initialized: false,
+            totalValid: 0,
+            totalProcessed: 0,
+            poolCount: 0,
+            usedCount: usedHeadlines.length,
+            rejectedCount: rejectedHeadlines.length
+        };
+    }
+    
+    return {
+        initialized: isInitialized,
+        totalValid: headlinePools.totalValid,
+        totalProcessed: headlinePools.totalProcessed,
+        poolCount: headlinePools.sortedScores.length,
+        bestScore: headlinePools.bestScore,
+        worstScore: headlinePools.worstScore,
+        usedCount: usedHeadlines.length,
+        rejectedCount: rejectedHeadlines.length,
+        scoreDistribution: headlinePools.sortedScores.map(score => ({
+            score: score,
+            count: headlinePools.scoreGroups[score].length
+        }))
+    };
+}
+
+/**
+ * Get detailed debug information about headline pools
+ * @returns {Object} Detailed debug information
+ */
+function getDetailedPoolInfo() {
+    if (!headlinePools) {
+        return null;
+    }
+    
+    return HeadlineScorer.getHeadlinePoolDebugInfo(headlinePools);
+}
+
+function generateAlternativeHeadlines() {
+    debugInfo.alternativeHeadlines = [];
+    debugInfo.compatibilityScores = {};
+    
+    // Analyze each headline for compatibility with current layout
+    englishMockHeadlines.forEach(headline => {
+        if (headline.text === currentHeadline.text) return;
+        
+        const compatibility = calculateHeadlineCompatibility(headline, currentHeadline);
+        debugInfo.compatibilityScores[headline.text] = Math.round(compatibility * 100);
+        
+        if (compatibility > 0.3) { // Only show reasonably compatible headlines
+            const commonLetters = countCommonLetters(headline.words, currentHeadline.words);
+            debugInfo.alternativeHeadlines.push({
+                text: headline.text,
+                words: headline.words,
+                compatibility: Math.round(compatibility * 100),
+                commonLetters: commonLetters
+            });
+        }
+    });
+    
+    // Sort by compatibility
+    debugInfo.alternativeHeadlines.sort((a, b) => b.compatibility - a.compatibility);
+    debugInfo.alternativeHeadlines = debugInfo.alternativeHeadlines.slice(0, 8); // Top 8
+}
+
+function calculateHeadlineCompatibility(headline1, headline2) {
+    let totalCompatibility = 0;
+    let comparisons = 0;
+    
+    // Compare each word in headline1 with each word in headline2
+    for (let word1 of headline1.words) {
+        for (let word2 of headline2.words) {
+            const commonLetters = findCommonLetters(word1, word2);
+            const compatibility = commonLetters.length / Math.max(word1.length, word2.length);
+            totalCompatibility += compatibility;
+            comparisons++;
+        }
+    }
+    
+    // Average compatibility
+    const avgCompatibility = comparisons > 0 ? totalCompatibility / comparisons : 0;
+    
+    // Bonus for similar word count
+    const wordCountBonus = 1 - Math.abs(headline1.words.length - headline2.words.length) * 0.1;
+    
+    // Bonus for similar total letter count
+    const totalLetters1 = headline1.words.join('').length;
+    const totalLetters2 = headline2.words.join('').length;
+    const letterCountBonus = 1 - Math.abs(totalLetters1 - totalLetters2) * 0.01;
+    
+    return avgCompatibility * wordCountBonus * letterCountBonus;
+}
+
+function countCommonLetters(words1, words2) {
+    const letters1 = words1.join('').split('').sort();
+    const letters2 = words2.join('').split('').sort();
+    
+    let common = 0;
+    let i = 0, j = 0;
+    
+    while (i < letters1.length && j < letters2.length) {
+        if (letters1[i] === letters2[j]) {
+            common++;
+            i++;
+            j++;
+        } else if (letters1[i] < letters2[j]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+    
+    return common;
+}
+
+// Helper function to find common letters between two words
+function findCommonLetters(word1, word2) {
+    const letters1 = word1.split('');
+    const letters2 = word2.split('');
+    const common = [];
+    
+    const used = new Set();
+    for (let i = 0; i < letters1.length; i++) {
+        for (let j = 0; j < letters2.length; j++) {
+            if (letters1[i] === letters2[j] && !used.has(j)) {
+                common.push(letters1[i]);
+                used.add(j);
+                break;
+            }
+        }
+    }
+    
+    return common;
+}
+
+// Export functions for use in other modules
+if (typeof window !== 'undefined') {
+    window.HeadlineManager = {
+        initializeHeadlineManagement,
+        getNextHeadline,
+        markHeadlineAsUsed,
+        markHeadlineAsRejected,
+        refreshHeadlinePools,
+        getPoolStatistics,
+        getDetailedPoolInfo
+    };
+    
+    // Also export individual functions to global scope for debug panel and other files
+    window.initializeHeadlineManagement = initializeHeadlineManagement;
+    window.getNextHeadline = getNextHeadline;
+    window.markHeadlineAsUsed = markHeadlineAsUsed;
+    window.markHeadlineAsRejected = markHeadlineAsRejected;
+    window.getPoolStatistics = getPoolStatistics;
+    window.getDetailedPoolInfo = getDetailedPoolInfo;
+    window.refreshHeadlinePools = refreshHeadlinePools;
+    window.generateAlternativeHeadlines = generateAlternativeHeadlines;
+}
+
+})();

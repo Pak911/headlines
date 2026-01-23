@@ -1,1 +1,1093 @@
-!function(){"use strict";function e(e,t={}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("game-controller",e,t):console.log("[game-controller]",e)}function n(e){const t=e.join("");return/[а-яА-ЯёЁ]/.test(t)?function(e){return e.map(e=>e.replace(/Ё/g,"Е").replace(/ё/g,"е"))}(e):/[çÇáàãâéêíóõôú]/.test(t)?function(e){return e.map(e=>{let t="";for(let n of e)/[çÇ]/.test(n)?t+=n:/[áàãâÁÀÃÂ]/.test(n)?t+=n.toLowerCase()===n?"a":"A":/[éêÉÊ]/.test(n)?t+=n.toLowerCase()===n?"e":"E":/[íÍ]/.test(n)?t+=n.toLowerCase()===n?"i":"I":/[óõôÓÕÔ]/.test(n)?t+=n.toLowerCase()===n?"o":"O":/[úÚ]/.test(n)?t+=n.toLowerCase()===n?"u":"U":t+=n;return t})}(e):e}function r(){if(!grid||!grid.length)return;const t=grid.length,n=grid[0].length,r=window.innerWidth-30-2*(n-1),o=window.innerHeight-250-2*(t-1),i=Math.floor(r/n),a=Math.floor(o/t);let l=Math.min(i,a,56);l=Math.max(l,24),document.documentElement.style.setProperty("--cell-size",`${l}px`),e(`Resizing grid: ${n}x${t}. Cell size: ${l}px`)}function o(e,t){const n=Math.floor(t*starRatingConfig.baseMultiplier);let r="",o=0;for(let t=5;t>=1;t--){const i=starRatingConfig.starThresholds[t];if(e<=(i===1/0?1/0:Math.floor(n*i))){o=t,r=starRatingConfig.ratingLabels[t];break}}return{rating:r,starCount:o,minPossibleSwaps:n}}function i(e){const t=Math.floor(e*starRatingConfig.baseMultiplier),n={};for(let e=5;e>=1;e--){const r=starRatingConfig.starThresholds[e];n[e]=r===1/0?1/0:Math.floor(t*r)}return n}function a(e,n,r,o){const a=i(o);if(e<=n){if(5===n)return t("victory.tooltips.perfect");{const e=a[n+1];let o=t("victory.tooltips.earned",n);return o=o.replace("{stars}",n),o=o.replace("{swaps}",r),o=o.replace("{swapsWord}",t("ui.moves",r)),o=o.replace("{nextStars}",n+1),o=o.replace("{threshold}",e),o=o.replace("{thresholdWord}",t("ui.moves",e)),o}}{const n=a[e];if(n===1/0){let n=t("victory.tooltips.getOneStar");return n=n.replace("{starIndex}",e),n}{let r=t("victory.tooltips.getStars",e);return r=r.replace("{starIndex}",e),r=r.replace("{requiredSwaps}",n),r=r.replace("{requiredSwapsWord}",t("ui.moves",n)),r}}}function l(e,t,n){document.querySelectorAll(".victory-star").forEach((r,o)=>{const i=o+1;r.addEventListener("mouseenter",function(r){!function(e,t,n,r,o){d();const i=document.createElement("div");i.className="star-tooltip",i.innerHTML=a(t,n,r,o);const l=e.getBoundingClientRect(),s=280,u=60;let c=l.left+l.width/2-s/2,w=l.top-u-10;c<10&&(c=10);c+s>window.innerWidth-10&&(c=window.innerWidth-s-10);w<10&&(w=l.bottom+10,i.classList.add("below"));i.style.left=c+"px",i.style.top=w+"px",document.body.appendChild(i),setTimeout(()=>i.classList.add("visible"),10)}(r.target,i,e,t,n)}),r.addEventListener("mouseleave",function(){d()})})}function d(){const e=document.querySelector(".star-tooltip");e&&e.remove()}function s(){const n=currentHeadline&&currentHeadline.djb2Hash&&givenUpPuzzles.has(currentHeadline.djb2Hash);n&&e("🏳️ Showing victory for previously given-up puzzle - hiding stats/stars");const r=document.querySelector(".victory-title"),i=document.querySelector(".victory-subtitle"),a=document.querySelector(".headline-label"),d=document.getElementById("articlePrompt"),s=document.querySelector(".btn-secondary:first-child"),c=document.querySelector(".btn-primary"),w=document.querySelector(".btn-secondary:last-child"),m=document.querySelector("#finalSwaps").parentElement.querySelector(".stat-label"),p=document.querySelector("#performanceRating").parentElement.querySelector(".stat-label");if("undefined"!=typeof t){r&&(r.textContent=t("victory.title")),i&&(i.textContent=t("victory.subtitle")),a&&(a.textContent=t("victory.headlineLabel"));const e=!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode();d&&(d.textContent=e?t("victory.customPuzzlePrompt"):t("victory.articlePrompt")),m&&(m.textContent=t("victory.stats.swaps",swapCount)),p&&(p.textContent=t("victory.stats.rating")),s&&(s.textContent=t("ui.replay")),c&&(e?(c.textContent=t("victory.createOwnPuzzle")||"Create Own Puzzle",c.href="create-puzzle.html"):c.textContent=t("ui.readFullArticle")),w&&(w.textContent=t("ui.newHeadline"))}document.getElementById("headlineReveal").textContent=currentHeadline.text;const f=!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode();let g,y,H;if(n)document.getElementById("finalSwaps").textContent="—",document.getElementById("performanceRating").textContent="—";else{document.getElementById("finalSwaps").textContent=swapCount,g=currentHeadline.words.reduce((e,t)=>e+t.length,0);const e=o(swapCount,g);y=e.rating,H=e.starCount;let n=y;if("undefined"!=typeof t){const e=y.toLowerCase();n=t(`victory.ratings.${e}`)||y}document.getElementById("performanceRating").textContent=n}document.getElementById("articleLink").href=f?"create-puzzle.html":currentHeadline.link||"#";const h=document.getElementById("victoryStars");if(h.innerHTML="",n)h.style.display="none";else{h.style.display="";for(let e=1;e<=5;e++){const t=document.createElement("div");t.className="victory-star"+(e<=H?" filled":" empty"),t.setAttribute("data-star-index",e);const n=document.createElementNS("http://www.w3.org/2000/svg","svg");n.setAttribute("width","40"),n.setAttribute("height","40"),n.setAttribute("viewBox","0 0 40 40"),n.setAttribute("fill","none");const r=document.createElementNS("http://www.w3.org/2000/svg","path");r.setAttribute("d","M20 3L25 13L36 15L28 23L30 34L20 29L10 34L12 23L4 15L15 13L20 3Z"),e<=H?(r.setAttribute("fill","#FFD700"),r.setAttribute("stroke","#FFA500"),t.style.animationDelay=.1*e+"s"):(r.setAttribute("fill","transparent"),r.setAttribute("stroke","#D1D5DB")),r.setAttribute("stroke-width","2"),n.appendChild(r),t.appendChild(n),h.appendChild(t)}l(H,swapCount,g)}currentHeadline&&currentHeadline.djb2Hash&&!n&&(Platform.saveSeenHeadline(currentHeadline.djb2Hash,{isSolved:!0,movesUsed:swapCount,link:currentHeadline.link,timestamp:Date.now()}).catch(e=>{console.error("Failed to save seen headline data:",e)}),window.dispatchEvent(new CustomEvent("headlines:puzzle:solved",{detail:{puzzleHash:currentHeadline.djb2Hash,puzzleLink:currentHeadline.link,starCount:H}})));const z=f?"challenge":"news",C="undefined"!=typeof i18n&&i18n.currentLanguage?i18n.currentLanguage:"en";window.dispatchEvent(new CustomEvent("headlines:puzzleSolved",{detail:{mode:z,movesUsed:n?0:swapCount,starRating:n?0:H,difficulty:currentDifficulty||"medium",language:C,wasGivenUp:n}})),window.HamburgerMenu&&"function"==typeof window.HamburgerMenu.switchToNextPuzzleMode&&window.HamburgerMenu.switchToNextPuzzleMode(),document.getElementById("victoryModal").style.display="flex",function(){const e=document.getElementById("articleLink");e&&(e.removeEventListener("click",u),e.addEventListener("click",u))}()}function u(e){!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode()?window.dispatchEvent(new CustomEvent("headlines:createOwnPuzzleClicked")):window.dispatchEvent(new CustomEvent("headlines:articleRead"))}async function c(){const o=performance.now();let i=null;window.debugInfo={layoutAttempts:0,layoutScore:0,rejectedHeadlines:[],alternativeHeadlines:[],compatibilityScores:{},generationTime:0,variantSelection:{totalVariants:0,topScore:0,selectedIndex:0,selectedScore:0},shuffleInfo:{difficulty:"medium",swapsPerformed:0,minimumSolution:0,intersectionsPreserved:0,totalIntersections:0}};const a=window.debugInfo;swapCount=0,selectedCell=null,document.getElementById("swapCount").textContent="0",document.getElementById("victoryModal").style.display="none",window.HamburgerMenu&&"function"==typeof window.HamburgerMenu.switchToGiveUpMode&&window.HamburgerMenu.switchToGiveUpMode();const l=document.querySelector(".moves-label");l&&"undefined"!=typeof t&&(l.textContent=t("ui.moves",swapCount)||"moves"),e("🎮 Starting enhanced game initialization...");try{let t=null;if(window.CustomPuzzleLoader&&"function"==typeof window.CustomPuzzleLoader.initializeCustomPuzzle&&(t=await window.CustomPuzzleLoader.initializeCustomPuzzle()),t){e("🎯 Loading custom puzzle from URL..."),currentHeadline=t,t.customDifficulty&&(i=t.customDifficulty,e(`📊 Custom puzzle has difficulty: ${i}`));const r=n(currentHeadline.words);if(e(`🎯 Attempting layout for custom puzzle: "${currentHeadline.text}" (${r.length} words)`),crosswordLayout=generateCrosswordLayout(r),null!==crosswordLayout)e("✅ Successfully generated layout for custom puzzle"),currentHeadline.words=r,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е");else{if(e("⚠️ Failed to generate layout for custom puzzle, trying simple layout..."),crosswordLayout=generateSimpleLayout(r),!crosswordLayout||crosswordLayout.words.length!==r.length)throw console.error("❌ Failed to generate layout for custom puzzle"),window.CustomPuzzleLoader&&window.CustomPuzzleLoader.clearCustomPuzzleURL(),new Error("Failed to generate layout for custom puzzle");normalizeLayout(crosswordLayout,r),currentHeadline.words=r,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е")}}else{await initializeHeadlineManagement();const t=10;let r=0;for(;r<t;){if(currentHeadline=await getNextHeadline(),!currentHeadline){console.error("❌ No headlines available from enhanced system");break}const t=n(currentHeadline.filteredWords||currentHeadline.words);if(e(`🎯 Attempting layout for: "${currentHeadline.filteredText||currentHeadline.text}" (${t.length} words)`),crosswordLayout=generateCrosswordLayout(t),a.layoutAttempts="Beam search",null!==crosswordLayout){a.layoutScore="Generated",markHeadlineAsUsed(currentHeadline),e(`✅ Successfully generated layout for: "${currentHeadline.filteredText||currentHeadline.text}"`),currentHeadline.filteredWords?(currentHeadline.words=t,currentHeadline.text=currentHeadline.filteredText.replace(/Ё/g,"Е").replace(/ё/g,"е")):(currentHeadline.words=t,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е"));break}markHeadlineAsRejected(currentHeadline),a.rejectedHeadlines.push(currentHeadline.filteredText||currentHeadline.text),e(`❌ Layout generation failed for: "${currentHeadline.filteredText||currentHeadline.text}"`),r++}if(null===crosswordLayout&&(e(`⚠️ Failed to generate valid layout after ${r} attempts. Trying simple layout...`),currentHeadline)){const t=n(currentHeadline.filteredWords||currentHeadline.words);crosswordLayout=generateSimpleLayout(t),crosswordLayout&&crosswordLayout.words.length===t.length?(normalizeLayout(crosswordLayout,t),a.layoutScore="Simple layout",markHeadlineAsUsed(currentHeadline),e(`✅ Simple layout succeeded for: "${currentHeadline.filteredText||currentHeadline.text}"`),currentHeadline.filteredWords?(currentHeadline.words=t,currentHeadline.text=currentHeadline.filteredText.replace(/Ё/g,"Е").replace(/ё/g,"е")):(currentHeadline.words=t,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е"))):(console.error("❌ Even simple layout failed"),markHeadlineAsRejected(currentHeadline))}}if(!crosswordLayout||!currentHeadline){console.error("🚨 Critical: No valid layout generated, falling back to emergency headline");const e="undefined"!=typeof i18n?i18n.getCurrentRSSLanguage():"en";"ru"===e&&"undefined"!=typeof mockRussianHeadlines?currentHeadline=mockRussianHeadlines[0]:"pt"===e&&"undefined"!=typeof mockPortugueseHeadlines?currentHeadline=mockPortugueseHeadlines[0]:currentHeadline=englishMockHeadlines[0];const t=n(currentHeadline.words);crosswordLayout=generateSimpleLayout(t),normalizeLayout(crosswordLayout,t),currentHeadline.words=t,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е")}}catch(t){console.error("❌ Error in enhanced game initialization:",t),e("🔄 Falling back to legacy headline system");const r="undefined"!=typeof i18n?i18n.getCurrentRSSLanguage():"en";let o=englishMockHeadlines;"ru"===r&&"undefined"!=typeof mockRussianHeadlines?o=mockRussianHeadlines:"pt"===r&&"undefined"!=typeof mockPortugueseHeadlines&&(o=mockPortugueseHeadlines),currentHeadline=o[Math.floor(Math.random()*o.length)];const i=n(currentHeadline.words);crosswordLayout=generateCrosswordLayout(i),crosswordLayout||(crosswordLayout=generateSimpleLayout(i),normalizeLayout(crosswordLayout,i)),currentHeadline.words=i,currentHeadline.text=currentHeadline.text.replace(/Ё/g,"Е").replace(/ё/g,"е")}grid=placeWordsInGrid(currentHeadline.words,crosswordLayout),correctGrid=JSON.parse(JSON.stringify(grid)),findWordConnections();let d=currentDifficulty;if(i)d=i,currentDifficulty=i,e(`🎯 Using custom puzzle difficulty: ${d}`,{always:!0});else if("undefined"!=typeof Platform&&Platform.isAvailable()&&Platform.hasSeenTutorial)try{await Platform.hasSeenTutorial("welcome")||(d="easy",e("🎓 First-time player detected - using easy difficulty for welcome puzzle",{always:!0}))}catch(e){console.error("Failed to check tutorial state:",e)}scrambleLettersByDifficulty(d),"function"==typeof renderCrossword?(renderCrossword(),r()):console.error("renderCrossword function not available"),window.dispatchEvent(new CustomEvent("headlines:newCrosswordCreated")),setTimeout(()=>{"function"==typeof positionMovesCounter&&positionMovesCounter()},100),w(),setTimeout(()=>{const e=document.querySelector(".crossword-container"),t=document.querySelector(".hint-section");e&&t&&(t.style.maxWidth=e.offsetWidth+"px",t.style.transition="opacity 400ms ease-out",t.style.opacity="1")},200),updateDifficultyDisplay(),a.generationTime=Math.round(performance.now()-o),e(`🎮 Game initialization completed in ${a.generationTime}ms`);const s=window.headlinesAnalytics?window.headlinesAnalytics.getCurrentMode():window.Utils&&window.Utils.isInCustomLinkMode&&window.Utils.isInCustomLinkMode()?"challenge":"news",u=d||currentDifficulty||"medium",c="undefined"!=typeof i18n&&i18n.currentLanguage?i18n.currentLanguage:"en";window.dispatchEvent(new CustomEvent("headlines:puzzleStart",{detail:{mode:s,difficulty:u,language:c}})),debugPanelVisible&&updateDebugInfo()}function w(){const n=document.getElementById("headlineDescription");if(currentHeadline&&currentHeadline.description){let r=currentHeadline.description;"undefined"!=typeof window&&window.HTMLProcessor&&window.HTMLProcessor.detectHTML(currentHeadline.description)&&(e("🔧 Processing HTML in description:",currentHeadline.description.substring(0,100)+"..."),r=window.HTMLProcessor.stripHTML(currentHeadline.description),e("✅ Clean description:",r.substring(0,100)+"..."));let o="Tip:";"undefined"!=typeof t&&(o=t("hints.tipPrefix").replace("💡 ","").replace(":","")+":");let i="";currentHeadline.sourceName?i=currentHeadline.sourceName:currentHeadline.source&&(i=currentHeadline.source);let a="";currentHeadline.link&&(a=currentHeadline.link);let l=r;const d=!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode();if(i)if(d){l+=` <a href="create-puzzle.html" target="_blank" rel="noopener noreferrer" style="opacity: 0.7;">[${"undefined"!=typeof t?t("victory.createOwnPuzzle"):"Create Own Puzzle"}]</a>`}else l+=a?` <a href="${a}" target="_blank" rel="noopener noreferrer">[${i}]</a>`:` <span style="opacity: 0.7;">[${i}]</span>`;n.innerHTML=l;const s=document.querySelector(".hint-section");s&&(s.style.transition="none",s.style.opacity="0",s.style.maxWidth="0px")}else n.innerHTML=""}window.closeVictoryModal=function(){document.getElementById("victoryModal").style.display="none",d()},window.replayGame=function(){document.getElementById("victoryModal").style.display="none",currentHeadline&&currentHeadline.djb2Hash&&givenUpPuzzles.has(currentHeadline.djb2Hash)&&(givenUpPuzzles.delete(currentHeadline.djb2Hash),e(`🔄 Removed puzzle ${currentHeadline.djb2Hash} from given-up set for replay`)),swapCount=0,selectedCell=null,document.getElementById("swapCount").textContent="0";const n=document.querySelector(".moves-label");n&&"undefined"!=typeof t&&(n.textContent=t("ui.moves",swapCount)||"moves"),"function"==typeof resetCompletedWords&&resetCompletedWords(),scrambleLetters(),renderCrossword(),r(),e("🔄 Replaying the same puzzle")},window.autoWinGame=function(){if(currentHeadline&&grid){e("🏆 Auto-winning game...");for(let e=0;e<grid.length;e++)for(let t=0;t<grid[e].length;t++)grid[e][t].letter&&(grid[e][t].currentLetter=grid[e][t].letter);renderCrossword(),r(),s(),e("✅ Auto-win completed!")}else e("❌ No active game to auto-win")},window.giveUp=async function(){if(!currentHeadline||!grid)return void e("❌ No active game to give up");e("🏳️ Giving up - revealing solution...");for(let e=0;e<grid.length;e++)for(let t=0;t<grid[e].length;t++)grid[e][t].letter&&(grid[e][t].currentLetter=grid[e][t].letter);if(renderCrossword(),r(),currentHeadline&&currentHeadline.djb2Hash&&(givenUpPuzzles.add(currentHeadline.djb2Hash),e(`Added puzzle ${currentHeadline.djb2Hash} to given-up set`)),window.HamburgerMenu&&"function"==typeof window.HamburgerMenu.switchToNextPuzzleMode&&window.HamburgerMenu.switchToNextPuzzleMode(),currentHeadline&&currentHeadline.djb2Hash){const e=await Platform.loadSeenHeadline(currentHeadline.djb2Hash);Platform.saveSeenHeadline(currentHeadline.djb2Hash,{isSolved:!1,link:currentHeadline.link,timestamp:Date.now()}).catch(e=>{console.error("Failed to save seen headline data:",e)}),e||window.dispatchEvent(new CustomEvent("headlines:puzzle:skipped",{detail:{puzzleHash:currentHeadline.djb2Hash,puzzleLink:currentHeadline.link}}))}const t=!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode()?"challenge":"news",n="undefined"!=typeof i18n&&i18n.currentLanguage?i18n.currentLanguage:"en";window.dispatchEvent(new CustomEvent("headlines:puzzleGiveUp",{detail:{mode:t,movesUsed:swapCount,difficulty:currentDifficulty||"medium",language:n}})),e("✅ Solution revealed!")},window.enhancedInitGame=c,window.checkVictory=function(){for(let e=0;e<grid.length;e++)for(let t=0;t<grid[e].length;t++)if(grid[e][t].letter&&grid[e][t].currentLetter!==grid[e][t].letter)return!1;return!0},window.showVictory=s,window.displayHeadlineDescription=w,window.generateTooltipContent=a,window.getStarThresholds=i,window.calculateStarRating=o,window.skipToNextHeadline=async function(){const t=!(!window.Utils||!window.Utils.isInCustomLinkMode)&&window.Utils.isInCustomLinkMode();if(e("skipToNextHeadline called. Custom puzzle mode:",t),t)return e("🔄 Exiting custom puzzle mode, returning to RSS mode..."),window.CustomPuzzleLoader&&"function"==typeof window.CustomPuzzleLoader.clearCustomPuzzleURL&&window.CustomPuzzleLoader.clearCustomPuzzleURL(),void window.location.reload();if(currentHeadline&&currentHeadline.djb2Hash){const e=await Platform.loadSeenHeadline(currentHeadline.djb2Hash);await Platform.saveSeenHeadline(currentHeadline.djb2Hash,{isSolved:!1,link:currentHeadline.link,timestamp:Date.now()}).catch(e=>{console.error("Failed to save seen headline data:",e)}),e||window.dispatchEvent(new CustomEvent("headlines:puzzle:skipped",{detail:{puzzleHash:currentHeadline.djb2Hash,puzzleLink:currentHeadline.link}}));const n=t?"challenge":"news",r="undefined"!=typeof i18n&&i18n.currentLanguage?i18n.currentLanguage:"en";window.dispatchEvent(new CustomEvent("headlines:puzzleSkipped",{detail:{mode:n,difficulty:currentDifficulty||"medium",language:r}}))}await c()}}();
+// Game Controller - Main Game Flow and State Management
+// Handles game initialization, victory conditions, and overall game state
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('game-controller', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[game-controller]', message);
+    }
+}
+
+// Normalize Russian Ё to Е for crossword algorithm (32-letter alphabet)
+function normalizeRussianWords(words) {
+    return words.map(word => word.replace(/Ё/g, 'Е').replace(/ё/g, 'е'));
+}
+
+// Normalize Portuguese diacritics for crossword algorithm (27-letter alphabet)
+function normalizePortugueseWords(words) {
+    return words.map(word => {
+        let normalized = '';
+        for (let char of word) {
+            // Preserve ç
+            if (/[çÇ]/.test(char)) {
+                normalized += char;
+            }
+            // Normalize other diacritics
+            else if (/[áàãâÁÀÃÂ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'a' : 'A';
+            } else if (/[éêÉÊ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'e' : 'E';
+            } else if (/[íÍ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'i' : 'I';
+            } else if (/[óõôÓÕÔ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'o' : 'O';
+            } else if (/[úÚ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'u' : 'U';
+            } else {
+                normalized += char;
+            }
+        }
+        return normalized;
+    });
+}
+
+// Unified normalization dispatcher
+function normalizeWordsByLanguage(words) {
+    const combinedText = words.join("");
+    if (/[а-яА-ЯёЁ]/.test(combinedText)) {
+        return normalizeRussianWords(words);
+    } else if (/[çÇáàãâéêíóõôú]/.test(combinedText)) {
+        return normalizePortugueseWords(words);
+    }
+    return words; // English - no normalization needed
+}
+
+function checkVictory() {
+    // Check if all letters are in their correct positions
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].currentLetter !== grid[r][c].letter) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function fitGridToScreen() {
+    if (!grid || !grid.length) return;
+
+    const rows = grid.length;
+    const cols = grid[0].length;
+
+    // Configurable padding constants
+    const paddingX = 30;
+    const paddingY = 250;
+
+    // Account for 1px margins between cells
+    const availableWidth = window.innerWidth - paddingX - (cols - 1) * 2;
+    const availableHeight = window.innerHeight - paddingY - (rows - 1) * 2;
+
+    const maxCellWidth = Math.floor(availableWidth / cols);
+    const maxCellHeight = Math.floor(availableHeight / rows);
+
+    let newCellSize = Math.min(maxCellWidth, maxCellHeight, 56);
+    newCellSize = Math.max(newCellSize, 24);
+
+    document.documentElement.style.setProperty('--cell-size', `${newCellSize}px`);
+    _log(`Resizing grid: ${cols}x${rows}. Cell size: ${newCellSize}px`);
+}
+
+// Calculate star rating based on swap count and letter count
+function calculateStarRating(swapCount, letterCount) {
+    const minPossibleSwaps = Math.floor(letterCount * starRatingConfig.baseMultiplier);
+    
+    let rating = '';
+    let starCount = 0;
+    
+    // Check each star level from highest to lowest
+    for (let stars = 5; stars >= 1; stars--) {
+        const threshold = starRatingConfig.starThresholds[stars];
+        const maxSwaps = threshold === Infinity ? Infinity : Math.floor(minPossibleSwaps * threshold);
+        
+        if (swapCount <= maxSwaps) {
+            starCount = stars;
+            rating = starRatingConfig.ratingLabels[stars];
+            break;
+        }
+    }
+    
+    return { rating, starCount, minPossibleSwaps };
+}
+
+// Get swap thresholds for each star level
+function getStarThresholds(letterCount) {
+    const minPossibleSwaps = Math.floor(letterCount * starRatingConfig.baseMultiplier);
+    
+    const thresholds = {};
+    for (let stars = 5; stars >= 1; stars--) {
+        const threshold = starRatingConfig.starThresholds[stars];
+        thresholds[stars] = threshold === Infinity ? Infinity : Math.floor(minPossibleSwaps * threshold);
+    }
+    
+    return thresholds;
+}
+
+// Generate tooltip content for star hover
+function generateTooltipContent(starIndex, currentStars, swapCount, letterCount) {
+    const thresholds = getStarThresholds(letterCount);
+    
+    if (starIndex <= currentStars) {
+        // Player achieved this star level
+        if (currentStars === 5) {
+            return t('victory.tooltips.perfect');
+        } else {
+            const nextStarThreshold = thresholds[currentStars + 1];
+            
+            // Use t() with count parameter to handle pluralization correctly
+            let tooltipText = t('victory.tooltips.earned', currentStars);
+            
+            tooltipText = tooltipText.replace('{stars}', currentStars);
+            tooltipText = tooltipText.replace('{swaps}', swapCount);
+            tooltipText = tooltipText.replace('{swapsWord}', t('ui.moves', swapCount));
+            tooltipText = tooltipText.replace('{nextStars}', currentStars + 1);
+            tooltipText = tooltipText.replace('{threshold}', nextStarThreshold);
+            tooltipText = tooltipText.replace('{thresholdWord}', t('ui.moves', nextStarThreshold));
+            return tooltipText;
+        }
+    } else {
+        // Player didn't achieve this star level
+        const requiredSwaps = thresholds[starIndex];
+        if (requiredSwaps === Infinity) {
+            let tooltipText = t('victory.tooltips.getOneStar');
+            tooltipText = tooltipText.replace('{starIndex}', starIndex);
+            return tooltipText;
+        } else {
+            // Use t() with count parameter to handle pluralization correctly
+            let tooltipText = t('victory.tooltips.getStars', starIndex);
+            
+            tooltipText = tooltipText.replace('{starIndex}', starIndex);
+            tooltipText = tooltipText.replace('{requiredSwaps}', requiredSwaps);
+            tooltipText = tooltipText.replace('{requiredSwapsWord}', t('ui.moves', requiredSwaps));
+            return tooltipText;
+        }
+    }
+}
+
+// Add hover listeners to stars for tooltips
+function addStarHoverListeners(currentStars, swapCount, letterCount) {
+    const stars = document.querySelectorAll('.victory-star');
+    
+    stars.forEach((star, index) => {
+        const starIndex = index + 1;
+        
+        star.addEventListener('mouseenter', function(e) {
+            showStarTooltip(e.target, starIndex, currentStars, swapCount, letterCount);
+        });
+        
+        star.addEventListener('mouseleave', function() {
+            hideStarTooltip();
+        });
+    });
+}
+
+// Show tooltip for star
+function showStarTooltip(starElement, starIndex, currentStars, swapCount, letterCount) {
+    // Remove existing tooltip
+    hideStarTooltip();
+    
+    const tooltip = document.createElement('div');
+    tooltip.className = 'star-tooltip';
+    tooltip.innerHTML = generateTooltipContent(starIndex, currentStars, swapCount, letterCount);
+    
+    // Position tooltip
+    const starRect = starElement.getBoundingClientRect();
+    const tooltipWidth = 280; // Approximate width
+    const tooltipHeight = 60; // Approximate height
+    
+    // Calculate position
+    let left = starRect.left + (starRect.width / 2) - (tooltipWidth / 2);
+    let top = starRect.top - tooltipHeight - 10; // 10px gap above star
+    
+    // Adjust if tooltip would go off screen
+    if (left < 10) left = 10;
+    if (left + tooltipWidth > window.innerWidth - 10) {
+        left = window.innerWidth - tooltipWidth - 10;
+    }
+    
+    // If not enough space above, show below
+    if (top < 10) {
+        top = starRect.bottom + 10;
+        tooltip.classList.add('below');
+    }
+    
+    tooltip.style.left = left + 'px';
+    tooltip.style.top = top + 'px';
+    
+    document.body.appendChild(tooltip);
+    
+    // Trigger animation
+    setTimeout(() => tooltip.classList.add('visible'), 10);
+}
+
+// Hide star tooltip
+function hideStarTooltip() {
+    const existingTooltip = document.querySelector('.star-tooltip');
+    if (existingTooltip) {
+        existingTooltip.remove();
+    }
+}
+
+function showVictory() {
+    // Check if this puzzle was given up
+    const wasGivenUp = currentHeadline &&
+                       currentHeadline.djb2Hash &&
+                       givenUpPuzzles.has(currentHeadline.djb2Hash);
+
+    if (wasGivenUp) {
+        _log('🏳️ Showing victory for previously given-up puzzle - hiding stats/stars');
+    }
+
+    // Update victory modal content with localization
+    const victoryTitle = document.querySelector('.victory-title');
+    const victorySubtitle = document.querySelector('.victory-subtitle');
+    const headlineLabel = document.querySelector('.headline-label');
+    const articlePrompt = document.getElementById('articlePrompt');
+    const replayBtn = document.querySelector('.btn-secondary:first-child');
+    const readArticleBtn = document.querySelector('.btn-primary');
+    const nextHeadlineBtn = document.querySelector('.btn-secondary:last-child');
+    
+    // Update stat labels
+    const swapsLabel = document.querySelector('#finalSwaps').parentElement.querySelector('.stat-label');
+    const ratingLabel = document.querySelector('#performanceRating').parentElement.querySelector('.stat-label');
+    
+    if (typeof t !== 'undefined') {
+        if (victoryTitle) victoryTitle.textContent = t('victory.title');
+        if (victorySubtitle) victorySubtitle.textContent = t('victory.subtitle');
+        if (headlineLabel) headlineLabel.textContent = t('victory.headlineLabel');
+        
+        // Check if we're in custom link mode to show different text/button
+        const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+        
+        if (articlePrompt) {
+            articlePrompt.textContent = isCustomMode ? t('victory.customPuzzlePrompt') : t('victory.articlePrompt');
+        }
+        
+        if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
+        if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
+        
+        // Update button texts - no icons
+        if (replayBtn) {
+            replayBtn.textContent = t('ui.replay');
+        }
+        
+        if (readArticleBtn) {
+            if (isCustomMode) {
+                readArticleBtn.textContent = t('victory.createOwnPuzzle') || 'Create Own Puzzle';
+                readArticleBtn.href = 'create-puzzle.html';
+            } else {
+                readArticleBtn.textContent = t('ui.readFullArticle');
+            }
+        }
+        
+        if (nextHeadlineBtn) {
+            nextHeadlineBtn.textContent = t('ui.newHeadline');
+        }
+    }
+    
+    document.getElementById('headlineReveal').textContent = currentHeadline.text;
+
+    // Check if we're in custom link mode for link handling
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+
+    // Declare these variables early so they're accessible throughout the function
+    let letterCount, rating, starCount;
+
+    // Conditionally display or hide stat values
+    if (wasGivenUp) {
+        // Hide the actual numbers but keep the labels/structure
+        document.getElementById('finalSwaps').textContent = '—';
+        document.getElementById('performanceRating').textContent = '—';
+    } else {
+        // Normal flow: calculate and display stats
+        document.getElementById('finalSwaps').textContent = swapCount;
+
+        // Calculate performance rating using new function
+        letterCount = currentHeadline.words.reduce((sum, word) => sum + word.length, 0);
+        const ratingData = calculateStarRating(swapCount, letterCount);
+        rating = ratingData.rating;
+        starCount = ratingData.starCount;
+
+        // Get localized rating text
+        let localizedRating = rating;
+        if (typeof t !== 'undefined') {
+            const ratingKey = rating.toLowerCase();
+            localizedRating = t(`victory.ratings.${ratingKey}`) || rating;
+        }
+
+        document.getElementById('performanceRating').textContent = localizedRating;
+    }
+
+    // Set article link based on mode
+    if (isCustomMode) {
+        document.getElementById('articleLink').href = 'create-puzzle.html';
+    } else {
+        document.getElementById('articleLink').href = currentHeadline.link || '#';
+    }
+
+    // Generate star display (only for non-given-up puzzles)
+    const starsContainer = document.getElementById('victoryStars');
+    starsContainer.innerHTML = '';
+
+    if (!wasGivenUp) {
+        // Normal flow: display stars (reset display style in case it was hidden before)
+        starsContainer.style.display = '';
+        for (let i = 1; i <= 5; i++) {
+            const starDiv = document.createElement('div');
+            starDiv.className = 'victory-star' + (i <= starCount ? ' filled' : ' empty');
+            starDiv.setAttribute('data-star-index', i);
+
+            const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+            svg.setAttribute('width', '40');
+            svg.setAttribute('height', '40');
+            svg.setAttribute('viewBox', '0 0 40 40');
+            svg.setAttribute('fill', 'none');
+
+            const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+            path.setAttribute('d', 'M20 3L25 13L36 15L28 23L30 34L20 29L10 34L12 23L4 15L15 13L20 3Z');
+
+            if (i <= starCount) {
+                path.setAttribute('fill', '#FFD700');
+                path.setAttribute('stroke', '#FFA500');
+                starDiv.style.animationDelay = `${i * 0.1}s`;
+            } else {
+                path.setAttribute('fill', 'transparent');
+                path.setAttribute('stroke', '#D1D5DB');
+            }
+            path.setAttribute('stroke-width', '2');
+
+            svg.appendChild(path);
+            starDiv.appendChild(svg);
+            starsContainer.appendChild(starDiv);
+        }
+
+        // Add hover listeners for tooltips
+        addStarHoverListeners(starCount, swapCount, letterCount);
+    } else {
+        // For given-up puzzles: hide stars completely
+        starsContainer.style.display = 'none';
+    }
+
+    // Save seen headline data and dispatch events ONLY if not given-up
+    if (currentHeadline && currentHeadline.djb2Hash && !wasGivenUp) {
+        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: true,
+            movesUsed: swapCount,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {  // Cleanup enabled by default
+            console.error('Failed to save seen headline data:', err);
+        });
+
+        // Dispatch puzzle solved event (for internal use) - triggers stats increment
+        window.dispatchEvent(new CustomEvent('headlines:puzzle:solved', {
+            detail: {
+                puzzleHash: currentHeadline.djb2Hash,
+                puzzleLink: currentHeadline.link,
+                starCount: starCount
+            }
+        }));
+    }
+    
+    // Dispatch analytics puzzle solved event (always, for both regular and custom puzzles)
+    const analyticsMode = isCustomMode ? 'challenge' : 'news';
+    const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+
+    window.dispatchEvent(new CustomEvent('headlines:puzzleSolved', {
+        detail: {
+            mode: analyticsMode,
+            movesUsed: wasGivenUp ? 0 : swapCount,
+            starRating: wasGivenUp ? 0 : starCount,
+            difficulty: currentDifficulty || 'medium',
+            language: analyticsLanguage,
+            wasGivenUp: wasGivenUp
+        }
+    }));
+    
+    // Switch menu item to Next Puzzle mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
+        window.HamburgerMenu.switchToNextPuzzleMode();
+    }
+    
+    document.getElementById('victoryModal').style.display = 'flex';
+    
+    // Add analytics event listeners for victory modal buttons
+    setupVictoryModalAnalytics();
+}
+
+// Set up analytics event listeners for victory modal buttons
+function setupVictoryModalAnalytics() {
+    const articleLink = document.getElementById('articleLink');
+    if (articleLink) {
+        // Remove existing listeners to avoid duplicates
+        articleLink.removeEventListener('click', handleArticleClick);
+        articleLink.addEventListener('click', handleArticleClick);
+    }
+}
+
+// Handle article link clicks for analytics
+function handleArticleClick(event) {
+    // Check if we're in custom link mode (challenge mode)
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+    
+    if (isCustomMode) {
+        // Dispatch create own puzzle clicked event
+        window.dispatchEvent(new CustomEvent('headlines:createOwnPuzzleClicked'));
+    } else {
+        // Dispatch article read event
+        window.dispatchEvent(new CustomEvent('headlines:articleRead'));
+    }
+}
+
+// Function to close the victory modal
+function closeVictoryModal() {
+    document.getElementById('victoryModal').style.display = 'none';
+    // Clean up any remaining tooltips
+    hideStarTooltip();
+}
+
+// Function to replay the same game
+function replayGame() {
+    // Close the victory modal
+    document.getElementById('victoryModal').style.display = 'none';
+
+    // Clear the given-up status for this puzzle (allows earning stars/stats on replay)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        if (givenUpPuzzles.has(currentHeadline.djb2Hash)) {
+            givenUpPuzzles.delete(currentHeadline.djb2Hash);
+            _log(`🔄 Removed puzzle ${currentHeadline.djb2Hash} from given-up set for replay`);
+        }
+    }
+
+    // Reset swap count
+    swapCount = 0;
+    selectedCell = null;
+    document.getElementById('swapCount').textContent = '0';
+    
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
+    
+    // Reset completed words tracking
+    if (typeof resetCompletedWords === 'function') {
+        resetCompletedWords();
+    }
+    
+    // Reset grid to the scrambled state (keep the same puzzle)
+    // We need to scramble the letters again
+    scrambleLetters();
+    
+    // Re-render the crossword
+    renderCrossword();
+    
+    fitGridToScreen();
+    
+    _log('🔄 Replaying the same puzzle');
+}
+
+// Make functions globally available
+window.closeVictoryModal = closeVictoryModal;
+window.replayGame = replayGame;
+
+// Enhanced game initialization with RSS headline fetching
+async function enhancedInitGame() {
+    const startTime = performance.now();
+    let customPuzzleDifficulty = null; // Store custom puzzle difficulty if loaded
+    
+    // Reset debug info
+    window.debugInfo = {
+        layoutAttempts: 0,
+        layoutScore: 0,
+        rejectedHeadlines: [],
+        alternativeHeadlines: [],
+        compatibilityScores: {},
+        generationTime: 0,
+        variantSelection: {
+            totalVariants: 0,
+            topScore: 0,
+            selectedIndex: 0,
+            selectedScore: 0
+        },
+        shuffleInfo: {
+            difficulty: 'medium',
+            swapsPerformed: 0,
+            minimumSolution: 0,
+            intersectionsPreserved: 0,
+            totalIntersections: 0
+        }
+    };
+    const debugInfo = window.debugInfo; // Local reference
+    
+    // Reset game state
+    swapCount = 0;
+    selectedCell = null;
+    document.getElementById('swapCount').textContent = '0';
+    document.getElementById('victoryModal').style.display = 'none';
+    
+    // Reset menu item back to Give Up mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToGiveUpMode === 'function') {
+        window.HamburgerMenu.switchToGiveUpMode();
+    }
+    
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
+    
+    _log('🎮 Starting enhanced game initialization...');
+    
+    try {
+        // Check for custom puzzle from URL before RSS initialization
+        let customPuzzleHeadline = null;
+        if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.initializeCustomPuzzle === 'function') {
+            customPuzzleHeadline = await window.CustomPuzzleLoader.initializeCustomPuzzle();
+        }
+        
+        // If custom puzzle exists, use it and skip RSS
+        if (customPuzzleHeadline) {
+            _log('🎯 Loading custom puzzle from URL...');
+            currentHeadline = customPuzzleHeadline;
+            
+            // Store custom difficulty if specified
+            if (customPuzzleHeadline.customDifficulty) {
+                customPuzzleDifficulty = customPuzzleHeadline.customDifficulty;
+                _log(`📊 Custom puzzle has difficulty: ${customPuzzleDifficulty}`);
+            }
+            
+            // Normalize Russian Ё → Е for crossword algorithm
+            const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
+            
+            _log(`🎯 Attempting layout for custom puzzle: "${currentHeadline.text}" (${normalizedWords.length} words)`);
+            
+            // Generate crossword layout
+            crosswordLayout = generateCrosswordLayout(normalizedWords);
+            
+            if (crosswordLayout !== null) {
+                _log(`✅ Successfully generated layout for custom puzzle`);
+                currentHeadline.words = normalizedWords;
+                currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+            } else {
+                _log(`⚠️ Failed to generate layout for custom puzzle, trying simple layout...`);
+                crosswordLayout = generateSimpleLayout(normalizedWords);
+                
+                if (crosswordLayout && crosswordLayout.words.length === normalizedWords.length) {
+                    normalizeLayout(crosswordLayout, normalizedWords);
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                } else {
+                    console.error('❌ Failed to generate layout for custom puzzle');
+                    if (window.CustomPuzzleLoader) {
+                        window.CustomPuzzleLoader.clearCustomPuzzleURL();
+                    }
+                    throw new Error('Failed to generate layout for custom puzzle');
+                }
+            }
+        } else {
+            // Normal RSS mode
+            // Initialize the enhanced headline management system
+            await initializeHeadlineManagement();
+        
+            // Try to generate a valid layout with enhanced headline management system
+            const maxCaptionAttempts = 10;
+            let captionAttempts = 0;
+            
+            while (captionAttempts < maxCaptionAttempts) {
+                // Get next available headline using enhanced management system
+                currentHeadline = await getNextHeadline();
+            
+                if (!currentHeadline) {
+                    console.error('❌ No headlines available from enhanced system');
+                    break;
+                }
+                
+                // Use filtered words if available, otherwise fall back to original words
+                const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
+
+            // Normalize words for crossword algorithm (Russian Ё → Е, Portuguese diacritics)
+            const normalizedWords = normalizeWordsByLanguage(wordsToUse);
+            
+            _log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${normalizedWords.length} words)`);
+            
+            // Generate crossword layout
+            crosswordLayout = generateCrosswordLayout(normalizedWords);
+            debugInfo.layoutAttempts = 'Beam search';
+            
+            // If layout generation succeeded, mark as used and break
+            if (crosswordLayout !== null) {
+                debugInfo.layoutScore = 'Generated';
+                markHeadlineAsUsed(currentHeadline);
+                _log(`✅ Successfully generated layout for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                
+                // Update currentHeadline to use normalized filtered words for the game
+                if (currentHeadline.filteredWords) {
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.filteredText.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                } else {
+                    currentHeadline.words = normalizedWords;
+                    currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                }
+                
+                break;
+            } else {
+                // Mark as rejected and try next headline
+                markHeadlineAsRejected(currentHeadline);
+                debugInfo.rejectedHeadlines.push(currentHeadline.filteredText || currentHeadline.text);
+                _log(`❌ Layout generation failed for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+            }
+                
+                captionAttempts++;
+            }
+            
+            // If we still don't have a valid layout after trying multiple headlines
+        if (crosswordLayout === null) {
+            _log(`⚠️ Failed to generate valid layout after ${captionAttempts} attempts. Trying simple layout...`);
+            
+            if (currentHeadline) {
+                const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
+                const normalizedWords = normalizeWordsByLanguage(wordsToUse);
+                crosswordLayout = generateSimpleLayout(normalizedWords);
+                
+                if (crosswordLayout && crosswordLayout.words.length === normalizedWords.length) {
+                    normalizeLayout(crosswordLayout, normalizedWords);
+                    debugInfo.layoutScore = 'Simple layout';
+                    markHeadlineAsUsed(currentHeadline);
+                    _log(`✅ Simple layout succeeded for: "${currentHeadline.filteredText || currentHeadline.text}"`);
+                    
+                    // Update currentHeadline to use normalized words
+                    if (currentHeadline.filteredWords) {
+                        currentHeadline.words = normalizedWords;
+                        currentHeadline.text = currentHeadline.filteredText.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                    } else {
+                        currentHeadline.words = normalizedWords;
+                        currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+                    }
+                } else {
+                    console.error('❌ Even simple layout failed');
+                    markHeadlineAsRejected(currentHeadline);
+                }
+            }
+        }
+        } // End of RSS mode else block
+        
+        // Final fallback check (applies to both custom and RSS modes)
+        if (!crosswordLayout || !currentHeadline) {
+            console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
+            // Use a guaranteed working headline from mock data based on language
+            const rssLang = typeof i18n !== 'undefined' ? i18n.getCurrentRSSLanguage() : 'en';
+            if (rssLang === 'ru' && typeof mockRussianHeadlines !== 'undefined') {
+                currentHeadline = mockRussianHeadlines[0];
+            } else if (rssLang === 'pt' && typeof mockPortugueseHeadlines !== 'undefined') {
+                currentHeadline = mockPortugueseHeadlines[0];
+            } else {
+                currentHeadline = englishMockHeadlines[0];
+            }
+            const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
+            crosswordLayout = generateSimpleLayout(normalizedWords);
+            normalizeLayout(crosswordLayout, normalizedWords);
+            currentHeadline.words = normalizedWords;
+            currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error in enhanced game initialization:', error);
+
+        // Emergency fallback to old system - use mock headlines based on language
+        _log('🔄 Falling back to legacy headline system');
+        const rssLang = typeof i18n !== 'undefined' ? i18n.getCurrentRSSLanguage() : 'en';
+        let mockHeadlines = englishMockHeadlines;
+        if (rssLang === 'ru' && typeof mockRussianHeadlines !== 'undefined') {
+            mockHeadlines = mockRussianHeadlines;
+        } else if (rssLang === 'pt' && typeof mockPortugueseHeadlines !== 'undefined') {
+            mockHeadlines = mockPortugueseHeadlines;
+        }
+        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
+        crosswordLayout = generateCrosswordLayout(normalizedWords);
+
+        if (!crosswordLayout) {
+            crosswordLayout = generateSimpleLayout(normalizedWords);
+            normalizeLayout(crosswordLayout, normalizedWords);
+        }
+        currentHeadline.words = normalizedWords;
+        currentHeadline.text = currentHeadline.text.replace(/Ё/g, 'Е').replace(/ё/g, 'е');
+    }
+    
+    // Place words in grid
+    grid = placeWordsInGrid(currentHeadline.words, crosswordLayout);
+    correctGrid = JSON.parse(JSON.stringify(grid));
+    
+    // Find word connections
+    findWordConnections();
+    
+    // Determine puzzle difficulty with priority:
+    // 1. Custom puzzle difficulty (if custom puzzle loaded)
+    // 2. Easy difficulty (if first-time player in regular mode)
+    // 3. Current saved/default difficulty
+    let puzzleDifficulty = currentDifficulty;
+    
+    if (customPuzzleDifficulty) {
+        // Custom puzzle always uses its specified difficulty
+        puzzleDifficulty = customPuzzleDifficulty;
+        // Temporarily set currentDifficulty so UI (hamburger menu) reflects custom difficulty
+        // Note: This is NOT saved to storage, only for this session
+        currentDifficulty = customPuzzleDifficulty;
+        _log(`🎯 Using custom puzzle difficulty: ${puzzleDifficulty}`, {always: true});
+    } else if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.hasSeenTutorial) {
+        // For regular puzzles, check if first-time player
+        try {
+            const hasSeenWelcome = await Platform.hasSeenTutorial('welcome');
+            if (!hasSeenWelcome) {
+                puzzleDifficulty = 'easy';
+                _log('🎓 First-time player detected - using easy difficulty for welcome puzzle', {always: true});
+            }
+        } catch (error) {
+            console.error('Failed to check tutorial state:', error);
+        }
+    }
+    
+    // Scramble letters using determined difficulty
+    scrambleLettersByDifficulty(puzzleDifficulty);
+    
+    // Render the crossword
+    if (typeof renderCrossword === 'function') {
+        renderCrossword();
+        
+        fitGridToScreen();
+    } else {
+        console.error('renderCrossword function not available');
+    }
+    
+    // Dispatch event that new crossword has been created and rendered
+    window.dispatchEvent(new CustomEvent('headlines:newCrosswordCreated'));
+    
+    // Position the moves counter to avoid intersections
+    setTimeout(() => {
+        if (typeof positionMovesCounter === 'function') {
+            positionMovesCounter();
+        }
+    }, 100);
+    
+    // Display headline description as hint
+    displayHeadlineDescription();
+    
+    // Animate hint section appearance with CSS transitions
+    setTimeout(() => {
+        const crosswordContainer = document.querySelector('.crossword-container');
+        const hintSection = document.querySelector('.hint-section');
+        
+        if (crosswordContainer && hintSection) {
+            // Set the maxWidth to match crossword container
+            hintSection.style.maxWidth = crosswordContainer.offsetWidth + 'px';
+            
+            // Set transition and trigger the fade-in animation
+            hintSection.style.transition = 'opacity 400ms ease-out';
+            hintSection.style.opacity = '1';
+        }
+    }, 200);
+    
+    // Update difficulty display
+    updateDifficultyDisplay();
+    
+    // Calculate generation time
+    debugInfo.generationTime = Math.round(performance.now() - startTime);
+    
+    _log(`🎮 Game initialization completed in ${debugInfo.generationTime}ms`);
+    
+    // Dispatch puzzle start analytics event
+    const mode = window.headlinesAnalytics ? window.headlinesAnalytics.getCurrentMode() : (window.Utils && window.Utils.isInCustomLinkMode && window.Utils.isInCustomLinkMode() ? 'challenge' : 'news');
+    const difficulty = puzzleDifficulty || currentDifficulty || 'medium';
+    const language = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+    
+    window.dispatchEvent(new CustomEvent('headlines:puzzleStart', {
+        detail: { mode, difficulty, language }
+    }));
+    
+    // Update debug panel if visible
+    if (debugPanelVisible) {
+        updateDebugInfo();
+    }
+}
+
+// DEBUG_ONLY_START
+// Keyboard event handler
+document.addEventListener('keydown', function(event) {
+    // Toggle debug panel with 'D' key
+    if (event.key.toLowerCase() === 'd' && !event.ctrlKey && !event.altKey && !event.metaKey) {
+        // Only if not typing in an input field
+        if (document.activeElement.tagName !== 'INPUT' && document.activeElement.tagName !== 'TEXTAREA') {
+            event.preventDefault();
+            toggleDebugPanel();
+        }
+    }
+    
+    // Close debug panel with Escape key
+    if (event.key === 'Escape' && debugPanelVisible) {
+        toggleDebugPanel();
+    }
+});
+// DEBUG_ONLY_END
+
+// Function to display headline description as hint
+function displayHeadlineDescription() {
+    const descriptionElement = document.getElementById('headlineDescription');
+    
+    if (currentHeadline && currentHeadline.description) {
+        // Use HTML processor to clean the description if available
+        let cleanDescription = currentHeadline.description;
+        
+        if (typeof window !== 'undefined' && window.HTMLProcessor) {
+            // Check if description contains HTML
+            if (window.HTMLProcessor.detectHTML(currentHeadline.description)) {
+                _log('🔧 Processing HTML in description:', currentHeadline.description.substring(0, 100) + '...');
+                cleanDescription = window.HTMLProcessor.stripHTML(currentHeadline.description);
+                _log('✅ Clean description:', cleanDescription.substring(0, 100) + '...');
+            }
+        }
+        
+        // Get localized tip text
+        let tipText = 'Tip:';
+        if (typeof t !== 'undefined') {
+            tipText = t('hints.tipPrefix').replace('💡 ', '').replace(':', '') + ':';
+        }
+        
+        // Get source name (fallback to empty if not available)
+        let sourceName = '';
+        if (currentHeadline.sourceName) {
+            sourceName = currentHeadline.sourceName;
+        } else if (currentHeadline.source) {
+            sourceName = currentHeadline.source;
+        }
+        
+        // Get source link
+        let sourceLink = '';
+        if (currentHeadline.link) {
+            sourceLink = currentHeadline.link;
+        }
+        
+        // Build the hint text with optional source link
+        let hintHTML = cleanDescription;
+        
+        // Check if we're in custom link mode
+        const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+        
+        if (sourceName) {
+            if (isCustomMode) {
+                // In custom link mode, show "Create Own Puzzle" link
+                const createText = (typeof t !== 'undefined') ? t('victory.createOwnPuzzle') : 'Create Own Puzzle';
+                hintHTML += ` <a href="create-puzzle.html" target="_blank" rel="noopener noreferrer" style="opacity: 0.7;">[${createText}]</a>`;
+            } else if (sourceLink) {
+                hintHTML += ` <a href="${sourceLink}" target="_blank" rel="noopener noreferrer">[${sourceName}]</a>`;
+            } else {
+                hintHTML += ` <span style="opacity: 0.7;">[${sourceName}]</span>`;
+            }
+        }
+        
+        // Set the hint text
+        descriptionElement.innerHTML = hintHTML;
+        
+        // Initially hide the entire hint section
+        const hintSection = document.querySelector('.hint-section');
+        if (hintSection) {
+            hintSection.style.transition = 'none';
+            hintSection.style.opacity = '0';
+            hintSection.style.maxWidth = '0px';
+        }
+        
+    } else {
+        // Clear the content if no description
+        descriptionElement.innerHTML = '';
+    }
+}
+
+// Auto-win function for debug purposes
+function autoWinGame() {
+    if (!currentHeadline || !grid) {
+        _log('❌ No active game to auto-win');
+        return;
+    }
+    
+    _log('🏆 Auto-winning game...');
+    
+    // Set all letters to their correct positions
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                grid[r][c].currentLetter = grid[r][c].letter;
+            }
+        }
+    }
+    
+    // Re-render the grid
+    renderCrossword();
+    
+    fitGridToScreen();
+    
+    // Show victory
+    showVictory();
+    
+    _log('✅ Auto-win completed!');
+}
+
+// Give up function - reveals solution without victory modal
+async function giveUp() {
+    if (!currentHeadline || !grid) {
+        _log('❌ No active game to give up');
+        return;
+    }
+    
+    _log('🏳️ Giving up - revealing solution...');
+    
+    // Set all letters to their correct positions
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                grid[r][c].currentLetter = grid[r][c].letter;
+            }
+        }
+    }
+    
+    // Re-render the grid
+    renderCrossword();
+    
+    fitGridToScreen();
+
+    // Add to the given-up set
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        givenUpPuzzles.add(currentHeadline.djb2Hash);
+        _log(`Added puzzle ${currentHeadline.djb2Hash} to given-up set`);
+    }
+
+    // Switch menu item to Next Puzzle mode
+    if (window.HamburgerMenu && typeof window.HamburgerMenu.switchToNextPuzzleMode === 'function') {
+        window.HamburgerMenu.switchToNextPuzzleMode();
+    }
+    
+    // Save seen headline data (gave up) - only for regular headlines with hashes
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        // Check if headline was already seen before saving
+        const wasAlreadySeen = await Platform.loadSeenHeadline(currentHeadline.djb2Hash);
+        
+        Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: false,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+
+        // Dispatch puzzle skipped event only if not previously seen
+        if (!wasAlreadySeen) {
+            window.dispatchEvent(new CustomEvent('headlines:puzzle:skipped', {
+                detail: {
+                    puzzleHash: currentHeadline.djb2Hash,
+                    puzzleLink: currentHeadline.link
+                }
+            }));
+        }
+    }
+    
+    // Dispatch analytics puzzle give up event (always, for both regular and custom puzzles)
+    const isCustomMode = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+    const analyticsMode = isCustomMode ? 'challenge' : 'news';
+    const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+    
+    window.dispatchEvent(new CustomEvent('headlines:puzzleGiveUp', {
+        detail: {
+            mode: analyticsMode,
+            movesUsed: swapCount,
+            difficulty: currentDifficulty || 'medium',
+            language: analyticsLanguage
+        }
+    }));
+    
+    _log('✅ Solution revealed!');
+}
+
+// Make auto-win function globally available
+window.autoWinGame = autoWinGame;
+window.giveUp = giveUp;
+
+// Expose enhancedInitGame globally
+window.enhancedInitGame = enhancedInitGame;
+
+// Skip to next headline function - saves as not solved
+async function skipToNextHeadline() {
+    // Check if we're in custom puzzle mode by checking URL parameter
+    const hasCustomParam = window.Utils && window.Utils.isInCustomLinkMode ? window.Utils.isInCustomLinkMode() : false;
+    _log('skipToNextHeadline called. Custom puzzle mode:', hasCustomParam);
+    
+    if (hasCustomParam) {
+        _log('🔄 Exiting custom puzzle mode, returning to RSS mode...');
+        
+        // Clear URL parameters and reload to return to normal RSS mode
+        if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.clearCustomPuzzleURL === 'function') {
+            window.CustomPuzzleLoader.clearCustomPuzzleURL();
+        }
+        window.location.reload();
+        return;
+    }
+    
+    // Save seen headline data (skipped)
+    if (currentHeadline && currentHeadline.djb2Hash) {
+        // Check if headline was already seen before saving
+        const wasAlreadySeen = await Platform.loadSeenHeadline(currentHeadline.djb2Hash);
+        
+        await Platform.saveSeenHeadline(currentHeadline.djb2Hash, {
+            isSolved: false,
+            link: currentHeadline.link,
+            timestamp: Date.now()
+        }).catch(err => {
+            console.error('Failed to save seen headline data:', err);
+        });
+
+        // Dispatch puzzle skipped event only if not previously seen
+        if (!wasAlreadySeen) {
+            window.dispatchEvent(new CustomEvent('headlines:puzzle:skipped', {
+                detail: {
+                    puzzleHash: currentHeadline.djb2Hash,
+                    puzzleLink: currentHeadline.link
+                }
+            }));
+        }
+
+        // Dispatch analytics puzzle skipped event
+        const analyticsMode = hasCustomParam ? 'challenge' : 'news';
+        const analyticsLanguage = (typeof i18n !== 'undefined' && i18n.currentLanguage) ? i18n.currentLanguage : 'en';
+        
+        window.dispatchEvent(new CustomEvent('headlines:puzzleSkipped', {
+            detail: {
+                mode: analyticsMode,
+                difficulty: currentDifficulty || 'medium',
+                language: analyticsLanguage
+            }
+        }));
+    }
+    
+    // Start new game and wait for completion - call enhanced version directly
+    // This will automatically reset the Give Up menu item via enhancedInitGame
+    await enhancedInitGame();
+}
+
+// Expose functions needed by other files
+window.checkVictory = checkVictory;
+window.showVictory = showVictory;
+window.displayHeadlineDescription = displayHeadlineDescription;
+window.generateTooltipContent = generateTooltipContent;
+window.getStarThresholds = getStarThresholds;
+window.calculateStarRating = calculateStarRating;
+window.skipToNextHeadline = skipToNextHeadline;
+
+// window.addEventListener('resize', () => {
+//     setTimeout(fitGridToScreen, 50);
+// });
+
+})();

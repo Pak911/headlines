@@ -1,1 +1,203 @@
-!function(){"use strict";function e(t,e={always:!0}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("tutorials",t,e):console.log("[tutorials]",t)}class a{constructor(){this.tutorialState={},this.initialized=!1,this.showingTutorial=!1}async init(){this.initialized||(this.initialized=!0,window.addEventListener("headlines:platform:ready",async()=>{await this.loadTutorialState(),this.checkAndShowTutorial()}),window.addEventListener("headlines:customPuzzle:languageChanged",t=>{e(`Custom puzzle language changed to: ${t.detail.language}`),this.tutorialState.welcome||(e("Tutorial not yet seen, updating language..."),this.updateTutorialLanguage(t.detail.language))}))}async loadTutorialState(){try{window.Platform&&"function"==typeof window.Platform.loadTutorialState&&(this.tutorialState=await window.Platform.loadTutorialState())}catch(t){console.error("Failed to load tutorial state:",t),this.tutorialState={}}}async saveTutorialState(){try{window.Platform&&"function"==typeof window.Platform.saveTutorialState&&await window.Platform.saveTutorialState(this.tutorialState)}catch(t){console.error("Failed to save tutorial state:",t)}}checkAndShowTutorial(){if(!this.tutorialState.welcome){if(window.CustomPuzzleLoader&&"function"==typeof window.CustomPuzzleLoader.checkForCustomPuzzle&&window.CustomPuzzleLoader.checkForCustomPuzzle())return void e("Custom puzzle detected, waiting for language event before showing tutorial");this.showWelcomeTutorial()}}updateTutorialLanguage(t){e(`Updating tutorial language to: ${t||"current"}`),t&&"undefined"!=typeof i18n&&i18n.currentLanguage!==t&&(i18n.currentLanguage=t,document.documentElement.lang=t,"function"==typeof i18n.updateUI&&i18n.updateUI());const a=document.querySelector(".popup-overlay");a&&a.remove(),this.showingTutorial=!1,this.showWelcomeTutorial()}async showWelcomeTutorial(){var e;this.showingTutorial||(this.showingTutorial=!0,window.dispatchEvent(new CustomEvent("headlines:helpOpened")),await showPopup({title:t("tutorial.welcome.title"),content:`<div style="line-height: 1.6;">\n                <p>${(e=t("tutorial.welcome.content"),e=(e=(e=(e=e.replace(/\n\s*---\s*\n/g,"\n<hr>\n")).replace(/!\[([^\]]*)\]\(([^)]+)\)/g,'<center><img alt="$1" src="$2"></center>')).replace(/\*\*(.*?)\*\*/g,"<strong>$1</strong>")).replace(/__(.*?)__/g,"<strong>$1</strong>")).replace(/\n\n/g,"</p><p>")}</p>\n            </div>`,buttons:[{text:t("tutorial.welcome.buttonText"),class:"primary"}],closeOnBackdrop:!1,isTutorial:!0}),this.closeTutorial(),this.showingTutorial=!1)}closeTutorial(){this.tutorialState.welcome=!0,this.saveTutorialState()}hasSeenTutorial(t){return!!this.tutorialState[t]}markTutorialAsSeen(t){this.tutorialState[t]=!0,this.saveTutorialState()}async resetTutorialState(){this.tutorialState={},await this.saveTutorialState()}}"undefined"!=typeof window&&(window.HeadlinesTutorial=new a,document.addEventListener("DOMContentLoaded",()=>{window.HeadlinesTutorial.init()}))}();
+// ===== TUTORIAL SYSTEM =====
+// Basic tutorial functionality for Headlines game
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {always:true}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('tutorials', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[tutorials]', message);
+    }
+}
+
+// Helper function to process markdown-like syntax
+function processMarkdown(text) {
+    // Convert --- to horizontal rule (with optional surrounding whitespace/newlines)
+    text = text.replace(/\n\s*---\s*\n/g, '\n<hr>\n');
+    // Convert ![alt](url) to <center><img alt="alt" src="url"></center>
+    text = text.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<center><img alt="$1" src="$2"></center>');
+    // Convert **text** to <strong>text</strong>
+    text = text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+    // Convert __text__ to <strong>text</strong>
+    text = text.replace(/__(.*?)__/g, '<strong>$1</strong>');
+    return text;
+}
+
+class HeadlinesTutorial {
+    constructor() {
+        this.tutorialState = {};
+        this.initialized = false;
+        this.showingTutorial = false;
+    }
+
+    /**
+     * Initialize the tutorial system
+     */
+    async init() {
+        if (this.initialized) return;
+        
+        this.initialized = true;
+        
+        // Wait for platform before loading state
+        window.addEventListener('headlines:platform:ready', async () => {
+            await this.loadTutorialState();
+            this.checkAndShowTutorial();
+        });
+        
+        // Listen for custom puzzle language changes
+        window.addEventListener('headlines:customPuzzle:languageChanged', (event) => {
+            _log(`Custom puzzle language changed to: ${event.detail.language}`);
+            // If tutorial hasn't been seen yet, update it with the new language
+            if (!this.tutorialState.welcome) {
+                _log('Tutorial not yet seen, updating language...');
+                this.updateTutorialLanguage(event.detail.language);
+            }
+        });
+    }
+
+    /**
+     * Load tutorial state from platform storage
+     */
+    async loadTutorialState() {
+        try {
+            if (window.Platform && typeof window.Platform.loadTutorialState === 'function') {
+                this.tutorialState = await window.Platform.loadTutorialState();
+            }
+        } catch (error) {
+            console.error('Failed to load tutorial state:', error);
+            this.tutorialState = {};
+        }
+    }
+
+    /**
+     * Save tutorial state to platform storage
+     */
+    async saveTutorialState() {
+        try {
+            if (window.Platform && typeof window.Platform.saveTutorialState === 'function') {
+                await window.Platform.saveTutorialState(this.tutorialState);
+            }
+        } catch (error) {
+            console.error('Failed to save tutorial state:', error);
+        }
+    }
+
+    /**
+     * Check if tutorial should be shown and show it
+     */
+    checkAndShowTutorial() {
+        // For now, only show welcome tutorial if not seen
+        if (!this.tutorialState.welcome) {
+            // Don't show immediately if custom puzzle is present - wait for language event
+            if (window.CustomPuzzleLoader && typeof window.CustomPuzzleLoader.checkForCustomPuzzle === 'function') {
+                if (window.CustomPuzzleLoader.checkForCustomPuzzle()) {
+                    _log('Custom puzzle detected, waiting for language event before showing tutorial');
+                    return; // Don't show now, language change event will trigger it
+                }
+            }
+            this.showWelcomeTutorial();
+        }
+    }
+    
+    /**
+     * Update tutorial content when language changes (for custom puzzles)
+     * @param {string} language - Optional language code to switch to before showing tutorial
+     */
+    updateTutorialLanguage(language) {
+        _log(`Updating tutorial language to: ${language || 'current'}`);
+        
+        // If language is provided, ensure i18n is using it
+        if (language && typeof i18n !== 'undefined' && i18n.currentLanguage !== language) {
+            i18n.currentLanguage = language;
+            document.documentElement.lang = language;
+            if (typeof i18n.updateUI === 'function') {
+                i18n.updateUI();
+            }
+        }
+        
+        // Close current popup if exists
+        const popupElement = document.querySelector('.popup-overlay');
+        if (popupElement) {
+            popupElement.remove();
+        }
+        
+        // Reset showing flag and show tutorial with updated language
+        this.showingTutorial = false;
+        this.showWelcomeTutorial();
+    }
+
+    /**
+     * Show the welcome tutorial
+     */
+    async showWelcomeTutorial() {
+        if (this.showingTutorial) return;
+
+        this.showingTutorial = true;
+
+        // Dispatch analytics event for help opened
+        window.dispatchEvent(new CustomEvent('headlines:helpOpened'));
+
+        await showPopup({
+            title: t('tutorial.welcome.title'),
+            content: `<div style="line-height: 1.6;">
+                <p>${processMarkdown(t('tutorial.welcome.content')).replace(/\n\n/g, '</p><p>')}</p>
+            </div>`,
+            buttons: [
+                { text: t('tutorial.welcome.buttonText'), class: 'primary' }
+            ],
+            closeOnBackdrop: false,
+            isTutorial: true  // Mark this as a tutorial popup
+        });
+        
+        // Mark as seen after popup closes
+        this.closeTutorial();
+        this.showingTutorial = false;
+    }
+    closeTutorial() {
+        // Mark as seen
+        this.tutorialState.welcome = true;
+        this.saveTutorialState();
+    }
+
+    /**
+     * Check if a tutorial has been seen
+     * @param {string} tutorialName - Name of the tutorial
+     * @returns {boolean} True if seen
+     */
+    hasSeenTutorial(tutorialName) {
+        return !!this.tutorialState[tutorialName];
+    }
+
+    /**
+     * Mark a tutorial as seen
+     * @param {string} tutorialName - Name of the tutorial
+     */
+    markTutorialAsSeen(tutorialName) {
+        this.tutorialState[tutorialName] = true;
+        this.saveTutorialState();
+    }
+
+    /**
+     * Reset tutorial state (for debugging)
+     */
+    async resetTutorialState() {
+        this.tutorialState = {};
+        await this.saveTutorialState();
+    }
+}
+
+// Create global instance
+if (typeof window !== 'undefined') {
+    window.HeadlinesTutorial = new HeadlinesTutorial();
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        window.HeadlinesTutorial.init();
+    });
+}
+
+})();

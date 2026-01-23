@@ -1,1 +1,60 @@
-.moves-counter-circle{position:absolute;bottom:16px;right:16px;width:80px;height:80px;background:#6366f1;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(99,102,241,.3);z-index:50;transition:.3s cubic-bezier(.34, 1.56, .64, 1)}.moves-number{font-size:1.75rem;font-weight:800;color:#fff;line-height:1;animation:.3s fadeIn}.moves-label{font-size:.7rem;font-weight:700;color:rgba(255,255,255,.9);text-transform:uppercase;letter-spacing:.05em;margin-top:2px}@keyframes movePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}.moves-counter-circle.pulse{animation:.4s cubic-bezier(.34,1.56,.64,1) movePulse}@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+/* Moves counter circle - positioned inside the playing field */
+.moves-counter-circle {
+    position: absolute;
+    bottom: 16px;
+    right: 16px;
+    width: 80px;
+    height: 80px;
+    background: #6366f1;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    z-index: 50;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.moves-counter-circle:hover {
+    /* No hover effect - it's just a counter, not interactive */
+}
+
+.moves-number {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: white;
+    line-height: 1;
+    animation: fadeIn 0.3s ease;
+}
+
+.moves-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.9);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-top: 2px;
+}
+
+/* Pulse animation when moves change */
+@keyframes movePulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.15);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.moves-counter-circle.pulse {
+    animation: movePulse 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}

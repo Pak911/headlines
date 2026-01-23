@@ -1,1 +1,604 @@
-!function(){"use strict";const e="undefined"!=typeof window&&window.AsyncRSSFetcher&&window.AsyncRSSFetcher.CACHE_DURATION?window.AsyncRSSFetcher.CACHE_DURATION:3e5;class t{constructor(){this.initialized=!1}async init(){return this.initialized=!0,this._log("Web platform initialized"),{success:!0}}async cacheHeadlines(e,t){try{const a=`headlines_${e}`,r={headlines:t,timestamp:Date.now(),sourceName:e},o=JSON.stringify(r);return localStorage.setItem(a,o),this._log(`Cached ${t.length} headlines for source: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] cacheHeadlines failed:",e),{success:!1,error:e}}}async loadCachedHeadlines(e){try{const t=`headlines_${e}`,a=localStorage.getItem(t);if(!a)return this._log(`No cached headlines found for source: ${e}`),null;const r=JSON.parse(a);return this._isCacheExpired(r.timestamp)?(this._log(`Cached headlines expired for source: ${e}`),null):(this._log(`Loaded ${r.headlines.length} cached headlines for source: ${e}`),r.headlines)}catch(e){return console.error("[Web Platform] loadCachedHeadlines failed:",e),null}}async isCacheExpired(e){try{const t=`headlines_${e}`,a=localStorage.getItem(t);if(!a)return!0;const r=JSON.parse(a),o=this._isCacheExpired(r.timestamp);return this._log(`Cache for ${e} is ${o?"expired":"valid"}`),o}catch(e){return console.error("[Web Platform] isCacheExpired failed:",e),!0}}async saveGameLanguage(e){try{const t="headline_settings_gameLanguage";return localStorage.setItem(t,e),this._log(`Saved game language: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] saveGameLanguage failed:",e),{success:!1,error:e}}}async loadGameLanguage(){try{const e="headline_settings_gameLanguage",t=localStorage.getItem(e);return t?this._log(`Loaded game language: ${t}`):this._log("No saved game language found"),t}catch(e){return console.error("[Web Platform] loadGameLanguage failed:",e),null}}async saveGameDifficulty(e){try{const t="headline_settings_gameDifficulty";return localStorage.setItem(t,e),this._log(`Saved game difficulty: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] saveGameDifficulty failed:",e),{success:!1,error:e}}}async loadGameDifficulty(){try{const e="headline_settings_gameDifficulty",t=localStorage.getItem(e);return t?this._log(`Loaded game difficulty: ${t}`):this._log("No saved game difficulty found"),t}catch(e){return console.error("[Web Platform] loadGameDifficulty failed:",e),null}}async saveGameCategory(e){try{const t="headline_settings_gameCategory";return localStorage.setItem(t,e),this._log(`Saved game category: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] saveGameCategory failed:",e),{success:!1,error:e}}}async loadGameCategory(){try{const e="headline_settings_gameCategory",t=localStorage.getItem(e);return t?this._log(`Loaded game category: ${t}`):this._log("No saved game category found"),t}catch(e){return console.error("[Web Platform] loadGameCategory failed:",e),null}}async saveSoundEnabled(e){try{const t="headline_settings_soundEnabled";return localStorage.setItem(t,e.toString()),this._log(`Saved sound enabled: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] saveSoundEnabled failed:",e),{success:!1,error:e}}}loadSoundEnabled(){try{const e="headline_settings_soundEnabled",t=localStorage.getItem(e);if(null!==t){const e="true"===t;return this._log(`Loaded sound enabled: ${e}`),e}return this._log("No saved sound enabled setting found"),null}catch(e){return console.error("[Web Platform] loadSoundEnabled failed:",e),null}}_isCacheExpired(t){return!t||"number"!=typeof t||Date.now()-t>e}_log(e){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("webPlatform",e):console.log("[webPlatform]",e)}async saveSeenHeadline(e,t,a=!0,r=null){try{const o=await this.loadAllSeenHeadlines();if(a&&null!==r){let e=0;for(const[t,a]of Object.entries(o))a.timestamp&&a.timestamp<r&&(delete o[t],e++);e>0&&this._log(`Cleaned up ${e} old seen headline entries`)}o[e]={...t,timestamp:t.timestamp||Date.now()};const n=JSON.stringify(o);return localStorage.setItem("headline_seenHeadlines",n),this._log(`Saved seen headline data for hash: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] saveSeenHeadline failed:",e),{success:!1,error:e}}}async loadSeenHeadline(e){try{const t=(await this.loadAllSeenHeadlines())[e]||null;return t?this._log(`Loaded seen headline data for hash: ${e}`):this._log(`No seen headline data found for hash: ${e}`),t}catch(e){return console.error("[Web Platform] loadSeenHeadline failed:",e),null}}async loadAllSeenHeadlines(){try{const e=localStorage.getItem("headline_seenHeadlines");if(!e)return this._log("No seen headlines data found"),{};const t=JSON.parse(e);return this._log(`Loaded ${Object.keys(t).length} seen headlines`),t}catch(e){return console.error("[Web Platform] loadAllSeenHeadlines failed:",e),{}}}async incrementPuzzleSolvedStat(){try{const e=await this.getPuzzleSolvedStat()+1;return localStorage.setItem("headline_puzzleSolvedCount",e.toString()),this._log(`Incremented puzzle solved count to: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] incrementPuzzleSolvedStat failed:",e),{success:!1,error:e}}}async incrementPuzzleSkippedStat(){try{const e=await this.getPuzzleSkippedStat()+1;return localStorage.setItem("headline_puzzleSkippedCount",e.toString()),this._log(`Incremented puzzle skipped count to: ${e}`),{success:!0}}catch(e){return console.error("[Web Platform] incrementPuzzleSkippedStat failed:",e),{success:!1,error:e}}}async getPuzzleSolvedStat(){try{const e=localStorage.getItem("headline_puzzleSolvedCount");if(null!==e){const t=parseInt(e,10);if(!isNaN(t)&&t>=0)return t}return 0}catch(e){return console.error("[Web Platform] getPuzzleSolvedStat failed:",e),0}}async getPuzzleSkippedStat(){try{const e=localStorage.getItem("headline_puzzleSkippedCount");if(null!==e){const t=parseInt(e,10);if(!isNaN(t)&&t>=0)return t}return 0}catch(e){return console.error("[Web Platform] getPuzzleSkippedStat failed:",e),0}}async saveTutorialState(e){try{const t=JSON.stringify(e);return localStorage.setItem("headline_tutorialState",t),this._log("Saved tutorial state"),{success:!0}}catch(e){return console.error("[Web Platform] saveTutorialState failed:",e),{success:!1,error:e}}}async loadTutorialState(){try{const e=localStorage.getItem("headline_tutorialState");if(!e)return this._log("No tutorial state found"),{};const t=JSON.parse(e);return this._log("Loaded tutorial state"),t}catch(e){return console.error("[Web Platform] loadTutorialState failed:",e),{}}}async hasSeenTutorial(e){try{return!!(await this.loadTutorialState())[e]}catch(e){return console.error("[Web Platform] hasSeenTutorial failed:",e),!1}}async incrementStarRatingStat(e){try{if(e<1||e>5)throw new Error(`Invalid star count: ${e}. Must be between 1 and 5.`);const t=await this.getStarRatingStats();t[e]=(t[e]||0)+1;const a=JSON.stringify(t);return localStorage.setItem("headline_starRatingStats",a),this._log(`Incremented star rating count for ${e} stars to: ${t[e]}`),{success:!0}}catch(e){return console.error("[Web Platform] incrementStarRatingStat failed:",e),{success:!1,error:e}}}async getStarRatingStats(){try{const e=localStorage.getItem("headline_starRatingStats");if(!e)return this._log("No star rating stats found"),{1:0,2:0,3:0,4:0,5:0};const t=JSON.parse(e),a={1:0,2:0,3:0,4:0,5:0};for(let e=1;e<=5;e++)a[e]=t[e]||0;return this._log(`Loaded star rating stats: ${JSON.stringify(a)}`),a}catch(e){return console.error("[Web Platform] getStarRatingStats failed:",e),{1:0,2:0,3:0,4:0,5:0}}}isAvailable(){return this.initialized}}"undefined"!=typeof window&&(window.WebPlatform=t)}();
+/**
+ * Web Platform Implementation
+ * 
+ * Local storage-based platform for web environment.
+ * Provides persistent storage for headlines cache and game settings.
+ */
+
+(function() {
+    'use strict';
+
+    // Import CACHE_DURATION from async-rss-fetcher if available, otherwise use default
+    const CACHE_DURATION = (typeof window !== 'undefined' && 
+                           window.AsyncRSSFetcher && 
+                           window.AsyncRSSFetcher.CACHE_DURATION) 
+                          ? window.AsyncRSSFetcher.CACHE_DURATION 
+                          : 300000; // 5 minutes default
+
+    /**
+     * Web platform implementation
+     */
+    class WebPlatform {
+        constructor() {
+            this.initialized = false;
+        }
+
+        /**
+         * Initialize web platform
+         * @returns {Promise<{success: boolean}>}
+         */
+        async init() {
+            this.initialized = true;
+            this._log('Web platform initialized');
+            return { success: true };
+        }
+
+        /**
+         * Cache headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @param {Array} headlines - Array of headline objects
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async cacheHeadlines(sourceName, headlines) {
+            try {
+                const key = `headlines_${sourceName}`;
+                const data = {
+                    headlines: headlines,
+                    timestamp: Date.now(),
+                    sourceName: sourceName
+                };
+                
+                const json = JSON.stringify(data);
+                localStorage.setItem(key, json);
+                
+                this._log(`Cached ${headlines.length} headlines for source: ${sourceName}`);
+                return { success: true };
+                
+            } catch (err) {
+                console.error('[Web Platform] cacheHeadlines failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load cached headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<Array|null>} Array of headlines or null if not found/expired
+         */
+        async loadCachedHeadlines(sourceName) {
+            try {
+                const key = `headlines_${sourceName}`;
+                const json = localStorage.getItem(key);
+                
+                if (!json) {
+                    this._log(`No cached headlines found for source: ${sourceName}`);
+                    return null;
+                }
+
+                const data = JSON.parse(json);
+                
+                // Check if cache is expired
+                if (this._isCacheExpired(data.timestamp)) {
+                    this._log(`Cached headlines expired for source: ${sourceName}`);
+                    return null;
+                }
+                
+                this._log(`Loaded ${data.headlines.length} cached headlines for source: ${sourceName}`);
+                return data.headlines;
+                
+            } catch (err) {
+                console.error('[Web Platform] loadCachedHeadlines failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Check if cache is expired for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<boolean>} True if expired or not found
+         */
+        async isCacheExpired(sourceName) {
+            try {
+                const key = `headlines_${sourceName}`;
+                const json = localStorage.getItem(key);
+                
+                if (!json) {
+                    return true; // No cache = expired
+                }
+
+                const data = JSON.parse(json);
+                const expired = this._isCacheExpired(data.timestamp);
+                
+                this._log(`Cache for ${sourceName} is ${expired ? 'expired' : 'valid'}`);
+                return expired;
+                
+            } catch (err) {
+                console.error('[Web Platform] isCacheExpired failed:', err);
+                return true; // Error = treat as expired
+            }
+        }
+
+        /**
+         * Save game language setting
+         * @param {string} language - Language code ('en' or 'ru')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameLanguage(language) {
+            try {
+                const key = 'headline_settings_gameLanguage';
+                localStorage.setItem(key, language);
+                
+                this._log(`Saved game language: ${language}`);
+                return { success: true };
+                
+            } catch (err) {
+                console.error('[Web Platform] saveGameLanguage failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game language setting
+         * @returns {Promise<string|null>} Language code or null if not found
+         */
+        async loadGameLanguage() {
+            try {
+                const key = 'headline_settings_gameLanguage';
+                const language = localStorage.getItem(key);
+                
+                if (language) {
+                    this._log(`Loaded game language: ${language}`);
+                } else {
+                    this._log('No saved game language found');
+                }
+                
+                return language;
+                
+            } catch (err) {
+                console.error('[Web Platform] loadGameLanguage failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Save game difficulty setting
+         * @param {string} difficulty - Difficulty key ('easy', 'mediumEasy', 'medium', 'mediumHard', 'hard')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameDifficulty(difficulty) {
+            try {
+                const key = 'headline_settings_gameDifficulty';
+                localStorage.setItem(key, difficulty);
+
+                this._log(`Saved game difficulty: ${difficulty}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveGameDifficulty failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game difficulty setting
+         * @returns {Promise<string|null>} Difficulty key or null if not found
+         */
+        async loadGameDifficulty() {
+            try {
+                const key = 'headline_settings_gameDifficulty';
+                const difficulty = localStorage.getItem(key);
+
+                if (difficulty) {
+                    this._log(`Loaded game difficulty: ${difficulty}`);
+                } else {
+                    this._log('No saved game difficulty found');
+                }
+
+                return difficulty;
+
+            } catch (err) {
+                console.error('[Web Platform] loadGameDifficulty failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Save game category setting
+         * @param {string} category - Category key ('all', 'general', 'economy', 'technology', 'sports')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameCategory(category) {
+            try {
+                const key = 'headline_settings_gameCategory';
+                localStorage.setItem(key, category);
+
+                this._log(`Saved game category: ${category}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveGameCategory failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game category setting
+         * @returns {Promise<string|null>} Category key or null if not found
+         */
+        async loadGameCategory() {
+            try {
+                const key = 'headline_settings_gameCategory';
+                const category = localStorage.getItem(key);
+
+                if (category) {
+                    this._log(`Loaded game category: ${category}`);
+                } else {
+                    this._log('No saved game category found');
+                }
+
+                return category;
+
+            } catch (err) {
+                console.error('[Web Platform] loadGameCategory failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Save sound enabled setting
+         * @param {boolean} enabled - Whether sound is enabled
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSoundEnabled(enabled) {
+            try {
+                const key = 'headline_settings_soundEnabled';
+                localStorage.setItem(key, enabled.toString());
+
+                this._log(`Saved sound enabled: ${enabled}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveSoundEnabled failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load sound enabled setting
+         * @returns {boolean|null} Sound enabled state or null if not set
+         */
+        loadSoundEnabled() {
+            try {
+                const key = 'headline_settings_soundEnabled';
+                const enabled = localStorage.getItem(key);
+
+                if (enabled !== null) {
+                    const isEnabled = enabled === 'true';
+                    this._log(`Loaded sound enabled: ${isEnabled}`);
+                    return isEnabled;
+                } else {
+                    this._log('No saved sound enabled setting found');
+                    return null;
+                }
+
+            } catch (err) {
+                console.error('[Web Platform] loadSoundEnabled failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Check if cache timestamp is expired
+         * @private
+         * @param {number} timestamp - Cache timestamp
+         * @returns {boolean} True if expired
+         */
+        _isCacheExpired(timestamp) {
+            if (!timestamp || typeof timestamp !== 'number') {
+                return true;
+            }
+            return (Date.now() - timestamp) > CACHE_DURATION;
+        }
+
+        /**
+         * Logging helper function
+         * @private
+         * @param {string} message - Message to log
+         */
+        _log(message) {
+            if (window.__cosic && typeof window.__cosic.flog === 'function') {
+                window.__cosic.flog('webPlatform', message);
+            } else {
+                console.log('[webPlatform]', message);
+            }
+        }
+
+        /**
+         * Save seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @param {boolean} [cleanupOldEntries=true] - Whether to delete old entries
+         * @param {number} [maxAge] - Maximum age timestamp for cleanup (entries older than this will be deleted)
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSeenHeadline(hash, data, cleanupOldEntries = true, maxAge = null) {
+            try {
+                // Load existing seen headlines
+                const allSeen = await this.loadAllSeenHeadlines();
+                
+                // Clean up old entries if requested
+                if (cleanupOldEntries && maxAge !== null) {
+                    let cleanedCount = 0;
+                    for (const [key, entry] of Object.entries(allSeen)) {
+                        if (entry.timestamp && entry.timestamp < maxAge) {
+                            delete allSeen[key];
+                            cleanedCount++;
+                        }
+                    }
+                    if (cleanedCount > 0) {
+                        this._log(`Cleaned up ${cleanedCount} old seen headline entries`);
+                    }
+                }
+
+                // Update with new data
+                allSeen[hash] = {
+                    ...data,
+                    timestamp: data.timestamp || Date.now()
+                };
+
+                // Save back to localStorage
+                const json = JSON.stringify(allSeen);
+                localStorage.setItem('headline_seenHeadlines', json);
+
+                this._log(`Saved seen headline data for hash: ${hash}`);
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Web Platform] saveSeenHeadline failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load seen headline data for a specific hash
+         * @param {string} hash - djb2 hash of the headline
+         * @returns {Promise<Object|null>} Seen headline data or null if not found
+         */
+        async loadSeenHeadline(hash) {
+            try {
+                const allSeen = await this.loadAllSeenHeadlines();
+                const data = allSeen[hash] || null;
+
+                if (data) {
+                    this._log(`Loaded seen headline data for hash: ${hash}`);
+                } else {
+                    this._log(`No seen headline data found for hash: ${hash}`);
+                }
+
+                return data;
+
+            } catch (err) {
+                console.error('[Web Platform] loadSeenHeadline failed:', err);
+                return null;
+            }
+        }
+
+        /**
+         * Load all seen headlines data
+         * @returns {Promise<Object>} Object with all seen headlines data (hash -> data mapping)
+         */
+        async loadAllSeenHeadlines() {
+            try {
+                const json = localStorage.getItem('headline_seenHeadlines');
+                if (!json) {
+                    this._log('No seen headlines data found');
+                    return {};
+                }
+
+                const data = JSON.parse(json);
+                this._log(`Loaded ${Object.keys(data).length} seen headlines`);
+                return data;
+
+            } catch (err) {
+                console.error('[Web Platform] loadAllSeenHeadlines failed:', err);
+                return {};
+            }
+        }
+
+        /**
+         * Increment puzzle solved stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSolvedStat() {
+            try {
+                const currentCount = await this.getPuzzleSolvedStat();
+                const newCount = currentCount + 1;
+                localStorage.setItem('headline_puzzleSolvedCount', newCount.toString());
+                this._log(`Incremented puzzle solved count to: ${newCount}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementPuzzleSolvedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Increment puzzle skipped stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSkippedStat() {
+            try {
+                const currentCount = await this.getPuzzleSkippedStat();
+                const newCount = currentCount + 1;
+                localStorage.setItem('headline_puzzleSkippedCount', newCount.toString());
+                this._log(`Incremented puzzle skipped count to: ${newCount}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementPuzzleSkippedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get puzzle solved stat
+         * @returns {Promise<number>} Current solved count (0 if not found)
+         */
+        async getPuzzleSolvedStat() {
+            try {
+                const stored = localStorage.getItem('headline_puzzleSolvedCount');
+                if (stored !== null) {
+                    const count = parseInt(stored, 10);
+                    if (!isNaN(count) && count >= 0) {
+                        return count;
+                    }
+                }
+                return 0;
+            } catch (err) {
+                console.error('[Web Platform] getPuzzleSolvedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Get puzzle skipped stat
+         * @returns {Promise<number>} Current skipped count (0 if not found)
+         */
+        async getPuzzleSkippedStat() {
+            try {
+                const stored = localStorage.getItem('headline_puzzleSkippedCount');
+                if (stored !== null) {
+                    const count = parseInt(stored, 10);
+                    if (!isNaN(count) && count >= 0) {
+                        return count;
+                    }
+                }
+                return 0;
+            } catch (err) {
+                console.error('[Web Platform] getPuzzleSkippedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Save tutorial state
+         * @param {Object} state - Tutorial state object {tutorialName: boolean}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveTutorialState(state) {
+            try {
+                const json = JSON.stringify(state);
+                localStorage.setItem('headline_tutorialState', json);
+                
+                this._log('Saved tutorial state');
+                return { success: true };
+                
+            } catch (err) {
+                console.error('[Web Platform] saveTutorialState failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load tutorial state
+         * @returns {Promise<Object>} Tutorial state object or empty object
+         */
+        async loadTutorialState() {
+            try {
+                const json = localStorage.getItem('headline_tutorialState');
+                if (!json) {
+                    this._log('No tutorial state found');
+                    return {};
+                }
+
+                const state = JSON.parse(json);
+                this._log('Loaded tutorial state');
+                return state;
+                
+            } catch (err) {
+                console.error('[Web Platform] loadTutorialState failed:', err);
+                return {};
+            }
+        }
+
+        /**
+         * Check if a specific tutorial has been seen
+         * @param {string} tutorialName - Name of the tutorial to check
+         * @returns {Promise<boolean>} True if tutorial has been seen
+         */
+        async hasSeenTutorial(tutorialName) {
+            try {
+                const tutorialState = await this.loadTutorialState();
+                return !!tutorialState[tutorialName];
+            } catch (err) {
+                console.error('[Web Platform] hasSeenTutorial failed:', err);
+                return false;
+            }
+        }
+
+        /**
+         * Increment star rating stat for a specific star count
+         * @param {number} starCount - Number of stars earned (1-5)
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementStarRatingStat(starCount) {
+            try {
+                if (starCount < 1 || starCount > 5) {
+                    throw new Error(`Invalid star count: ${starCount}. Must be between 1 and 5.`);
+                }
+
+                const currentStats = await this.getStarRatingStats();
+                currentStats[starCount] = (currentStats[starCount] || 0) + 1;
+
+                const json = JSON.stringify(currentStats);
+                localStorage.setItem('headline_starRatingStats', json);
+
+                this._log(`Incremented star rating count for ${starCount} stars to: ${currentStats[starCount]}`);
+                return { success: true };
+            } catch (err) {
+                console.error('[Web Platform] incrementStarRatingStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get star rating statistics
+         * @returns {Promise<Object>} Object with star counts {1: count, 2: count, 3: count, 4: count, 5: count}
+         */
+        async getStarRatingStats() {
+            try {
+                const json = localStorage.getItem('headline_starRatingStats');
+                if (!json) {
+                    this._log('No star rating stats found');
+                    return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+                }
+
+                const stats = JSON.parse(json);
+                // Ensure all star levels are present with defaults
+                const completeStats = {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+                for (let i = 1; i <= 5; i++) {
+                    completeStats[i] = stats[i] || 0;
+                }
+
+                this._log(`Loaded star rating stats: ${JSON.stringify(completeStats)}`);
+                return completeStats;
+            } catch (err) {
+                console.error('[Web Platform] getStarRatingStats failed:', err);
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+        }
+
+        /**
+         * Check if platform is available and initialized
+         * @returns {boolean}
+         */
+        isAvailable() {
+            return this.initialized;
+        }
+    }
+
+    // Export for use in platform adapter
+    if (typeof window !== 'undefined') {
+        window.WebPlatform = WebPlatform;
+    }
+
+})();

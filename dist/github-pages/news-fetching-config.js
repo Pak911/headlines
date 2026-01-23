@@ -118,7 +118,44 @@ const portugueseRssNewsSources = [
         name: "Folha de S.Paulo Sport",
         url: "https://feeds.folha.uol.com.br/esporte/rss091.xml",
         category: "sports"
-    }
+    },
+    {
+        name: "Correio da Manhã",
+        url: "https://www.cmjornal.pt/rss",
+        category: "general"
+    },
+    {
+        name: "Público",
+        url: "https://feeds.feedburner.com/PublicoRSS",
+        category: "general"
+    },
+    {
+        name: "Pplware",
+        url: "https://pplware.sapo.pt/feed/",
+        category: "technology"
+    },
+    {
+        name: "Jornal de Negócios",
+        url: "https://www.jornaldenegocios.pt/rss",
+        category: "economy"
+    },
+    {
+        name: "IGN Portugal",
+        url: "https://pt.ign.com/news.xml",
+        category: "technology"
+    },
+    {
+        name: "Placar",
+        url: "https://placar.com/feed/",
+        category: "sports"
+    },
+    
+    // English :(
+    // {
+    //     name: "Rio Times",
+    //     url: "https://www.riotimesonline.com/brazil-news/category/rio-business/feed/",
+    //     category: "economy"
+    // }
 ];
 
 // Russian RSS News Sources

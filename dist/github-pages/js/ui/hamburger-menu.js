@@ -1,1 +1,925 @@
-!function(){"use strict";function e(e,t={}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("menu",e,t):console.log("[menu]",e)}class n{constructor(){this.overlay=null,this.isOpen=!1}init(){this.overlay=document.getElementById("menuOverlay");const t=document.getElementById("menuClose");this.overlay?(t&&t.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),this.close()}),this.overlay.addEventListener("click",e=>{e.target===this.overlay&&this.close()}),document.addEventListener("keydown",e=>{"Escape"===e.key&&this.isOpen&&this.close()}),this.initMenuItems(),e("Hamburger menu initialized")):console.error("Menu overlay not found")}initMenuItems(){this.initLanguageDropdown(),this.initDifficultyDropdown(),this.initCategoryDropdown();const t=document.getElementById("menuStatistics");t&&t.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),e("Statistics menu item clicked - TODO: implement statistics view")});const n=document.getElementById("menuSound"),o=document.getElementById("menuSoundToggle");n&&o&&n.addEventListener("click",e=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),e.stopPropagation(),o.classList.toggle("active"),window.__headlines_sound,window.dispatchEvent(new CustomEvent("headlines:soundToggle"));const t=o.classList.contains("active");window.dispatchEvent(new CustomEvent("headlines:soundSettingChanged",{detail:{enabled:t}}))});const i=document.getElementById("menuHelp");i&&i.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),e("Help menu item clicked"),this.close(),window.HeadlinesTutorial&&"function"==typeof window.HeadlinesTutorial.showWelcomeTutorial&&window.HeadlinesTutorial.showWelcomeTutorial()});const d=document.getElementById("menuGiveUp");d&&d.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),e("Give Up/Next Puzzle menu item clicked"),this.close(),d.classList.contains("next-puzzle-mode")?"function"==typeof skipToNextHeadline&&skipToNextHeadline():"function"==typeof giveUp&&giveUp()});const s=document.getElementById("menuCreateOwnPuzzle");s&&s.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),e("Create Own Puzzle menu item clicked"),this.close(),window.open("create-puzzle.html","_blank")})}switchToNextPuzzleMode(){const n=document.getElementById("menuGiveUp");if(!n)return;n.classList.add("next-puzzle-mode"),n.classList.remove("danger");const o=n.querySelector(".menu-item-icon svg");o&&(o.innerHTML='<path d="M6 6l6 6-6 6V6z"/><path d="M13 6l6 6-6 6V6z"/>');const i=document.getElementById("menuGiveUpLabel");i&&"undefined"!=typeof t&&(i.textContent=t("menu.nextPuzzle"),i.style.color="");const d=document.getElementById("menuGiveUpValue");d&&"undefined"!=typeof t&&(d.textContent=t("menu.nextPuzzleDescription")),e("Switched Give Up item to Next Puzzle mode")}switchToGiveUpMode(){const n=document.getElementById("menuGiveUp");if(!n)return;n.classList.remove("next-puzzle-mode"),n.classList.add("danger");const o=n.querySelector(".menu-item-icon svg");o&&(o.innerHTML='<path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>');const i=document.getElementById("menuGiveUpLabel");i&&"undefined"!=typeof t&&(i.textContent=t("menu.giveUp"));const d=document.getElementById("menuGiveUpValue");d&&"undefined"!=typeof t&&(d.textContent=t("menu.giveUpDescription")),e("Switched Next Puzzle item back to Give Up mode")}open(){this.overlay&&(this.isOpen=!0,this.overlay.classList.add("visible"),this.updateMenuValues(),this.updateSoundToggleState(),e("Menu opened"))}close(){this.overlay&&(this.isOpen=!1,this.overlay.classList.remove("visible"),e("Menu closed"))}toggle(){this.isOpen?this.close():this.open()}updateMenuValues(){const n=document.getElementById("menuLanguageText");if(n&&"undefined"!=typeof i18n){const t=i18n.currentLanguage,o={en:"English",ru:"Русский",pt:"Português"}[t]||"English";e(`Language dropdown: current i18n language = '${t}', setting display to '${o}'`),n.textContent=o,this.languageDropdown&&this.languageDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.langCode===t)})}const o=document.getElementById("menuDifficultyText"),i=document.getElementById("menuDifficultyValue");o&&i&&"undefined"!=typeof currentDifficulty&&"undefined"!=typeof t&&(o.textContent=t(`difficulty.${currentDifficulty}.name`),i.textContent=t(`difficulty.${currentDifficulty}.description`),this.difficultyDropdown&&this.difficultyDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.difficultyId===currentDifficulty)}));const d=document.getElementById("menuCategoryText"),s=document.getElementById("menuCategoryValue");d&&s&&"undefined"!=typeof currentCategory&&"undefined"!=typeof t&&(d.textContent=t(`category.${currentCategory}.name`),s.textContent=t(`category.${currentCategory}.description`),this.categoryDropdown&&this.categoryDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.categoryId===currentCategory)}))}updateSoundToggleState(){const e=document.getElementById("menuSoundToggle");e&&window.__headlines_sound&&e.classList.toggle("active",window.__headlines_sound.enabled)}updateDifficultyDropdownLanguage(){this.difficultyDropdown&&this.difficultyDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{const n=e.dataset.difficultyId,o=e.querySelector(".menu-dropdown-option-text");if(o&&n&&"undefined"!=typeof t){const e=t(`difficulty.${n}.name`),i=t(`difficulty.${n}.description`);o.textContent=`${e} - ${i}`}})}updateCategoryDropdownLanguage(){this.categoryDropdown&&this.categoryDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{const n=e.dataset.categoryId,o=e.querySelector(".menu-dropdown-option-text");if(o&&n&&"undefined"!=typeof t){const e=t(`category.${n}.name`),i=t(`category.${n}.description`);o.textContent=`${e} - ${i}`}})}updateLanguage(){const e=document.getElementById("menuTitle");e&&(e.textContent=t("menu.title"));const n=document.getElementById("menuLanguageLabel");n&&(n.textContent=t("menu.language"));const o=document.getElementById("menuDifficultyLabel");o&&(o.textContent=t("menu.difficulty"));const i=document.getElementById("menuCategoryLabel");i&&(i.textContent=t("menu.category"));const d=document.getElementById("menuStatisticsLabel");d&&(d.textContent=t("menu.statistics"));const s=document.getElementById("menuSoundLabel");s&&(s.textContent=t("menu.sound"));const a=document.getElementById("menuHelpLabel");a&&(a.textContent=t("menu.help"));const c=document.getElementById("menuGiveUpLabel");c&&(c.textContent=t("menu.giveUp"));const l=document.getElementById("menuGiveUpValue");l&&(l.textContent=t("menu.giveUpDescription"));const u=document.getElementById("menuCreateOwnPuzzleLabel");u&&(u.textContent=t("menu.createOwnPuzzle"));const r=document.getElementById("menuCreateOwnPuzzleValue");r&&(r.textContent=t("menu.createOwnPuzzleDescription")),this.updateDifficultyDropdownLanguage(),this.updateCategoryDropdownLanguage(),this.updateMenuValues()}initLanguageDropdown(){const e=document.getElementById("menuLanguage"),t=document.getElementById("menuLanguageText");if(!e||!t)return;const n=document.createElement("div");n.className="menu-dropdown-panel",n.id="languageDropdownPanel";("undefined"!=typeof i18n&&i18n.getAvailableLanguages?i18n.getAvailableLanguages():[{code:"en",name:"English"},{code:"ru",name:"Русский"},{code:"pt",name:"Português"}]).forEach(e=>{const t=document.createElement("div");t.className="menu-dropdown-option",t.dataset.langCode=e.code;const o=document.createElement("span");o.className="menu-dropdown-option-text",o.textContent=e.name,t.appendChild(o);const i=document.createElement("div");i.className="menu-dropdown-check",i.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',t.appendChild(i),"undefined"!=typeof i18n&&e.code===i18n.currentLanguage&&t.classList.add("selected"),t.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),this.selectLanguage(e.code,e.name),this.closeLanguageDropdown()}),n.appendChild(t)}),document.body.appendChild(n),e.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),e.classList.contains("open")?this.closeLanguageDropdown():(this.closeDifficultyDropdown(),this.closeCategoryDropdown(),this.openLanguageDropdown())}),this.languageDropdown=n,this.languageItem=e,document.addEventListener("click",t=>{!e.classList.contains("open")||e.contains(t.target)||n.contains(t.target)||this.closeLanguageDropdown()})}openLanguageDropdown(){if(!this.languageItem||!this.languageDropdown)return;this.languageItem.classList.add("open");const t=this.languageItem.getBoundingClientRect(),n=this.languageItem.querySelector(".menu-dropdown-select"),o=n?n.getBoundingClientRect():t;this.languageDropdown.style.right=window.innerWidth-o.right-12+"px",this.languageDropdown.style.top=`${o.bottom}px`,this.languageDropdown.classList.add("visible"),e("Language dropdown opened")}closeLanguageDropdown(){this.languageItem&&this.languageDropdown&&(this.languageItem.classList.remove("open"),this.languageDropdown.classList.remove("visible"),e("Language dropdown closed"))}async selectLanguage(t,n){if("undefined"==typeof i18n)return;const o=i18n.currentLanguage;if(t===o)return;e(`Language changed to: ${t}`),i18n.setLanguage(t);const i=document.getElementById("menuLanguageText");i&&(i.textContent=n),this.languageDropdown&&this.languageDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.langCode===t)}),"undefined"!=typeof Platform&&Platform.saveGameLanguage&&await Platform.saveGameLanguage(t),window.dispatchEvent(new CustomEvent("headlines:languageChanged",{detail:{newLanguage:t}})),"function"==typeof updateLocalizedText&&updateLocalizedText(),this.updateLanguage()}initDifficultyDropdown(){const e=document.getElementById("menuDifficulty"),n=document.getElementById("menuDifficultyText");if(!e||!n)return;const o=document.createElement("div");o.className="menu-dropdown-panel",o.id="difficultyDropdownPanel";[{id:"easy",key:"difficulty.easy"},{id:"mediumEasy",key:"difficulty.mediumEasy"},{id:"medium",key:"difficulty.medium"},{id:"mediumHard",key:"difficulty.mediumHard"},{id:"hard",key:"difficulty.hard"}].forEach(e=>{const n=document.createElement("div");n.className="menu-dropdown-option",n.dataset.difficultyId=e.id;const i=document.createElement("span");if(i.className="menu-dropdown-option-text","undefined"!=typeof t){const n=t(`${e.key}.name`),o=t(`${e.key}.description`);i.textContent=`${n} - ${o}`}else i.textContent=e.id;n.appendChild(i);const d=document.createElement("div");d.className="menu-dropdown-check",d.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',n.appendChild(d),"undefined"!=typeof currentDifficulty&&e.id===currentDifficulty&&n.classList.add("selected"),n.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),this.selectDifficulty(e.id),this.closeDifficultyDropdown()}),o.appendChild(n)}),document.body.appendChild(o),e.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),e.classList.contains("open")?this.closeDifficultyDropdown():(this.closeLanguageDropdown(),this.closeCategoryDropdown(),this.openDifficultyDropdown())}),this.difficultyDropdown=o,this.difficultyItem=e,document.addEventListener("click",t=>{!e.classList.contains("open")||e.contains(t.target)||o.contains(t.target)||this.closeDifficultyDropdown()})}openDifficultyDropdown(){if(!this.difficultyItem||!this.difficultyDropdown)return;this.difficultyItem.classList.add("open");const t=this.difficultyItem.getBoundingClientRect(),n=this.difficultyItem.querySelector(".menu-dropdown-select"),o=n?n.getBoundingClientRect():t;this.difficultyDropdown.style.right=window.innerWidth-o.right-12+"px",this.difficultyDropdown.style.top=`${o.bottom}px`,this.difficultyDropdown.classList.add("visible"),e("Difficulty dropdown opened")}closeDifficultyDropdown(){this.difficultyItem&&this.difficultyDropdown&&(this.difficultyItem.classList.remove("open"),this.difficultyDropdown.classList.remove("visible"),e("Difficulty dropdown closed"))}selectDifficulty(n){if("undefined"==typeof currentDifficulty)return;if(n===currentDifficulty)return;e(`Difficulty changed to: ${n}`),"function"==typeof changeDifficulty?changeDifficulty(n):window.currentDifficulty=n,window.dispatchEvent(new CustomEvent("headlines:difficultyChanged",{detail:{newDifficulty:n}}));const o=document.getElementById("menuDifficultyText");o&&"undefined"!=typeof t&&(o.textContent=t(`difficulty.${n}.name`));const i=document.getElementById("menuDifficultyValue");i&&"undefined"!=typeof t&&(i.textContent=t(`difficulty.${n}.description`)),this.difficultyDropdown&&this.difficultyDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.difficultyId===n)})}initCategoryDropdown(){const e=document.getElementById("menuCategory"),n=document.getElementById("menuCategoryText");if(!e||!n)return;const o=document.createElement("div");o.className="menu-dropdown-panel",o.id="categoryDropdownPanel";[{id:"all",key:"category.all"},{id:"general",key:"category.general"},{id:"economy",key:"category.economy"},{id:"technology",key:"category.technology"},{id:"sports",key:"category.sports"}].forEach(e=>{const n=document.createElement("div");n.className="menu-dropdown-option",n.dataset.categoryId=e.id;const i=document.createElement("span");if(i.className="menu-dropdown-option-text","undefined"!=typeof t){const n=t(`${e.key}.name`),o=t(`${e.key}.description`);i.textContent=`${n} - ${o}`}else i.textContent=e.id;n.appendChild(i);const d=document.createElement("div");d.className="menu-dropdown-check",d.innerHTML='<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>',n.appendChild(d),"undefined"!=typeof currentCategory&&e.id===currentCategory&&n.classList.add("selected"),n.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),this.selectCategory(e.id),this.closeCategoryDropdown()}),o.appendChild(n)}),document.body.appendChild(o),e.addEventListener("click",t=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),t.stopPropagation(),e.classList.contains("open")?this.closeCategoryDropdown():(this.closeLanguageDropdown(),this.closeDifficultyDropdown(),this.openCategoryDropdown())}),this.categoryDropdown=o,this.categoryItem=e,document.addEventListener("click",t=>{!e.classList.contains("open")||e.contains(t.target)||o.contains(t.target)||this.closeCategoryDropdown()})}openCategoryDropdown(){if(!this.categoryItem||!this.categoryDropdown)return;this.categoryItem.classList.add("open");const t=this.categoryItem.getBoundingClientRect(),n=this.categoryItem.querySelector(".menu-dropdown-select"),o=n?n.getBoundingClientRect():t;this.categoryDropdown.style.right=window.innerWidth-o.right-12+"px",this.categoryDropdown.style.top=`${o.bottom}px`,this.categoryDropdown.classList.add("visible"),e("Category dropdown opened")}closeCategoryDropdown(){this.categoryItem&&this.categoryDropdown&&(this.categoryItem.classList.remove("open"),this.categoryDropdown.classList.remove("visible"),e("Category dropdown closed"))}selectCategory(n){if("undefined"==typeof currentCategory)return;if(n===currentCategory)return;e(`Category changed to: ${n}`),"function"==typeof changeCategory?changeCategory(n):window.currentCategory=n,window.dispatchEvent(new CustomEvent("headlines:categoryChanged",{detail:{newCategory:n}}));const o=document.getElementById("menuCategoryText");o&&"undefined"!=typeof t&&(o.textContent=t(`category.${n}.name`));const i=document.getElementById("menuCategoryValue");i&&"undefined"!=typeof t&&(i.textContent=t(`category.${n}.description`)),this.categoryDropdown&&this.categoryDropdown.querySelectorAll(".menu-dropdown-option").forEach(e=>{e.classList.toggle("selected",e.dataset.categoryId===n)})}}"undefined"!=typeof window&&(window.HamburgerMenu=new n,document.addEventListener("DOMContentLoaded",()=>{window.HamburgerMenu.init()}))}();
+// ===== HAMBURGER MENU =====
+// Side menu functionality for Headlines game
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('menu', message, options);
+    } else {
+        console.log('[menu]', message);
+    }
+}
+
+class HamburgerMenu {
+    constructor() {
+        this.overlay = null;
+        this.isOpen = false;
+    }
+
+    /**
+     * Initialize the hamburger menu
+     */
+    init() {
+        this.overlay = document.getElementById('menuOverlay');
+        const menuClose = document.getElementById('menuClose');
+        
+        if (!this.overlay) {
+            console.error('Menu overlay not found');
+            return;
+        }
+        
+        // Close button
+        if (menuClose) {
+            menuClose.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                this.close();
+            });
+        }
+        
+        // Close on backdrop click
+        this.overlay.addEventListener('click', (e) => {
+            if (e.target === this.overlay) {
+                this.close();
+            }
+        });
+        
+        // Close on ESC key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && this.isOpen) {
+                this.close();
+            }
+        });
+        
+        // Menu item handlers
+        this.initMenuItems();
+        
+        _log('Hamburger menu initialized');
+    }
+
+    /**
+     * Initialize menu item click handlers
+     */
+    initMenuItems() {
+        // Language dropdown
+        this.initLanguageDropdown();
+        
+        // Difficulty dropdown
+        this.initDifficultyDropdown();
+        
+        // Category dropdown
+        this.initCategoryDropdown();
+        
+        // Statistics
+        const statisticsItem = document.getElementById('menuStatistics');
+        if (statisticsItem) {
+            statisticsItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                _log('Statistics menu item clicked - TODO: implement statistics view');
+                // TODO: Implement statistics view
+            });
+        }
+        
+        // Sound toggle
+        const soundItem = document.getElementById('menuSound');
+        const soundToggle = document.getElementById('menuSoundToggle');
+        if (soundItem && soundToggle) {
+            soundItem.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                e.stopPropagation();
+                // Toggle visual state immediately
+                soundToggle.classList.toggle('active');
+                // Ensure sound manager is initialized
+                window.__headlines_sound;
+                // Dispatch sound toggle event
+                window.dispatchEvent(new CustomEvent('headlines:soundToggle'));
+                
+                // Dispatch analytics event for sound setting change
+                const isEnabled = soundToggle.classList.contains('active');
+                window.dispatchEvent(new CustomEvent('headlines:soundSettingChanged', {
+                    detail: { enabled: isEnabled }
+                }));
+            });
+        }
+        
+        // Help
+        const helpItem = document.getElementById('menuHelp');
+        if (helpItem) {
+            helpItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                _log('Help menu item clicked');
+                this.close();
+                // Show tutorial popup
+                if (window.HeadlinesTutorial && typeof window.HeadlinesTutorial.showWelcomeTutorial === 'function') {
+                    window.HeadlinesTutorial.showWelcomeTutorial();
+                }
+            });
+        }
+        
+        // Give Up
+        const giveUpItem = document.getElementById('menuGiveUp');
+        if (giveUpItem) {
+            giveUpItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                _log('Give Up/Next Puzzle menu item clicked');
+                this.close();
+                
+                // Check if puzzle is solved (item is in Next Puzzle mode)
+                if (giveUpItem.classList.contains('next-puzzle-mode')) {
+                    // Call next headline function
+                    if (typeof skipToNextHeadline === 'function') {
+                        skipToNextHeadline();
+                    }
+                } else {
+                    // Call give up function
+                    if (typeof giveUp === 'function') {
+                        giveUp();
+                    }
+                }
+            });
+        }
+        
+        // Create Own Puzzle
+        const createOwnPuzzleItem = document.getElementById('menuCreateOwnPuzzle');
+        if (createOwnPuzzleItem) {
+            createOwnPuzzleItem.addEventListener('click', () => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                _log('Create Own Puzzle menu item clicked');
+                this.close();
+                // Open create-puzzle.html in new tab
+                window.open('create-puzzle.html', '_blank');
+            });
+        }
+    }
+    
+    /**
+     * Switch Give Up item to Next Puzzle mode
+     */
+    switchToNextPuzzleMode() {
+        const giveUpItem = document.getElementById('menuGiveUp');
+        if (!giveUpItem) return;
+        
+        // Add mode class and remove danger class
+        giveUpItem.classList.add('next-puzzle-mode');
+        giveUpItem.classList.remove('danger');
+        
+        // Update icon to fast-forward icon (same as toolbar button)
+        const icon = giveUpItem.querySelector('.menu-item-icon svg');
+        if (icon) {
+            icon.innerHTML = '<path d="M6 6l6 6-6 6V6z"/><path d="M13 6l6 6-6 6V6z"/>';
+        }
+        
+        // Update label
+        const label = document.getElementById('menuGiveUpLabel');
+        if (label && typeof t !== 'undefined') {
+            label.textContent = t('menu.nextPuzzle');
+            label.style.color = ''; // Reset to default color
+        }
+        
+        // Update description
+        const value = document.getElementById('menuGiveUpValue');
+        if (value && typeof t !== 'undefined') {
+            value.textContent = t('menu.nextPuzzleDescription');
+        }
+        
+        _log('Switched Give Up item to Next Puzzle mode');
+    }
+    
+    /**
+     * Switch Next Puzzle item back to Give Up mode
+     */
+    switchToGiveUpMode() {
+        const giveUpItem = document.getElementById('menuGiveUp');
+        if (!giveUpItem) return;
+        
+        // Remove mode class and add danger class back
+        giveUpItem.classList.remove('next-puzzle-mode');
+        giveUpItem.classList.add('danger');
+        
+        // Update icon back to X icon
+        const icon = giveUpItem.querySelector('.menu-item-icon svg');
+        if (icon) {
+            icon.innerHTML = '<path d="M12 2C6.47 2 2 6.47 2 12s4.47 10 10 10 10-4.47 10-10S17.53 2 12 2zm5 13.59L15.59 17 12 13.41 8.41 17 7 15.59 10.59 12 7 8.41 8.41 7 12 10.59 15.59 7 17 8.41 13.41 12 17 15.59z"/>';
+        }
+        
+        // Update label
+        const label = document.getElementById('menuGiveUpLabel');
+        if (label && typeof t !== 'undefined') {
+            label.textContent = t('menu.giveUp');
+        }
+        
+        // Update description
+        const value = document.getElementById('menuGiveUpValue');
+        if (value && typeof t !== 'undefined') {
+            value.textContent = t('menu.giveUpDescription');
+        }
+        
+        _log('Switched Next Puzzle item back to Give Up mode');
+    }
+
+    /**
+     * Open the menu
+     */
+    open() {
+        if (!this.overlay) return;
+        
+        this.isOpen = true;
+        this.overlay.classList.add('visible');
+        this.updateMenuValues();
+        this.updateSoundToggleState();
+        
+        _log('Menu opened');
+    }
+
+    /**
+     * Close the menu
+     */
+    close() {
+        if (!this.overlay) return;
+        
+        this.isOpen = false;
+        this.overlay.classList.remove('visible');
+        
+        _log('Menu closed');
+    }
+
+    /**
+     * Toggle the menu
+     */
+    toggle() {
+        if (this.isOpen) {
+            this.close();
+        } else {
+            this.open();
+        }
+    }
+
+    /**
+     * Update menu values to reflect current state
+     */
+    updateMenuValues() {
+        // Update language value
+        const languageValue = document.getElementById('menuLanguageText');
+        if (languageValue && typeof i18n !== 'undefined') {
+            const currentLang = i18n.currentLanguage;
+            const langMap = { 'en': 'English', 'ru': 'Русский', 'pt': 'Português' };
+            const displayName = langMap[currentLang] || 'English';
+            _log(`Language dropdown: current i18n language = '${currentLang}', setting display to '${displayName}'`);
+            languageValue.textContent = displayName;
+            
+            // Also update the selected state of dropdown options
+            if (this.languageDropdown) {
+                this.languageDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.langCode === currentLang);
+                });
+            }
+        }
+        
+        // Update difficulty name and description
+        const difficultyText = document.getElementById('menuDifficultyText');
+        const difficultyValue = document.getElementById('menuDifficultyValue');
+        if (difficultyText && difficultyValue && typeof currentDifficulty !== 'undefined' && typeof t !== 'undefined') {
+            difficultyText.textContent = t(`difficulty.${currentDifficulty}.name`);
+            difficultyValue.textContent = t(`difficulty.${currentDifficulty}.description`);
+            
+            // Also update the selected state of difficulty dropdown options
+            if (this.difficultyDropdown) {
+                this.difficultyDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.difficultyId === currentDifficulty);
+                });
+            }
+        }
+        
+        // Update category name and description
+        const categoryText = document.getElementById('menuCategoryText');
+        const categoryValue = document.getElementById('menuCategoryValue');
+        if (categoryText && categoryValue && typeof currentCategory !== 'undefined' && typeof t !== 'undefined') {
+            categoryText.textContent = t(`category.${currentCategory}.name`);
+            categoryValue.textContent = t(`category.${currentCategory}.description`);
+            
+            // Also update the selected state of category dropdown options
+            if (this.categoryDropdown) {
+                this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                    option.classList.toggle('selected', option.dataset.categoryId === currentCategory);
+                });
+            }
+        }
+    }
+    
+    /**
+     * Update sound toggle state to reflect current sound manager state
+     */
+    updateSoundToggleState() {
+        const soundToggle = document.getElementById('menuSoundToggle');
+        if (soundToggle && window.__headlines_sound) {
+            soundToggle.classList.toggle('active', window.__headlines_sound.enabled);
+        }
+    }
+    
+    /**
+     * Update difficulty dropdown text when language changes
+     */
+    updateDifficultyDropdownLanguage() {
+        if (!this.difficultyDropdown) return;
+        
+        this.difficultyDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+            const diffId = option.dataset.difficultyId;
+            const optionText = option.querySelector('.menu-dropdown-option-text');
+            if (optionText && diffId && typeof t !== 'undefined') {
+                const name = t(`difficulty.${diffId}.name`);
+                const description = t(`difficulty.${diffId}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            }
+        });
+    }
+
+    /**
+     * Update category dropdown text when language changes
+     */
+    updateCategoryDropdownLanguage() {
+        if (!this.categoryDropdown) return;
+        
+        this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+            const catId = option.dataset.categoryId;
+            const optionText = option.querySelector('.menu-dropdown-option-text');
+            if (optionText && catId && typeof t !== 'undefined') {
+                const name = t(`category.${catId}.name`);
+                const description = t(`category.${catId}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            }
+        });
+    }
+
+    /**
+     * Update menu text when language changes
+     */
+    updateLanguage() {
+        const menuTitle = document.getElementById('menuTitle');
+        if (menuTitle) {
+            menuTitle.textContent = t('menu.title');
+        }
+        
+        const menuLanguageLabel = document.getElementById('menuLanguageLabel');
+        if (menuLanguageLabel) {
+            menuLanguageLabel.textContent = t('menu.language');
+        }
+        
+        const menuDifficultyLabel = document.getElementById('menuDifficultyLabel');
+        if (menuDifficultyLabel) {
+            menuDifficultyLabel.textContent = t('menu.difficulty');
+        }
+        
+        const menuCategoryLabel = document.getElementById('menuCategoryLabel');
+        if (menuCategoryLabel) {
+            menuCategoryLabel.textContent = t('menu.category');
+        }
+        
+        const menuStatisticsLabel = document.getElementById('menuStatisticsLabel');
+        if (menuStatisticsLabel) {
+            menuStatisticsLabel.textContent = t('menu.statistics');
+        }
+        
+        const menuSoundLabel = document.getElementById('menuSoundLabel');
+        if (menuSoundLabel) {
+            menuSoundLabel.textContent = t('menu.sound');
+        }
+        
+        const menuHelpLabel = document.getElementById('menuHelpLabel');
+        if (menuHelpLabel) {
+            menuHelpLabel.textContent = t('menu.help');
+        }
+        
+        const menuGiveUpLabel = document.getElementById('menuGiveUpLabel');
+        if (menuGiveUpLabel) {
+            menuGiveUpLabel.textContent = t('menu.giveUp');
+        }
+        
+        const menuGiveUpValue = document.getElementById('menuGiveUpValue');
+        if (menuGiveUpValue) {
+            menuGiveUpValue.textContent = t('menu.giveUpDescription');
+        }
+        
+        const menuCreateOwnPuzzleLabel = document.getElementById('menuCreateOwnPuzzleLabel');
+        if (menuCreateOwnPuzzleLabel) {
+            menuCreateOwnPuzzleLabel.textContent = t('menu.createOwnPuzzle');
+        }
+        
+        const menuCreateOwnPuzzleValue = document.getElementById('menuCreateOwnPuzzleValue');
+        if (menuCreateOwnPuzzleValue) {
+            menuCreateOwnPuzzleValue.textContent = t('menu.createOwnPuzzleDescription');
+        }
+        
+        // Update difficulty dropdown language
+        this.updateDifficultyDropdownLanguage();
+        
+        // Update category dropdown language
+        this.updateCategoryDropdownLanguage();
+        
+        // Update values as well
+        this.updateMenuValues();
+    }
+    
+    /**
+     * Initialize language dropdown
+     */
+    initLanguageDropdown() {
+        const languageItem = document.getElementById('menuLanguage');
+        const languageText = document.getElementById('menuLanguageText');
+        
+        if (!languageItem || !languageText) return;
+        
+        // Create dropdown panel
+        const dropdownPanel = document.createElement('div');
+        dropdownPanel.className = 'menu-dropdown-panel';
+        dropdownPanel.id = 'languageDropdownPanel';
+        
+        // Language options - get from i18n if available
+        const languages = typeof i18n !== 'undefined' && i18n.getAvailableLanguages
+            ? i18n.getAvailableLanguages()
+            : [
+                { code: 'en', name: 'English' },
+                { code: 'ru', name: 'Русский' },
+                { code: 'pt', name: 'Português' }
+            ];
+        
+        languages.forEach(lang => {
+            const option = document.createElement('div');
+            option.className = 'menu-dropdown-option';
+            option.dataset.langCode = lang.code;
+            
+            const optionText = document.createElement('span');
+            optionText.className = 'menu-dropdown-option-text';
+            optionText.textContent = lang.name;
+            option.appendChild(optionText);
+            
+            const checkIcon = document.createElement('div');
+            checkIcon.className = 'menu-dropdown-check';
+            checkIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+            option.appendChild(checkIcon);
+            
+            // Mark current language as selected
+            if (typeof i18n !== 'undefined' && lang.code === i18n.currentLanguage) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                e.stopPropagation();
+                this.selectLanguage(lang.code, lang.name);
+                this.closeLanguageDropdown();
+            });
+            
+            dropdownPanel.appendChild(option);
+        });
+        
+        // Append to body
+        document.body.appendChild(dropdownPanel);
+        
+        // Click handler for language item
+        languageItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            e.stopPropagation();
+            if (languageItem.classList.contains('open')) {
+                this.closeLanguageDropdown();
+            } else {
+                this.closeDifficultyDropdown(); // Close other dropdown
+                this.closeCategoryDropdown();
+                this.openLanguageDropdown();
+            }
+        });
+        
+        // Store references
+        this.languageDropdown = dropdownPanel;
+        this.languageItem = languageItem;
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (languageItem.classList.contains('open') && 
+                !languageItem.contains(e.target) && 
+                !dropdownPanel.contains(e.target)) {
+                this.closeLanguageDropdown();
+            }
+        });
+    }
+    
+    /**
+     * Open language dropdown
+     */
+    openLanguageDropdown() {
+        if (!this.languageItem || !this.languageDropdown) return;
+        
+        this.languageItem.classList.add('open');
+        
+        // Position dropdown
+        const rect = this.languageItem.getBoundingClientRect();
+        const dropdownSelect = this.languageItem.querySelector('.menu-dropdown-select');
+        const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
+        
+        this.languageDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.languageDropdown.style.top = `${selectRect.bottom}px`;
+        
+        this.languageDropdown.classList.add('visible');
+        
+        _log('Language dropdown opened');
+    }
+    
+    /**
+     * Close language dropdown
+     */
+    closeLanguageDropdown() {
+        if (!this.languageItem || !this.languageDropdown) return;
+        
+        this.languageItem.classList.remove('open');
+        this.languageDropdown.classList.remove('visible');
+        
+        _log('Language dropdown closed');
+    }
+    
+    /**
+     * Select a language
+     */
+    async selectLanguage(langCode, langName) {
+        if (typeof i18n === 'undefined') return;
+        
+        const currentLang = i18n.currentLanguage;
+        if (langCode === currentLang) return;
+        
+        _log(`Language changed to: ${langCode}`);
+        
+        // Update i18n
+        i18n.setLanguage(langCode);
+        
+        // Update display text
+        const languageText = document.getElementById('menuLanguageText');
+        if (languageText) {
+            languageText.textContent = langName;
+        }
+        
+        // Update selected state in dropdown
+        if (this.languageDropdown) {
+            this.languageDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.langCode === langCode);
+            });
+        }
+        
+        // Save to platform
+        if (typeof Platform !== 'undefined' && Platform.saveGameLanguage) {
+            await Platform.saveGameLanguage(langCode);
+        }
+        
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:languageChanged', {
+            detail: { newLanguage: langCode }
+        }));
+        
+        // Update all UI
+        if (typeof updateLocalizedText === 'function') {
+            updateLocalizedText();
+        }
+        this.updateLanguage();
+    }
+    
+    /**
+     * Initialize difficulty dropdown
+     */
+    initDifficultyDropdown() {
+        const difficultyItem = document.getElementById('menuDifficulty');
+        const difficultyText = document.getElementById('menuDifficultyText');
+        
+        if (!difficultyItem || !difficultyText) return;
+        
+        // Create dropdown panel
+        const dropdownPanel = document.createElement('div');
+        dropdownPanel.className = 'menu-dropdown-panel';
+        dropdownPanel.id = 'difficultyDropdownPanel';
+        
+        // Difficulty options
+        const difficulties = [
+            { id: 'easy', key: 'difficulty.easy' },
+            { id: 'mediumEasy', key: 'difficulty.mediumEasy' },
+            { id: 'medium', key: 'difficulty.medium' },
+            { id: 'mediumHard', key: 'difficulty.mediumHard' },
+            { id: 'hard', key: 'difficulty.hard' }
+        ];
+        
+        difficulties.forEach(diff => {
+            const option = document.createElement('div');
+            option.className = 'menu-dropdown-option';
+            option.dataset.difficultyId = diff.id;
+            
+            const optionText = document.createElement('span');
+            optionText.className = 'menu-dropdown-option-text';
+            // Show "Name - Description" in dropdown
+            if (typeof t !== 'undefined') {
+                const name = t(`${diff.key}.name`);
+                const description = t(`${diff.key}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            } else {
+                optionText.textContent = diff.id;
+            }
+            option.appendChild(optionText);
+            
+            const checkIcon = document.createElement('div');
+            checkIcon.className = 'menu-dropdown-check';
+            checkIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+            option.appendChild(checkIcon);
+            
+            // Mark current difficulty as selected
+            if (typeof currentDifficulty !== 'undefined' && diff.id === currentDifficulty) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                e.stopPropagation();
+                this.selectDifficulty(diff.id);
+                this.closeDifficultyDropdown();
+            });
+            
+            dropdownPanel.appendChild(option);
+        });
+        
+        // Append to body
+        document.body.appendChild(dropdownPanel);
+        
+        // Click handler for difficulty item
+        difficultyItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            e.stopPropagation();
+            if (difficultyItem.classList.contains('open')) {
+                this.closeDifficultyDropdown();
+            } else {
+                this.closeLanguageDropdown(); // Close other dropdown
+                this.closeCategoryDropdown();
+                this.openDifficultyDropdown();
+            }
+        });
+        
+        // Store references
+        this.difficultyDropdown = dropdownPanel;
+        this.difficultyItem = difficultyItem;
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (difficultyItem.classList.contains('open') && 
+                !difficultyItem.contains(e.target) && 
+                !dropdownPanel.contains(e.target)) {
+                this.closeDifficultyDropdown();
+            }
+        });
+    }
+    
+    /**
+     * Open difficulty dropdown
+     */
+    openDifficultyDropdown() {
+        if (!this.difficultyItem || !this.difficultyDropdown) return;
+        
+        this.difficultyItem.classList.add('open');
+        
+        // Position dropdown
+        const rect = this.difficultyItem.getBoundingClientRect();
+        const dropdownSelect = this.difficultyItem.querySelector('.menu-dropdown-select');
+        const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
+        
+        this.difficultyDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.difficultyDropdown.style.top = `${selectRect.bottom}px`;
+        
+        this.difficultyDropdown.classList.add('visible');
+        
+        _log('Difficulty dropdown opened');
+    }
+    
+    /**
+     * Close difficulty dropdown
+     */
+    closeDifficultyDropdown() {
+        if (!this.difficultyItem || !this.difficultyDropdown) return;
+        
+        this.difficultyItem.classList.remove('open');
+        this.difficultyDropdown.classList.remove('visible');
+        
+        _log('Difficulty dropdown closed');
+    }
+    
+    /**
+     * Select a difficulty
+     */
+    selectDifficulty(difficultyId) {
+        if (typeof currentDifficulty === 'undefined') return;
+        
+        if (difficultyId === currentDifficulty) return;
+        
+        _log(`Difficulty changed to: ${difficultyId}`);
+        
+        // Update global difficulty
+        if (typeof changeDifficulty === 'function') {
+            changeDifficulty(difficultyId);
+        } else {
+            window.currentDifficulty = difficultyId;
+        }
+        
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:difficultyChanged', {
+            detail: { newDifficulty: difficultyId }
+        }));
+        
+        // Update display text - show only name
+        const difficultyText = document.getElementById('menuDifficultyText');
+        if (difficultyText && typeof t !== 'undefined') {
+            difficultyText.textContent = t(`difficulty.${difficultyId}.name`);
+        }
+        
+        // Update description text
+        const difficultyValue = document.getElementById('menuDifficultyValue');
+        if (difficultyValue && typeof t !== 'undefined') {
+            difficultyValue.textContent = t(`difficulty.${difficultyId}.description`);
+        }
+        
+        // Update selected state in dropdown
+        if (this.difficultyDropdown) {
+            this.difficultyDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.difficultyId === difficultyId);
+            });
+        }
+    }
+
+    /**
+     * Initialize category dropdown
+     */
+    initCategoryDropdown() {
+        const categoryItem = document.getElementById('menuCategory');
+        const categoryText = document.getElementById('menuCategoryText');
+        
+        if (!categoryItem || !categoryText) return;
+        
+        // Create dropdown panel
+        const dropdownPanel = document.createElement('div');
+        dropdownPanel.className = 'menu-dropdown-panel';
+        dropdownPanel.id = 'categoryDropdownPanel';
+        
+        // Category options
+        const categories = [
+            { id: 'all', key: 'category.all' },
+            { id: 'general', key: 'category.general' },
+            { id: 'economy', key: 'category.economy' },
+            { id: 'technology', key: 'category.technology' },
+            { id: 'sports', key: 'category.sports' }
+        ];
+        
+        categories.forEach(cat => {
+            const option = document.createElement('div');
+            option.className = 'menu-dropdown-option';
+            option.dataset.categoryId = cat.id;
+            
+            const optionText = document.createElement('span');
+            optionText.className = 'menu-dropdown-option-text';
+            // Show "Name - Description" in dropdown
+            if (typeof t !== 'undefined') {
+                const name = t(`${cat.key}.name`);
+                const description = t(`${cat.key}.description`);
+                optionText.textContent = `${name} - ${description}`;
+            } else {
+                optionText.textContent = cat.id;
+            }
+            option.appendChild(optionText);
+            
+            const checkIcon = document.createElement('div');
+            checkIcon.className = 'menu-dropdown-check';
+            checkIcon.innerHTML = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/></svg>';
+            option.appendChild(checkIcon);
+            
+            // Mark current category as selected
+            if (typeof currentCategory !== 'undefined' && cat.id === currentCategory) {
+                option.classList.add('selected');
+            }
+            
+            option.addEventListener('click', (e) => {
+                window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+                e.stopPropagation();
+                this.selectCategory(cat.id);
+                this.closeCategoryDropdown();
+            });
+            
+            dropdownPanel.appendChild(option);
+        });
+        
+        // Append to body
+        document.body.appendChild(dropdownPanel);
+        
+        // Click handler for category item
+        categoryItem.addEventListener('click', (e) => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            e.stopPropagation();
+            if (categoryItem.classList.contains('open')) {
+                this.closeCategoryDropdown();
+            } else {
+                this.closeLanguageDropdown(); // Close other dropdowns
+                this.closeDifficultyDropdown();
+                this.openCategoryDropdown();
+            }
+        });
+        
+        // Store references
+        this.categoryDropdown = dropdownPanel;
+        this.categoryItem = categoryItem;
+        
+        // Close on outside click
+        document.addEventListener('click', (e) => {
+            if (categoryItem.classList.contains('open') && 
+                !categoryItem.contains(e.target) && 
+                !dropdownPanel.contains(e.target)) {
+                this.closeCategoryDropdown();
+            }
+        });
+    }
+    
+    /**
+     * Open category dropdown
+     */
+    openCategoryDropdown() {
+        if (!this.categoryItem || !this.categoryDropdown) return;
+        
+        this.categoryItem.classList.add('open');
+        
+        // Position dropdown
+        const rect = this.categoryItem.getBoundingClientRect();
+        const dropdownSelect = this.categoryItem.querySelector('.menu-dropdown-select');
+        const selectRect = dropdownSelect ? dropdownSelect.getBoundingClientRect() : rect;
+        
+        this.categoryDropdown.style.right = `${window.innerWidth - selectRect.right - 12}px`;
+        this.categoryDropdown.style.top = `${selectRect.bottom}px`;
+        
+        this.categoryDropdown.classList.add('visible');
+        
+        _log('Category dropdown opened');
+    }
+    
+    /**
+     * Close category dropdown
+     */
+    closeCategoryDropdown() {
+        if (!this.categoryItem || !this.categoryDropdown) return;
+        
+        this.categoryItem.classList.remove('open');
+        this.categoryDropdown.classList.remove('visible');
+        
+        _log('Category dropdown closed');
+    }
+    
+    /**
+     * Select a category
+     */
+    selectCategory(categoryId) {
+        if (typeof currentCategory === 'undefined') return;
+        
+        if (categoryId === currentCategory) return;
+        
+        _log(`Category changed to: ${categoryId}`);
+        
+        // Update global category
+        if (typeof changeCategory === 'function') {
+            changeCategory(categoryId);
+        } else {
+            window.currentCategory = categoryId;
+        }
+        
+        // Dispatch analytics event
+        window.dispatchEvent(new CustomEvent('headlines:categoryChanged', {
+            detail: { newCategory: categoryId }
+        }));
+        
+        // Update display text - show only name
+        const categoryText = document.getElementById('menuCategoryText');
+        if (categoryText && typeof t !== 'undefined') {
+            categoryText.textContent = t(`category.${categoryId}.name`);
+        }
+        
+        // Update description text
+        const categoryValue = document.getElementById('menuCategoryValue');
+        if (categoryValue && typeof t !== 'undefined') {
+            categoryValue.textContent = t(`category.${categoryId}.description`);
+        }
+        
+        // Update selected state in dropdown
+        if (this.categoryDropdown) {
+            this.categoryDropdown.querySelectorAll('.menu-dropdown-option').forEach(option => {
+                option.classList.toggle('selected', option.dataset.categoryId === categoryId);
+            });
+        }
+    }
+}
+
+// Create global instance
+if (typeof window !== 'undefined') {
+    window.HamburgerMenu = new HamburgerMenu();
+    
+    // Initialize when DOM is ready
+    document.addEventListener('DOMContentLoaded', () => {
+        window.HamburgerMenu.init();
+    });
+}
+
+})();

@@ -1,1 +1,168 @@
-!function(){"use strict";function e(e){return new Promise(t=>{const n=document.createElement("div");n.className="popup",e.isTutorial&&n.classList.add("tutorial-popup"),"error"===e.type&&n.classList.add("error-popup");const o=document.createElement("div");o.className="popup-content";const c=document.createElement("div");c.className="popup-top";const a=document.createElement("div");a.className="popup-top-inner";const s=document.createElement("h2");s.className="popup-title",s.textContent=e.title||"";const i=document.createElement("button");i.className="popup-close",i.innerHTML="×",i.addEventListener("click",()=>{r()}),a.appendChild(s),a.appendChild(i),c.appendChild(a);const p=document.createElement("div");p.className="popup-body",p.innerHTML=e.content||"";const d=document.createElement("div");d.className="popup-footer",(e.buttons||[]).forEach(e=>{const t=document.createElement("button");t.className=`popup-button ${e.class||"primary"}`,t.textContent=e.text||"OK",t.addEventListener("click",()=>{e.action&&e.action(),r()}),d.appendChild(t)}),o.appendChild(c),o.appendChild(p),o.appendChild(d),n.appendChild(o),document.body.appendChild(n),requestAnimationFrame(()=>{n.classList.add("visible")}),!1!==e.closeOnBackdrop&&n.addEventListener("click",e=>{e.target===n&&r()});const l=e=>{"Escape"===e.key&&r()};function r(){n.classList.remove("visible"),setTimeout(()=>{n.parentNode&&n.parentNode.removeChild(n),document.removeEventListener("keydown",l),t()},300)}document.addEventListener("keydown",l)})}"undefined"!=typeof window&&(window.showPopup=e,window.showAlert=function(n,o){return e({title:n,content:`<p>${o}</p>`,buttons:[{text:t("ui.ok")||"OK"}]})},window.showConfirm=function(n,o,c,a){return e({title:n,content:`<p>${o}</p>`,buttons:[{text:t("ui.cancel")||"Cancel",action:a,class:"secondary"},{text:t("ui.ok")||"OK",action:c,class:"primary"}]})})}();
+// ===== POPUP SYSTEM =====
+// Basic popup functionality for Headlines game
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('popups', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[popups]', message);
+    }
+}
+
+/**
+ * Shows a popup with title, content, and buttons
+ * @param {Object} options - Popup options
+ * @param {string} options.title - Popup title
+ * @param {string} options.content - Popup content (HTML allowed)
+ * @param {Array} options.buttons - Array of button objects {text, action, class}
+ * @param {boolean} options.closeOnBackdrop - Whether clicking backdrop closes popup
+ * @returns {Promise} Resolves when popup is closed
+ */
+function showPopup(options) {
+    return new Promise((resolve) => {
+        // Create overlay
+        const overlay = document.createElement('div');
+        overlay.className = 'popup';
+        
+        // Add type-specific classes
+        if (options.isTutorial) overlay.classList.add('tutorial-popup');
+        if (options.type === 'error') overlay.classList.add('error-popup');
+        
+        // Create content
+        const content = document.createElement('div');
+        content.className = 'popup-content';
+        
+        // Top section
+        const top = document.createElement('div');
+        top.className = 'popup-top';
+        
+        const topInner = document.createElement('div');
+        topInner.className = 'popup-top-inner';
+        
+        const title = document.createElement('h2');
+        title.className = 'popup-title';
+        title.textContent = options.title || '';
+        
+        const closeBtn = document.createElement('button');
+        closeBtn.className = 'popup-close';
+        closeBtn.innerHTML = '×';
+        closeBtn.addEventListener('click', () => {
+            closePopup();
+        });
+        
+        topInner.appendChild(title);
+        topInner.appendChild(closeBtn);
+        top.appendChild(topInner);
+        
+        // Body
+        const body = document.createElement('div');
+        body.className = 'popup-body';
+        body.innerHTML = options.content || '';
+        
+        // Footer
+        const footer = document.createElement('div');
+        footer.className = 'popup-footer';
+        
+        (options.buttons || []).forEach(btnOptions => {
+            const btn = document.createElement('button');
+            btn.className = `popup-button ${btnOptions.class || 'primary'}`;
+            btn.textContent = btnOptions.text || 'OK';
+            btn.addEventListener('click', () => {
+                if (btnOptions.action) {
+                    btnOptions.action();
+                }
+                closePopup();
+            });
+            footer.appendChild(btn);
+        });
+        
+        // Assemble
+        content.appendChild(top);
+        content.appendChild(body);
+        content.appendChild(footer);
+        overlay.appendChild(content);
+        
+        // Add to body
+        document.body.appendChild(overlay);
+        
+        // Show with animation
+        requestAnimationFrame(() => {
+            overlay.classList.add('visible');
+        });
+        
+        // Handle backdrop click
+        if (options.closeOnBackdrop !== false) {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    closePopup();
+                }
+            });
+        }
+        
+        // Handle escape key
+        const escapeHandler = (e) => {
+            if (e.key === 'Escape') {
+                closePopup();
+            }
+        };
+        document.addEventListener('keydown', escapeHandler);
+        
+        function closePopup() {
+            overlay.classList.remove('visible');
+            setTimeout(() => {
+                if (overlay.parentNode) {
+                    overlay.parentNode.removeChild(overlay);
+                }
+                document.removeEventListener('keydown', escapeHandler);
+                resolve();
+            }, 300);
+        }
+    });
+}
+
+/**
+ * Shows a simple alert popup
+ * @param {string} title - Alert title
+ * @param {string} message - Alert message
+ * @returns {Promise} Resolves when closed
+ */
+function showAlert(title, message) {
+    return showPopup({
+        title: title,
+        content: `<p>${message}</p>`,
+        buttons: [{ text: t('ui.ok') || 'OK' }]
+    });
+}
+
+/**
+ * Shows a confirmation popup
+ * @param {string} title - Confirmation title
+ * @param {string} message - Confirmation message
+ * @param {Function} onConfirm - Callback for confirm action
+ * @param {Function} onCancel - Callback for cancel action
+ * @returns {Promise} Resolves when closed
+ */
+function showConfirm(title, message, onConfirm, onCancel) {
+    return showPopup({
+        title: title,
+        content: `<p>${message}</p>`,
+        buttons: [
+            { text: t('ui.cancel') || 'Cancel', action: onCancel, class: 'secondary' },
+            { text: t('ui.ok') || 'OK', action: onConfirm, class: 'primary' }
+        ]
+    });
+}
+
+// Expose functions globally for testing and external use
+if (typeof window !== 'undefined') {
+    window.showPopup = showPopup;
+    window.showAlert = showAlert;
+    window.showConfirm = showConfirm;
+}
+
+})();

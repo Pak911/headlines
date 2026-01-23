@@ -1,1 +1,246 @@
-const headlinesAnalytics={isGoogleAnalyticsEnabled:()=>!0===window.analyticsConfig?.googleAnalytics?.enabled,isAnalyticsDebugEnabled:()=>!0===window.analyticsConfig?.analyticsDebug,formatEventForConsole:(e,n={})=>`${e}${Object.keys(n).length>0?` (${JSON.stringify(n)})`:""}`,logAnalyticsEvent(e,n={}){if(this.isAnalyticsDebugEnabled()){const t=this.formatEventForConsole(e,n);console.log("[analytics]",t)}},sendGoogleAnalyticsEvent(e,n={}){if(this.logAnalyticsEvent(e,n),this.isGoogleAnalyticsEnabled())if("function"==typeof gtag)try{gtag("event",e,n)}catch(n){console.warn("[analytics] Failed to send GA event:",e,n)}else console.warn("[analytics] gtag not available, skipping event:",e)},getCurrentGameState(){return{mode:this.getCurrentMode(),difficulty:this.getCurrentDifficulty(),language:this.getCurrentLanguage()}},getCurrentMode:()=>window.Utils&&window.Utils.isInCustomLinkMode&&window.Utils.isInCustomLinkMode()?"challenge":"news",getCurrentDifficulty:()=>window.currentDifficulty||"medium",getCurrentLanguage:()=>localStorage.getItem("headlines-language")||(navigator.language.startsWith("ru")?"ru":"en"),trackPuzzleStart(e,n,t){const i={mode:e,difficulty:n,language:t};this.sendGoogleAnalyticsEvent("puzzleStart",i)},trackPuzzleSolved(e,n,t,i,a){const d={mode:e,movesUsed:n,starRating:t,difficulty:i,language:a};this.sendGoogleAnalyticsEvent("puzzleSolved",d)},trackPuzzleGiveUp(e,n,t,i){const a={mode:e,movesUsed:n,difficulty:t,language:i};this.sendGoogleAnalyticsEvent("puzzleGiveUp",a)},trackPuzzleSkipped(e,n,t){const i={mode:e,difficulty:n,language:t};this.sendGoogleAnalyticsEvent("puzzleSkipped",i)},trackPuzzleSkipped(e,n,t){const i={mode:e,difficulty:n,language:t};this.sendGoogleAnalyticsEvent("puzzleSkipped",i)},trackHelpOpened(){this.sendGoogleAnalyticsEvent("helpOpened",{})},trackLanguageChanged(e){const n={newLanguage:e};this.sendGoogleAnalyticsEvent("languageChanged",n)},trackDifficultyChanged(e){const n={newDifficulty:e};this.sendGoogleAnalyticsEvent("difficultyChanged",n)},trackSoundSettingChanged(e){const n={enabled:e};this.sendGoogleAnalyticsEvent("soundSettingChanged",n)},trackArticleRead(){this.sendGoogleAnalyticsEvent("articleRead",{})},trackCreateOwnPuzzleClicked(){this.sendGoogleAnalyticsEvent("createOwnPuzzleClicked",{})},trackCustomPuzzlePreviewed(e,n,t,i){const a={headlineLength:e,wordCount:n,difficulty:t,language:i};this.sendGoogleAnalyticsEvent("customPuzzlePreviewed",a)},trackCustomPuzzleLinkCopied(e,n,t,i){const a={headlineLength:e,wordCount:n,difficulty:t,language:i};this.sendGoogleAnalyticsEvent("customPuzzleLinkCopied",a)}};if("undefined"!=typeof window){if(!0===window.analyticsConfig?.googleAnalytics?.enabled){const e=document.createElement("script");function gtag(){dataLayer.push(arguments)}e.async=!0,e.src="https://www.googletagmanager.com/gtag/js?id="+window.analyticsConfig.googleAnalytics.measurementId,document.head.appendChild(e),window.dataLayer=window.dataLayer||[],window.gtag=gtag,gtag("js",new Date),gtag("config",window.analyticsConfig.googleAnalytics.measurementId),window.addEventListener("headlines:puzzleStart",e=>{window.headlinesAnalytics.trackPuzzleStart(e.detail.mode,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:puzzleSolved",e=>{window.headlinesAnalytics.trackPuzzleSolved(e.detail.mode,e.detail.movesUsed,e.detail.starRating,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:puzzleGiveUp",e=>{window.headlinesAnalytics.trackPuzzleGiveUp(e.detail.mode,e.detail.movesUsed,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:puzzleSkipped",e=>{window.headlinesAnalytics.trackPuzzleSkipped(e.detail.mode,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:articleRead",()=>{window.headlinesAnalytics.trackArticleRead()}),window.addEventListener("headlines:createOwnPuzzleClicked",()=>{window.headlinesAnalytics.trackCreateOwnPuzzleClicked()}),window.addEventListener("headlines:customPuzzlePreviewed",e=>{window.headlinesAnalytics.trackCustomPuzzlePreviewed(e.detail.headlineLength,e.detail.wordCount,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:customPuzzleLinkCopied",e=>{window.headlinesAnalytics.trackCustomPuzzleLinkCopied(e.detail.headlineLength,e.detail.wordCount,e.detail.difficulty,e.detail.language)}),window.addEventListener("headlines:helpOpened",()=>{window.headlinesAnalytics.trackHelpOpened()}),window.addEventListener("headlines:languageChanged",e=>{window.headlinesAnalytics.trackLanguageChanged(e.detail.newLanguage)}),window.addEventListener("headlines:difficultyChanged",e=>{window.headlinesAnalytics.trackDifficultyChanged(e.detail.newDifficulty)}),window.addEventListener("headlines:soundSettingChanged",e=>{window.headlinesAnalytics.trackSoundSettingChanged(e.detail.enabled)})}}"undefined"!=typeof window&&(window.headlinesAnalytics=headlinesAnalytics);
+// Headlines Analytics System
+// Handles sending custom events to configured analytics services
+
+const headlinesAnalytics = {
+    // Check if Google Analytics is enabled
+    isGoogleAnalyticsEnabled() {
+        return window.analyticsConfig?.googleAnalytics?.enabled === true;
+    },
+
+    // Check if analytics debug logging is enabled
+    isAnalyticsDebugEnabled() {
+        return window.analyticsConfig?.analyticsDebug === true;
+    },
+
+    // Format event data for console logging
+    formatEventForConsole(eventName, parameters = {}) {
+        const paramStr = Object.keys(parameters).length > 0
+            ? ` (${JSON.stringify(parameters)})`
+            : '';
+        return `${eventName}${paramStr}`;
+    },
+
+    // Log analytics event to console if debug is enabled
+    logAnalyticsEvent(eventName, parameters = {}) {
+        if (this.isAnalyticsDebugEnabled()) {
+            const formattedEvent = this.formatEventForConsole(eventName, parameters);
+            console.log('[analytics]', formattedEvent);
+        }
+    },
+
+    // Send event to Google Analytics 4
+    sendGoogleAnalyticsEvent(eventName, parameters = {}) {
+        // Always log to console if debug is enabled
+        this.logAnalyticsEvent(eventName, parameters);
+
+        if (!this.isGoogleAnalyticsEnabled()) {
+            return;
+        }
+
+        if (typeof gtag !== 'function') {
+            console.warn('[analytics] gtag not available, skipping event:', eventName);
+            return;
+        }
+
+        try {
+            gtag('event', eventName, parameters);
+        } catch (error) {
+            console.warn('[analytics] Failed to send GA event:', eventName, error);
+        }
+    },
+
+    // Get current game state parameters
+    getCurrentGameState() {
+        // Get mode from utils if available
+        const mode = this.getCurrentMode();
+        const difficulty = this.getCurrentDifficulty();
+        const language = this.getCurrentLanguage();
+
+        return { mode, difficulty, language };
+    },
+
+    // Get current game mode (news or challenge)
+    getCurrentMode() {
+        // Check if we're in challenge mode (custom puzzle)
+        if (window.Utils && window.Utils.isInCustomLinkMode && window.Utils.isInCustomLinkMode()) {
+            return 'challenge';
+        }
+        return 'news';
+    },
+
+    // Get current difficulty level
+    getCurrentDifficulty() {
+        return window.currentDifficulty || 'medium';
+    },
+
+    // Get current language
+    getCurrentLanguage() {
+        // Check for language in localStorage or use default
+        return localStorage.getItem('headlines-language') ||
+               (navigator.language.startsWith('ru') ? 'ru' : 'en');
+    },
+
+    // Core Puzzle Events
+    trackPuzzleStart(mode, difficulty, language) {
+        const parameters = { mode, difficulty, language };
+        this.sendGoogleAnalyticsEvent('puzzleStart', parameters);
+    },
+
+    trackPuzzleSolved(mode, movesUsed, starRating, difficulty, language) {
+        const parameters = { mode, movesUsed, starRating, difficulty, language };
+        this.sendGoogleAnalyticsEvent('puzzleSolved', parameters);
+    },
+
+    trackPuzzleGiveUp(mode, movesUsed, difficulty, language) {
+        const parameters = { mode, movesUsed, difficulty, language };
+        this.sendGoogleAnalyticsEvent('puzzleGiveUp', parameters);
+    },
+
+    trackPuzzleSkipped(mode, difficulty, language) {
+        const parameters = { mode, difficulty, language };
+        this.sendGoogleAnalyticsEvent('puzzleSkipped', parameters);
+    },
+
+    trackPuzzleSkipped(mode, difficulty, language) {
+        const parameters = { mode, difficulty, language };
+        this.sendGoogleAnalyticsEvent('puzzleSkipped', parameters);
+    },
+
+    // UI/Feature Events
+    trackHelpOpened() {
+        this.sendGoogleAnalyticsEvent('helpOpened', {});
+    },
+
+    trackLanguageChanged(newLanguage) {
+        const parameters = { newLanguage };
+        this.sendGoogleAnalyticsEvent('languageChanged', parameters);
+    },
+
+    trackDifficultyChanged(newDifficulty) {
+        const parameters = { newDifficulty };
+        this.sendGoogleAnalyticsEvent('difficultyChanged', parameters);
+    },
+
+    trackSoundSettingChanged(enabled) {
+        const parameters = { enabled };
+        this.sendGoogleAnalyticsEvent('soundSettingChanged', parameters);
+    },
+
+    trackArticleRead() {
+        this.sendGoogleAnalyticsEvent('articleRead', {});
+    },
+
+    trackCreateOwnPuzzleClicked() {
+        this.sendGoogleAnalyticsEvent('createOwnPuzzleClicked', {});
+    },
+
+    trackCustomPuzzlePreviewed(headlineLength, wordCount, difficulty, language) {
+        const parameters = { headlineLength, wordCount, difficulty, language };
+        this.sendGoogleAnalyticsEvent('customPuzzlePreviewed', parameters);
+    },
+
+    trackCustomPuzzleLinkCopied(headlineLength, wordCount, difficulty, language) {
+        const parameters = { headlineLength, wordCount, difficulty, language };
+        this.sendGoogleAnalyticsEvent('customPuzzleLinkCopied', parameters);
+    }
+};
+
+// Set up event listeners for custom events (only if analytics is enabled)
+if (typeof window !== 'undefined') {
+    // Check if Google Analytics is enabled before setting up anything
+    const isGAEnabled = window.analyticsConfig?.googleAnalytics?.enabled === true;
+    
+    if (isGAEnabled) {
+        // Dynamically load Google Analytics
+        const gaScript = document.createElement('script');
+        gaScript.async = true;
+        gaScript.src = 'https://www.googletagmanager.com/gtag/js?id=' + window.analyticsConfig.googleAnalytics.measurementId;
+        document.head.appendChild(gaScript);
+        
+        // Initialize gtag
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        window.gtag = gtag;
+        gtag('js', new Date());
+        gtag('config', window.analyticsConfig.googleAnalytics.measurementId);
+        
+        // Set up event listeners only when GA is enabled
+        window.addEventListener('headlines:puzzleStart', (event) => {
+            window.headlinesAnalytics.trackPuzzleStart(event.detail.mode, event.detail.difficulty, event.detail.language);
+        });
+
+        window.addEventListener('headlines:puzzleSolved', (event) => {
+            window.headlinesAnalytics.trackPuzzleSolved(
+                event.detail.mode, 
+                event.detail.movesUsed, 
+                event.detail.starRating, 
+                event.detail.difficulty, 
+                event.detail.language
+            );
+        });
+
+        window.addEventListener('headlines:puzzleGiveUp', (event) => {
+            window.headlinesAnalytics.trackPuzzleGiveUp(
+                event.detail.mode,
+                event.detail.movesUsed,
+                event.detail.difficulty,
+                event.detail.language
+            );
+        });
+
+        window.addEventListener('headlines:puzzleSkipped', (event) => {
+            window.headlinesAnalytics.trackPuzzleSkipped(
+                event.detail.mode,
+                event.detail.difficulty,
+                event.detail.language
+            );
+        });
+
+        window.addEventListener('headlines:articleRead', () => {
+            window.headlinesAnalytics.trackArticleRead();
+        });
+
+        window.addEventListener('headlines:createOwnPuzzleClicked', () => {
+            window.headlinesAnalytics.trackCreateOwnPuzzleClicked();
+        });
+
+        window.addEventListener('headlines:customPuzzlePreviewed', (event) => {
+            window.headlinesAnalytics.trackCustomPuzzlePreviewed(
+                event.detail.headlineLength,
+                event.detail.wordCount,
+                event.detail.difficulty,
+                event.detail.language
+            );
+        });
+
+        window.addEventListener('headlines:customPuzzleLinkCopied', (event) => {
+            window.headlinesAnalytics.trackCustomPuzzleLinkCopied(
+                event.detail.headlineLength,
+                event.detail.wordCount,
+                event.detail.difficulty,
+                event.detail.language
+            );
+        });
+
+        window.addEventListener('headlines:helpOpened', () => {
+            window.headlinesAnalytics.trackHelpOpened();
+        });
+
+        window.addEventListener('headlines:languageChanged', (event) => {
+            window.headlinesAnalytics.trackLanguageChanged(event.detail.newLanguage);
+        });
+
+        window.addEventListener('headlines:difficultyChanged', (event) => {
+            window.headlinesAnalytics.trackDifficultyChanged(event.detail.newDifficulty);
+        });
+
+        window.addEventListener('headlines:soundSettingChanged', (event) => {
+            window.headlinesAnalytics.trackSoundSettingChanged(event.detail.enabled);
+        });
+    }
+}
+
+// Expose globally for use by other modules
+if (typeof window !== 'undefined') {
+    window.headlinesAnalytics = headlinesAnalytics;
+}

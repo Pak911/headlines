@@ -1,1 +1,513 @@
-!function(){"use strict";function t(t,e={}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("difficulty-system",t,e):console.log("[difficulty-system]",t)}function e(t,e,r){const o=grid[t.row][t.col].currentLetter;grid[t.row][t.col].currentLetter=grid[e.row][e.col].currentLetter,grid[e.row][e.col].currentLetter=o,r.push({from:{row:t.row,col:t.col,letter:grid[e.row][e.col].currentLetter},to:{row:e.row,col:e.col,letter:grid[t.row][t.col].currentLetter}})}function r(){const t=[];for(let e=0;e<grid.length;e++){const r=[];for(let t=0;t<grid[e].length;t++)grid[e][t].letter?r.push({letter:grid[e][t].letter,currentLetter:grid[e][t].currentLetter}):r.push(null);t.push(r)}return t}function o(t){const e=[];for(let r=0;r<grid.length;r++)for(let o=0;o<grid[r].length;o++)grid[r][o].letter&&grid[r][o].wordIndices.includes(t)&&e.push({row:r,col:o});return e}function n(r=currentDifficulty){const n=getIntersectionCells(),i=[];let c=0;debugInfo.shuffleInfo={difficulty:r,swapsPerformed:0,minimumSolution:0,intersectionsPreserved:0,totalIntersections:n.length},difficultySettings&&difficultySettings[r]||(t(`⚠️ Invalid difficulty "${r}", falling back to "hard"`,{error:!0}),r="hard");const f=difficultySettings[r],s=f.maxGreenPercentage,g=countCorrectCells();switch(t(`Starting scramble - Initial: ${g.correctCells}/${g.totalCells} correct (${g.percentage.toFixed(1)}% green)`),t(`Target: ${s}% green letters for ${f.name} difficulty`),r){case"easy":c=function(t){let r=0;const n=difficultySettings.easy.maxSwaps;for(let l=0;l<currentHeadline.words.length;l++){const i=o(l).filter(t=>1===grid[t.row][t.col].wordIndices.length);if(i.length>=2){const o=Math.min(2,Math.floor(i.length/2));for(let l=0;l<o&&r<n;l++){const o=[...i];for(let t=o.length-1;t>0;t--){const e=Math.floor(Math.random()*(t+1));[o[t],o[e]]=[o[e],o[t]]}o.length>=2&&(e(o[0],o[1],t),r++)}}}return r}(i);break;case"mediumEasy":case"medium":case"mediumHard":case"hard":c=l(i,n,s,f);break;default:c=l(i,n,f.maxGreenPercentage||30,f)}const a=countCorrectCells();t(`Scramble complete - Final: ${a.correctCells}/${a.totalCells} correct (${a.percentage.toFixed(1)}% green)`),t(`Performed ${c} swaps to achieve target difficulty`),"easy"!==r&&void 0!==f.intersectionGreenPercentage&&function(e,r){if(0===e.length)return;let o=[],n=[];for(let t of e){const e=grid[t.row][t.col];e.letter===e.currentLetter?o.push(t):n.push(t)}const l=o.length,i=Math.round(e.length*r/100);if(t(`Intersection adjustment: ${l}/${e.length} green (${(l/e.length*100).toFixed(1)}%), target: ${i} (${r}%)`),l<i){const e=i-l;t(`Need to correct ${e} intersections`);const r=[];for(let t=0;t<grid.length;t++)for(let e=0;e<grid[t].length;e++){const o=grid[t][e];o.letter&&o.letter!==o.currentLetter&&1===o.wordIndices.length&&r.push({row:t,col:e})}for(let o=0;o<Math.min(e,n.length);o++){const e=n[o],l=grid[e.row][e.col].letter,i=r.find(t=>grid[t.row][t.col].currentLetter===l);if(i){const r=grid[e.row][e.col].currentLetter;grid[e.row][e.col].currentLetter=grid[i.row][i.col].currentLetter,grid[i.row][i.col].currentLetter=r,t(`  ✓ Corrected intersection at (${e.row},${e.col})`)}}}else if(l>i){const e=l-i;t(`Need to scramble ${e} intersections`);const r=[];for(let t=0;t<grid.length;t++)for(let e=0;e<grid[t].length;e++){const o=grid[t][e];o.letter&&1===o.wordIndices.length&&r.push({row:t,col:e})}for(let n=0;n<Math.min(e,o.length);n++){const e=o[n],l=r[Math.floor(Math.random()*r.length)];if(l){const r=grid[e.row][e.col].currentLetter;grid[e.row][e.col].currentLetter=grid[l.row][l.col].currentLetter,grid[l.row][l.col].currentLetter=r,t(`  ✓ Scrambled intersection at (${e.row},${e.col})`)}}}else t("Intersections already at target percentage")}(n,f.intersectionGreenPercentage),debugInfo.shuffleInfo.swapsPerformed=c,debugInfo.shuffleInfo.minimumSolution=c;let d=0;for(let t of n){const e=grid[t.row][t.col];e.letter===e.currentLetter&&d++}debugInfo.shuffleInfo.intersectionsPreserved=d}function l(o,n,l,i){let c=0;const f=i.maxSwaps;let s=r(),g=countCorrectCells().percentage,a=[...o],d=c,u=0;for(;u<1e4&&c<f;){const t=countCorrectCells();if(t.percentage<g&&(s=r(),g=t.percentage,a=[...o],d=c),t.percentage<=l)break;const n=[],i=[];for(let t=0;t<grid.length;t++)for(let e=0;e<grid[t].length;e++)grid[t][e].letter&&(grid[t][e].letter===grid[t][e].currentLetter?n.push({row:t,col:e}):i.push({row:t,col:e}));if(0===n.length)break;if(0===i.length){if(!(n.length>=2))break;{const t=n[Math.floor(Math.random()*n.length)];let r=n[Math.floor(Math.random()*n.length)],l=0;for(;t.row===r.row&&t.col===r.col&&l<10;)r=n[Math.floor(Math.random()*n.length)],l++;if(t.row===r.row&&t.col===r.col)break;e(t,r,o),c++}}else{e(n[Math.floor(Math.random()*n.length)],i[Math.floor(Math.random()*i.length)],o),c++}u++}const h=countCorrectCells();for(h.percentage>l&&g<h.percentage&&(t(`Target ${l}% not achieved (current: ${h.percentage.toFixed(1)}%). Restoring best state with ${g.toFixed(1)}% green.`),function(t){for(let e=0;e<grid.length;e++)for(let r=0;r<grid[e].length;r++)t[e][r]&&grid[e][r].letter&&(grid[e][r].currentLetter=t[e][r].currentLetter)}(s),o.length=0,o.push(...a),c=d);c<i.minSwaps&&c<f;){if(countCorrectCells().percentage>l){const t=[],r=[];for(let e=0;e<grid.length;e++)for(let o=0;o<grid[e].length;o++)grid[e][o].letter&&(grid[e][o].letter===grid[e][o].currentLetter?t.push({row:e,col:o}):r.push({row:e,col:o}));if(t.length>0&&r.length>0){e(t[Math.floor(Math.random()*t.length)],r[Math.floor(Math.random()*r.length)],o),c++}else{if(!(t.length>=2))break;e(t[0],t[1],o),c++}}else{const t=[];for(let e=0;e<grid.length;e++)for(let r=0;r<grid[e].length;r++)grid[e][r].letter&&grid[e][r].letter!==grid[e][r].currentLetter&&t.push({row:e,col:r});if(!(t.length>=2))break;{const r=t[Math.floor(Math.random()*t.length)];let n=t[Math.floor(Math.random()*t.length)],l=0;for(;r.row===n.row&&r.col===n.col&&l<10;)n=t[Math.floor(Math.random()*t.length)],l++;if(r.row===n.row&&r.col===n.col)break;e(r,n,o),c++}}}return c}function i(){const t=difficultySettings[currentDifficulty],e=document.getElementById("difficultyInfo");e&&(e.innerHTML=`\n            <strong>Current:</strong> ${t.name}<br>\n            <strong>Minimum swaps to solve:</strong> ${debugInfo.shuffleInfo.minimumSolution}<br>\n            <strong>Range:</strong> ${t.minSwaps}-${t.maxSwaps} swaps\n        `)}window.scrambleLetters=function(){n(currentDifficulty)},window.scrambleLettersByDifficulty=n,window.changeDifficulty=function(t){currentDifficulty=t,"undefined"!=typeof Platform&&Platform.saveGameDifficulty&&Platform.saveGameDifficulty(t).catch(t=>{console.error("Failed to save difficulty:",t)});for(let t=0;t<grid.length;t++)for(let e=0;e<grid[t].length;e++)grid[t][e].letter&&(grid[t][e].currentLetter=grid[t][e].letter);swapCount=0,document.getElementById("swapCount").textContent="0",n(t),renderCrossword(),i(),debugPanelVisible&&updateDebugInfo()},window.updateDifficultyDisplay=i,window.initDifficultySystem=async function(){if("undefined"!=typeof Platform&&Platform.isAvailable()&&Platform.loadGameDifficulty){const e=await Platform.loadGameDifficulty();e&&difficultySettings[e]?(currentDifficulty=e,t(`Loaded saved difficulty: ${e}`)):t(`Using default difficulty: ${currentDifficulty}`)}else t(`Platform not available, using default difficulty: ${currentDifficulty}`)}}();
+// Difficulty System - Letter Scrambling and Difficulty Management
+// Handles strategic letter scrambling with configurable difficulty constraints
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('difficulty-system', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[difficulty-system]', message);
+    }
+}
+
+// Perform a strategic swap between two positions
+function performStrategicSwap(pos1, pos2, swapLog) {
+    const temp = grid[pos1.row][pos1.col].currentLetter;
+    grid[pos1.row][pos1.col].currentLetter = grid[pos2.row][pos2.col].currentLetter;
+    grid[pos2.row][pos2.col].currentLetter = temp;
+    
+    swapLog.push({
+        from: {row: pos1.row, col: pos1.col, letter: grid[pos2.row][pos2.col].currentLetter},
+        to: {row: pos2.row, col: pos2.col, letter: grid[pos1.row][pos1.col].currentLetter}
+    });
+}
+
+// Capture current grid state for state tracking
+function captureGridState() {
+    const state = [];
+    for (let r = 0; r < grid.length; r++) {
+        const row = [];
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                row.push({
+                    letter: grid[r][c].letter,
+                    currentLetter: grid[r][c].currentLetter
+                });
+            } else {
+                row.push(null);
+            }
+        }
+        state.push(row);
+    }
+    return state;
+}
+
+// Restore grid state from captured state
+function restoreGridState(state) {
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (state[r][c] && grid[r][c].letter) {
+                grid[r][c].currentLetter = state[r][c].currentLetter;
+            }
+        }
+    }
+}
+
+// Get all cells that belong to a specific word
+function getWordCells(wordIndex) {
+    const cells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                cells.push({row: r, col: c});
+            }
+        }
+    }
+    return cells;
+}
+
+// Adjust intersection letters to match target green percentage
+function adjustIntersectionGreenPercentage(intersections, targetPercentage) {
+    if (intersections.length === 0) return;
+    
+    // Count current green intersections
+    let greenIntersections = [];
+    let wrongIntersections = [];
+    
+    for (let intersection of intersections) {
+        const cell = grid[intersection.row][intersection.col];
+        if (cell.letter === cell.currentLetter) {
+            greenIntersections.push(intersection);
+        } else {
+            wrongIntersections.push(intersection);
+        }
+    }
+    
+    const currentGreenCount = greenIntersections.length;
+    const targetGreenCount = Math.round(intersections.length * targetPercentage / 100);
+    
+    _log(`Intersection adjustment: ${currentGreenCount}/${intersections.length} green (${(currentGreenCount/intersections.length*100).toFixed(1)}%), target: ${targetGreenCount} (${targetPercentage}%)`);
+    
+    // If we need MORE green intersections
+    if (currentGreenCount < targetGreenCount) {
+        const needed = targetGreenCount - currentGreenCount;
+        _log(`Need to correct ${needed} intersections`);
+        
+        // Get all non-intersection wrong cells to swap with
+        const nonIntersectionWrongCells = [];
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                const cell = grid[r][c];
+                if (cell.letter && cell.letter !== cell.currentLetter && cell.wordIndices.length === 1) {
+                    nonIntersectionWrongCells.push({row: r, col: c});
+                }
+            }
+        }
+        
+        // Fix wrong intersections by swapping with non-intersection cells that have their correct letter
+        for (let i = 0; i < Math.min(needed, wrongIntersections.length); i++) {
+            const intersection = wrongIntersections[i];
+            const correctLetter = grid[intersection.row][intersection.col].letter;
+            
+            // Find a non-intersection cell that currently has this correct letter
+            const swapCandidate = nonIntersectionWrongCells.find(pos => 
+                grid[pos.row][pos.col].currentLetter === correctLetter
+            );
+            
+            if (swapCandidate) {
+                // Swap the intersection's wrong letter with the non-intersection's correct letter
+                const temp = grid[intersection.row][intersection.col].currentLetter;
+                grid[intersection.row][intersection.col].currentLetter = grid[swapCandidate.row][swapCandidate.col].currentLetter;
+                grid[swapCandidate.row][swapCandidate.col].currentLetter = temp;
+                _log(`  ✓ Corrected intersection at (${intersection.row},${intersection.col})`);
+            }
+        }
+    }
+    // If we need FEWER green intersections
+    else if (currentGreenCount > targetGreenCount) {
+        const excess = currentGreenCount - targetGreenCount;
+        _log(`Need to scramble ${excess} intersections`);
+        
+        // Get all non-intersection cells
+        const nonIntersectionCells = [];
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                const cell = grid[r][c];
+                if (cell.letter && cell.wordIndices.length === 1) {
+                    nonIntersectionCells.push({row: r, col: c});
+                }
+            }
+        }
+        
+        // Scramble some green intersections by swapping with non-intersection cells
+        for (let i = 0; i < Math.min(excess, greenIntersections.length); i++) {
+            const intersection = greenIntersections[i];
+            const swapCandidate = nonIntersectionCells[Math.floor(Math.random() * nonIntersectionCells.length)];
+            
+            if (swapCandidate) {
+                // Swap to make intersection wrong
+                const temp = grid[intersection.row][intersection.col].currentLetter;
+                grid[intersection.row][intersection.col].currentLetter = grid[swapCandidate.row][swapCandidate.col].currentLetter;
+                grid[swapCandidate.row][swapCandidate.col].currentLetter = temp;
+                _log(`  ✓ Scrambled intersection at (${intersection.row},${intersection.col})`);
+            }
+        }
+    } else {
+        _log(`Intersections already at target percentage`);
+    }
+}
+
+// Difficulty-based scrambling function with green letter percentage constraints
+function scrambleLettersByDifficulty(difficulty = currentDifficulty) {
+    const intersections = getIntersectionCells();
+    const swapLog = [];
+    let swapsPerformed = 0;
+    
+    // Reset shuffle info
+    debugInfo.shuffleInfo = {
+        difficulty: difficulty,
+        swapsPerformed: 0,
+        minimumSolution: 0,
+        intersectionsPreserved: 0,
+        totalIntersections: intersections.length
+    };
+    
+    // Validate difficulty setting exists
+    if (!difficultySettings || !difficultySettings[difficulty]) {
+        _log(`⚠️ Invalid difficulty "${difficulty}", falling back to "hard"`, {error: true});
+        difficulty = 'hard';
+    }
+    
+    const settings = difficultySettings[difficulty];
+    const targetGreenPercentage = settings.maxGreenPercentage;
+    
+    // Get initial stats for logging
+    const initialStats = countCorrectCells();
+    _log(`Starting scramble - Initial: ${initialStats.correctCells}/${initialStats.totalCells} correct (${initialStats.percentage.toFixed(1)}% green)`);
+    _log(`Target: ${targetGreenPercentage}% green letters for ${settings.name} difficulty`);
+    
+    switch (difficulty) {
+        case 'easy':
+            swapsPerformed = scrambleEasy(swapLog);
+            break;
+        case 'mediumEasy':
+        case 'medium':
+        case 'mediumHard':
+        case 'hard':
+            swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, targetGreenPercentage, settings);
+            break;
+        default:
+            swapsPerformed = scrambleWithGreenConstraint(swapLog, intersections, settings.maxGreenPercentage || 30, settings);
+    }
+    
+    // Get final stats for logging
+    const finalStats = countCorrectCells();
+    _log(`Scramble complete - Final: ${finalStats.correctCells}/${finalStats.totalCells} correct (${finalStats.percentage.toFixed(1)}% green)`);
+    _log(`Performed ${swapsPerformed} swaps to achieve target difficulty`);
+    
+    // Adjust intersections to match target percentage (except for Easy mode which handles its own)
+    if (difficulty !== 'easy' && settings.intersectionGreenPercentage !== undefined) {
+        adjustIntersectionGreenPercentage(intersections, settings.intersectionGreenPercentage);
+    }
+    
+    // Update debug info
+    debugInfo.shuffleInfo.swapsPerformed = swapsPerformed;
+    debugInfo.shuffleInfo.minimumSolution = swapsPerformed; // Minimum swaps needed equals swaps performed
+    
+    // Count preserved intersections
+    let preservedIntersections = 0;
+    for (let intersection of intersections) {
+        const cell = grid[intersection.row][intersection.col];
+        if (cell.letter === cell.currentLetter) {
+            preservedIntersections++;
+        }
+    }
+    debugInfo.shuffleInfo.intersectionsPreserved = preservedIntersections;
+}
+
+// Universal scrambling function with green letter percentage constraint
+function scrambleWithGreenConstraint(swapLog, intersections, maxGreenPercentage, settings) {
+    let swapsPerformed = 0;
+    const maxSwaps = settings.maxSwaps;
+    
+    // State tracking for best variant
+    let bestState = captureGridState();
+    let bestPercentage = countCorrectCells().percentage;
+    let bestSwapLog = [...swapLog];
+    let bestSwapsPerformed = swapsPerformed;
+    
+    // Phase 1: Aggressively reduce green percentage
+    let attempts = 0;
+    const maxAttempts = 10000;
+    
+    while (attempts < maxAttempts && swapsPerformed < maxSwaps) {
+        const stats = countCorrectCells();
+        
+        // Track best state (lowest green percentage achieved)
+        if (stats.percentage < bestPercentage) {
+            bestState = captureGridState();
+            bestPercentage = stats.percentage;
+            bestSwapLog = [...swapLog];
+            bestSwapsPerformed = swapsPerformed;
+        }
+        
+        // If we're at or below target, we're done with aggressive phase
+        if (stats.percentage <= maxGreenPercentage) {
+            break;
+        }
+        
+        // Find all cells that are currently correct (green)
+        const correctCells = [];
+        const wrongCells = [];
+        
+        for (let r = 0; r < grid.length; r++) {
+            for (let c = 0; c < grid[r].length; c++) {
+                if (grid[r][c].letter) {
+                    if (grid[r][c].letter === grid[r][c].currentLetter) {
+                        correctCells.push({row: r, col: c});
+                    } else {
+                        wrongCells.push({row: r, col: c});
+                    }
+                }
+            }
+        }
+        
+        // Must have both correct and wrong cells to swap
+        if (correctCells.length === 0) {
+            break;
+        }
+        
+        if (wrongCells.length === 0) {
+            // If no wrong cells, swap two correct cells with each other
+            if (correctCells.length >= 2) {
+                const cell1 = correctCells[Math.floor(Math.random() * correctCells.length)];
+                let cell2 = correctCells[Math.floor(Math.random() * correctCells.length)];
+                
+                // Ensure different cells
+                let cellAttempts = 0;
+                while ((cell1.row === cell2.row && cell1.col === cell2.col) && cellAttempts < 10) {
+                    cell2 = correctCells[Math.floor(Math.random() * correctCells.length)];
+                    cellAttempts++;
+                }
+                
+                if (cell1.row !== cell2.row || cell1.col !== cell2.col) {
+                    performStrategicSwap(cell1, cell2, swapLog);
+                    swapsPerformed++;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        } else {
+            // Swap a correct cell with a wrong cell
+            const correctCell = correctCells[Math.floor(Math.random() * correctCells.length)];
+            const wrongCell = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+            
+            performStrategicSwap(correctCell, wrongCell, swapLog);
+            swapsPerformed++;
+        }
+        
+        attempts++;
+    }
+    
+    // Check if target was achieved, if not restore best state
+    const finalStats = countCorrectCells();
+    if (finalStats.percentage > maxGreenPercentage && bestPercentage < finalStats.percentage) {
+        _log(`Target ${maxGreenPercentage}% not achieved (current: ${finalStats.percentage.toFixed(1)}%). Restoring best state with ${bestPercentage.toFixed(1)}% green.`);
+        restoreGridState(bestState);
+        // Clear and restore the swap log to match the best state
+        swapLog.length = 0;
+        swapLog.push(...bestSwapLog);
+        swapsPerformed = bestSwapsPerformed;
+    }
+    
+    // Phase 2: Additional swaps to reach minimum while maintaining constraint
+    while (swapsPerformed < settings.minSwaps && swapsPerformed < maxSwaps) {
+        const stats = countCorrectCells();
+        
+        // If we're still above target, continue reducing
+        if (stats.percentage > maxGreenPercentage) {
+            const correctCells = [];
+            const wrongCells = [];
+            
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    if (grid[r][c].letter) {
+                        if (grid[r][c].letter === grid[r][c].currentLetter) {
+                            correctCells.push({row: r, col: c});
+                        } else {
+                            wrongCells.push({row: r, col: c});
+                        }
+                    }
+                }
+            }
+            
+            if (correctCells.length > 0 && wrongCells.length > 0) {
+                const correctCell = correctCells[Math.floor(Math.random() * correctCells.length)];
+                const wrongCell = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+                performStrategicSwap(correctCell, wrongCell, swapLog);
+                swapsPerformed++;
+            } else if (correctCells.length >= 2) {
+                // Swap two correct cells
+                const cell1 = correctCells[0];
+                const cell2 = correctCells[1];
+                performStrategicSwap(cell1, cell2, swapLog);
+                swapsPerformed++;
+            } else {
+                break;
+            }
+        } else {
+            // We're at target, perform neutral swaps (wrong cell with wrong cell)
+            const wrongCells = [];
+            
+            for (let r = 0; r < grid.length; r++) {
+                for (let c = 0; c < grid[r].length; c++) {
+                    if (grid[r][c].letter && grid[r][c].letter !== grid[r][c].currentLetter) {
+                        wrongCells.push({row: r, col: c});
+                    }
+                }
+            }
+            
+            if (wrongCells.length >= 2) {
+                const cell1 = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+                let cell2 = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+                
+                // Ensure different cells
+                let cellAttempts = 0;
+                while ((cell1.row === cell2.row && cell1.col === cell2.col) && cellAttempts < 10) {
+                    cell2 = wrongCells[Math.floor(Math.random() * wrongCells.length)];
+                    cellAttempts++;
+                }
+                
+                if (cell1.row !== cell2.row || cell1.col !== cell2.col) {
+                    performStrategicSwap(cell1, cell2, swapLog);
+                    swapsPerformed++;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+    }
+    
+    return swapsPerformed;
+}
+
+// EASY: Only shuffle within individual words, keep all intersections intact
+function scrambleEasy(swapLog) {
+    let swapsPerformed = 0;
+    const maxSwaps = difficultySettings.easy.maxSwaps;
+    
+    // For each word, perform internal swaps
+    for (let wordIndex = 0; wordIndex < currentHeadline.words.length; wordIndex++) {
+        const wordCells = getWordCells(wordIndex);
+        const nonIntersectionCells = wordCells.filter(cell => 
+            grid[cell.row][cell.col].wordIndices.length === 1
+        );
+        
+        if (nonIntersectionCells.length >= 2) {
+            // Perform 1-2 swaps within this word
+            const swapsInWord = Math.min(2, Math.floor(nonIntersectionCells.length / 2));
+            for (let i = 0; i < swapsInWord && swapsPerformed < maxSwaps; i++) {
+                const shuffled = [...nonIntersectionCells];
+                for (let j = shuffled.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [shuffled[j], shuffled[k]] = [shuffled[k], shuffled[j]];
+                }
+                
+                if (shuffled.length >= 2) {
+                    performStrategicSwap(shuffled[0], shuffled[1], swapLog);
+                    swapsPerformed++;
+                }
+            }
+        }
+    }
+    
+    return swapsPerformed;
+}
+
+// Main scramble function (backwards compatible)
+function scrambleLetters() {
+    scrambleLettersByDifficulty(currentDifficulty);
+}
+
+// Function to change difficulty
+function changeDifficulty(newDifficulty) {
+    currentDifficulty = newDifficulty;
+    
+    // Save to platform system
+    if (typeof Platform !== 'undefined' && Platform.saveGameDifficulty) {
+        Platform.saveGameDifficulty(newDifficulty).catch(err => {
+            console.error('Failed to save difficulty:', err);
+        });
+    }
+    
+    // Reset to correct grid first
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                grid[r][c].currentLetter = grid[r][c].letter;
+            }
+        }
+    }
+    
+    // Reset swap count
+    swapCount = 0;
+    document.getElementById('swapCount').textContent = '0';
+    
+    // Apply new difficulty shuffling
+    scrambleLettersByDifficulty(newDifficulty);
+    renderCrossword();
+    
+    // Update difficulty display
+    updateDifficultyDisplay();
+    
+    // Update debug panel if visible
+    if (debugPanelVisible) {
+        updateDebugInfo();
+    }
+}
+
+// Function to update difficulty display
+function updateDifficultyDisplay() {
+    const settings = difficultySettings[currentDifficulty];
+    const difficultyInfo = document.getElementById('difficultyInfo');
+    if (difficultyInfo) {
+        difficultyInfo.innerHTML = `
+            <strong>Current:</strong> ${settings.name}<br>
+            <strong>Minimum swaps to solve:</strong> ${debugInfo.shuffleInfo.minimumSolution}<br>
+            <strong>Range:</strong> ${settings.minSwaps}-${settings.maxSwaps} swaps
+        `;
+    }
+}
+
+// Initialize difficulty system
+async function initDifficultySystem() {
+    // Load saved difficulty from platform
+    if (typeof Platform !== 'undefined' && Platform.isAvailable() && Platform.loadGameDifficulty) {
+        const savedDifficulty = await Platform.loadGameDifficulty();
+        if (savedDifficulty && difficultySettings[savedDifficulty]) {
+            currentDifficulty = savedDifficulty;
+            _log(`Loaded saved difficulty: ${savedDifficulty}`);
+        } else {
+            _log(`Using default difficulty: ${currentDifficulty}`);
+        }
+    } else {
+        _log(`Platform not available, using default difficulty: ${currentDifficulty}`);
+    }
+}
+
+// Expose functions globally
+window.scrambleLetters = scrambleLetters;
+window.scrambleLettersByDifficulty = scrambleLettersByDifficulty;
+window.changeDifficulty = changeDifficulty;
+window.updateDifficultyDisplay = updateDifficultyDisplay;
+window.initDifficultySystem = initDifficultySystem;
+
+})();

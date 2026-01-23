@@ -1,1 +1,434 @@
-!function(){"use strict";function e(t,e={}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("ui-interactions",t,e):console.log("[ui-interactions]",t)}let o=null,l=new Set;function r(){const t=document.getElementById("crosswordGrid");t.innerHTML="";let e=-1,o=-1;for(let t=0;t<grid.length;t++)for(let l=0;l<grid[t].length;l++)if(grid[t][l].letter){-1===e&&(e=t),o=t;break}-1===e&&(e=0,o=grid.length-1);const l=Math.max(0,e-1),r=Math.min(grid.length-1,o+1);for(let e=l;e<=r;e++){const o=document.createElement("div");o.className="grid-row";for(let t=0;t<grid[e].length;t++){const l=document.createElement("div");if(l.className="grid-cell",grid[e][t].letter){l.className+=" filled",l.textContent=grid[e][t].currentLetter,l.dataset.row=e,l.dataset.col=t,l.addEventListener("click",()=>n(e,t));const o=getLetterColorClass(e,t);o&&l.classList.add(o)}else l.className+=" empty";o.appendChild(l)}t.appendChild(o)}}function n(e,n){if(!grid[e][n].letter)return;const c=document.querySelector(`.grid-cell[data-row="${e}"][data-col="${n}"]`);null===selectedCell?(selectedCell={row:e,col:n},c.classList.add("selected"),window.dispatchEvent(new CustomEvent("headlines:buttonPress"))):selectedCell.row===e&&selectedCell.col===n?(c.classList.remove("selected"),selectedCell=null,window.dispatchEvent(new CustomEvent("headlines:buttonPress"))):(!function(e,n){window.dispatchEvent(new CustomEvent("headlines:letterSwapStart")),o=[e,n];const c=document.querySelector(`.grid-cell[data-row="${e.row}"][data-col="${e.col}"]`),d=document.querySelector(`.grid-cell[data-row="${n.row}"][data-col="${n.col}"]`);c.classList.add("swapping"),d.classList.add("swapping"),swapCount++;document.getElementById("swapCount").textContent=swapCount;const a=document.querySelector(".moves-label");a&&"undefined"!=typeof t&&(a.textContent=t("ui.moves",swapCount)||"moves");const u=document.querySelector(".moves-counter-circle");u&&(u.classList.remove("pulse"),u.offsetWidth,u.classList.add("pulse"));setTimeout(()=>{window.dispatchEvent(new CustomEvent("headlines:letterSwapEnd"));const t=grid[e.row][e.col].currentLetter;grid[e.row][e.col].currentLetter=grid[n.row][n.col].currentLetter,grid[n.row][n.col].currentLetter=t,c.textContent=grid[e.row][e.col].currentLetter,d.textContent=grid[n.row][n.col].currentLetter,c.classList.remove("swapping"),d.classList.remove("swapping"),c.style.animation="swapSpinSecond 0.25s ease forwards",d.style.animation="swapSpinSecond 0.25s ease forwards",c.offsetHeight,d.offsetHeight;const o=getLetterColorClass(e.row,e.col),l=getLetterColorClass(n.row,n.col);c.classList.remove("correct","wrong-position","connected-word","wrong-word"),d.classList.remove("correct","wrong-position","connected-word","wrong-word"),o&&c.classList.add(o),l&&d.classList.add(l)},250),setTimeout(()=>{if(c.style.animation="",d.style.animation="",r(),!checkVictory())for(let t=0;t<currentHeadline.words.length;t++)!l.has(t)&&s(t)&&(l.add(t),i(t));debugPanelVisible&&updateGridStateCode(),checkVictory()&&setTimeout(playVictoryAnimation,300)},500)}(selectedCell,{row:e,col:n}),document.querySelector(`.grid-cell[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`).classList.remove("selected"),selectedCell=null)}function s(t){const e=[];for(let o=0;o<grid.length;o++)for(let l=0;l<grid[o].length;l++)grid[o][l].letter&&grid[o][l].wordIndices.includes(t)&&e.push({row:o,col:l,cell:grid[o][l]});for(let t of e)if(t.cell.currentLetter!==t.cell.letter)return!1;return e.length>0}function i(t){window.dispatchEvent(new CustomEvent("headlines:wordSolved"));const e=[];for(let o=0;o<grid.length;o++)for(let l=0;l<grid[o].length;l++)grid[o][l].letter&&grid[o][l].wordIndices.includes(t)&&e.push({row:o,col:l,element:document.querySelector(`.grid-cell[data-row="${o}"][data-col="${l}"]`)});if(0===e.length)return;const o=crosswordLayout.words.find(e=>e.word===t);o&&"horizontal"===o.direction?e.sort((t,e)=>t.col-e.col):e.sort((t,e)=>t.row-e.row);e.forEach((t,e)=>{if(t.element){setTimeout(()=>{t.element.style.transition="all 400ms ease-out",t.element.style.backgroundColor="#4ade80",setTimeout(()=>{t.element&&(t.element.style.backgroundColor="#4CAF50")},400)},80*e)}})}window.renderCrossword=r,window.resetCompletedWords=function(){l.clear()},window.positionMovesCounter=function(){const t=document.querySelector(".moves-counter-circle"),o=document.querySelector(".main-crossword-content"),l=document.querySelector(".color-legend"),r=document.querySelector(".crossword-grid");if(!t||!o)return;const n=o.getBoundingClientRect(),s=(l&&l.getBoundingClientRect(),r&&r.getBoundingClientRect(),80),i=16,c=document.querySelectorAll(".grid-cell.filled"),d=Array.from(c).map(t=>t.getBoundingClientRect()),a=[{bottom:i,right:i,top:"auto",left:"auto",name:"bottom-right"},{bottom:i,left:i,top:"auto",right:"auto",name:"bottom-left"},{top:i,right:i,bottom:"auto",left:"auto",name:"top-right"},{top:i,left:i,bottom:"auto",right:"auto",name:"top-left"}];for(let o of a){let l,r,i=!1;l="auto"!==o.top?o.top:n.height-o.bottom-s,r="auto"!==o.left?o.left:n.width-o.right-s;const c={top:l,left:r,right:r+s,bottom:l+s};for(let t of d){const l={top:t.top-n.top,left:t.left-n.left,right:t.right-n.left,bottom:t.bottom-n.top};if(!(c.right<=l.left||c.left>=l.right||c.bottom<=l.top||c.top>=l.bottom)){i=!0,e(`Position ${o.name} would hide a letter`);break}}if(!i)return t.style.top=l+"px",t.style.left=r+"px",t.style.bottom="auto",t.style.right="auto",void e(`Moves counter positioned at: ${o.name}`)}const u=document.querySelector(".top-toolbar");if(u){const o=u.getBoundingClientRect(),l=o.left-n.left+o.width/2-40,r=o.top-n.top+o.height/2-40;t.style.top=r+"px",t.style.left=l+"px",t.style.bottom="auto",t.style.right="auto",e("Moves counter positioned at: center of top toolbar (fallback - all positions hide letters)")}else t.style.top="16px",t.style.left="16px",t.style.bottom="auto",t.style.right="auto",e("Moves counter positioned at: top-left (fallback - toolbar not found)")},window.addEventListener("headlines:newCrosswordCreated",()=>{"function"==typeof updateLocalizedText?updateLocalizedText():console.warn("updateColorLegend: updateLocalizedText function not available")})}();
+// UI Interactions - Cell Selection, Swapping, and Rendering
+// Handles user interface interactions and visual feedback
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('ui-interactions', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[ui-interactions]', message);
+    }
+}
+
+// Store the last swap positions for victory animation
+let lastSwapPositions = null;
+
+// Track completed words to avoid duplicate animations
+let completedWords = new Set();
+
+function renderCrossword() {
+    const container = document.getElementById('crosswordGrid');
+    container.innerHTML = '';
+    
+    // Find the first and last rows that contain letters
+    let firstFilledRow = -1;
+    let lastFilledRow = -1;
+    
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                if (firstFilledRow === -1) {
+                    firstFilledRow = r;
+                }
+                lastFilledRow = r;
+                break;
+            }
+        }
+    }
+    
+    // If no filled rows found, render normally
+    if (firstFilledRow === -1) {
+        firstFilledRow = 0;
+        lastFilledRow = grid.length - 1;
+    }
+    
+    // Add a small buffer (1 row before and after)
+    const startRow = Math.max(0, firstFilledRow - 1);
+    const endRow = Math.min(grid.length - 1, lastFilledRow + 1);
+    
+    // Create grid cells only for the relevant rows
+    for (let r = startRow; r <= endRow; r++) {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'grid-row';
+        
+        for (let c = 0; c < grid[r].length; c++) {
+            const cell = document.createElement('div');
+            cell.className = 'grid-cell';
+            
+            if (grid[r][c].letter) {
+                cell.className += ' filled';
+                cell.textContent = grid[r][c].currentLetter;
+                cell.dataset.row = r;
+                cell.dataset.col = c;
+                
+                // Add click handler
+                cell.addEventListener('click', () => selectCell(r, c));
+                
+                // Apply color coding
+                const colorClass = getLetterColorClass(r, c);
+                if (colorClass) {
+                    cell.classList.add(colorClass);
+                }
+            } else {
+                cell.className += ' empty';
+            }
+            
+            rowDiv.appendChild(cell);
+        }
+        
+        container.appendChild(rowDiv);
+    }
+    
+}
+
+// Update color legend with localized text
+function updateColorLegend() {
+    // Call the main update function to handle all localization
+    if (typeof updateLocalizedText === 'function') {
+        updateLocalizedText();
+    } else {
+        console.warn('updateColorLegend: updateLocalizedText function not available');
+    }
+}
+
+function selectCell(row, col) {
+    const cell = grid[row][col];
+    if (!cell.letter) return;
+    
+    const cellElement = document.querySelector(`.grid-cell[data-row="${row}"][data-col="${col}"]`);
+    
+    if (selectedCell === null) {
+        // First selection - dispatch button press sound
+        selectedCell = {row, col};
+        cellElement.classList.add('selected');
+        window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+    } else if (selectedCell.row === row && selectedCell.col === col) {
+        // Deselect if clicking same cell - dispatch button press sound
+        cellElement.classList.remove('selected');
+        selectedCell = null;
+        window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+    } else {
+        // Second selection - perform swap (no sound for swap)
+        swapLetters(selectedCell, {row, col});
+        
+        // Remove selection
+        document.querySelector(`.grid-cell[data-row="${selectedCell.row}"][data-col="${selectedCell.col}"]`).classList.remove('selected');
+        selectedCell = null;
+    }
+}
+
+// Check if a word is completely correct (all letters in correct positions)
+function isWordComplete(wordIndex) {
+    // Get all cells for this word
+    const wordCells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                wordCells.push({row: r, col: c, cell: grid[r][c]});
+            }
+        }
+    }
+    
+    // Check if all letters are correct
+    for (let cellInfo of wordCells) {
+        if (cellInfo.cell.currentLetter !== cellInfo.cell.letter) {
+            return false;
+        }
+    }
+    
+    return wordCells.length > 0;
+}
+
+// Play subtle color wave animation along a completed word
+function playWordCompletionAnimation(wordIndex) {
+    // Dispatch word solved event for sound
+    window.dispatchEvent(new CustomEvent('headlines:wordSolved'));
+    
+    // Get all cells for this word
+    const wordCells = [];
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter && grid[r][c].wordIndices.includes(wordIndex)) {
+                wordCells.push({
+                    row: r,
+                    col: c,
+                    element: document.querySelector(`.grid-cell[data-row="${r}"][data-col="${c}"]`)
+                });
+            }
+        }
+    }
+    
+    if (wordCells.length === 0) return;
+    
+    // Get word info to determine direction
+    const wordInfo = crosswordLayout.words.find(w => w.word === wordIndex);
+    const isHorizontal = wordInfo && wordInfo.direction === 'horizontal';
+    
+    // Sort cells based on word direction
+    if (isHorizontal) {
+        // Left to right
+        wordCells.sort((a, b) => a.col - b.col);
+    } else {
+        // Top to bottom
+        wordCells.sort((a, b) => a.row - b.row);
+    }
+    
+    // Apply subtle color wave animation with staggered delays
+    const baseDelay = 80; // Slower, more subtle timing
+    const duration = 400; // Longer duration for smoother transition
+    
+    wordCells.forEach((cell, index) => {
+        if (cell.element) {
+            const delay = index * baseDelay;
+            
+            setTimeout(() => {
+                cell.element.style.transition = `all ${duration}ms ease-out`;
+                cell.element.style.backgroundColor = '#4ade80'; // Brighter green
+                
+                // Return to normal green with smooth transition
+                setTimeout(() => {
+                    if (cell.element) {
+                        cell.element.style.backgroundColor = '#4CAF50'; // Normal green
+                    }
+                }, duration);
+            }, delay);
+        }
+    });
+}
+
+function swapLetters(pos1, pos2) {
+    // Dispatch letter swap start event for sound
+    window.dispatchEvent(new CustomEvent('headlines:letterSwapStart'));
+    
+    // Store last swap positions for victory animation
+    lastSwapPositions = [pos1, pos2];
+    
+    // Get cell elements
+    const cell1 = document.querySelector(`.grid-cell[data-row="${pos1.row}"][data-col="${pos1.col}"]`);
+    const cell2 = document.querySelector(`.grid-cell[data-row="${pos2.row}"][data-col="${pos2.col}"]`);
+    
+    // Add swapping animation (first 180 degrees)
+    cell1.classList.add('swapping');
+    cell2.classList.add('swapping');
+    
+    // Update swap counter immediately with animation
+    swapCount++;
+    const swapCountElement = document.getElementById('swapCount');
+    swapCountElement.textContent = swapCount;
+    
+    // Update moves label with proper pluralization
+    const movesLabel = document.querySelector('.moves-label');
+    if (movesLabel && typeof t !== 'undefined') {
+        movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+    }
+    
+    // Add pulse animation to moves counter circle
+    const movesCircle = document.querySelector('.moves-counter-circle');
+    if (movesCircle) {
+        movesCircle.classList.remove('pulse');
+        // Force reflow to restart animation
+        void movesCircle.offsetWidth;
+        movesCircle.classList.add('pulse');
+    }
+    // After first 180 degrees, swap letters and update colors immediately
+    setTimeout(() => {
+        // Dispatch letter swap end event for sound
+        window.dispatchEvent(new CustomEvent('headlines:letterSwapEnd'));
+        
+        // Swap the letters in the grid data
+        const temp = grid[pos1.row][pos1.col].currentLetter;
+        grid[pos1.row][pos1.col].currentLetter = grid[pos2.row][pos2.col].currentLetter;
+        grid[pos2.row][pos2.col].currentLetter = temp;
+        
+        // Update the text content of the cells immediately
+        cell1.textContent = grid[pos1.row][pos1.col].currentLetter;
+        cell2.textContent = grid[pos2.row][pos2.col].currentLetter;
+        
+        // Remove first animation and add second animation
+        cell1.classList.remove('swapping');
+        cell2.classList.remove('swapping');
+        cell1.style.animation = 'swapSpinSecond 0.25s ease forwards';
+        cell2.style.animation = 'swapSpinSecond 0.25s ease forwards';
+        
+        // Force reflow to restart animation
+        cell1.offsetHeight;
+        cell2.offsetHeight;
+        
+        // Apply color classes immediately after swapping
+        const colorClass1 = getLetterColorClass(pos1.row, pos1.col);
+        const colorClass2 = getLetterColorClass(pos2.row, pos2.col);
+        
+        // Remove old color classes
+        cell1.classList.remove('correct', 'wrong-position', 'connected-word', 'wrong-word');
+        cell2.classList.remove('correct', 'wrong-position', 'connected-word', 'wrong-word');
+        
+        // Add new color classes
+        if (colorClass1) {
+            cell1.classList.add(colorClass1);
+        }
+        if (colorClass2) {
+            cell2.classList.add(colorClass2);
+        }
+    }, 250); // Half of the 500ms animation duration (first 180 degrees)
+    
+    // Clean up and check for completions after full animation
+    setTimeout(() => {
+        // Remove animation styles
+        cell1.style.animation = '';
+        cell2.style.animation = '';
+        
+        // Re-render the entire grid to update all dependent letters
+        renderCrossword();
+        
+        // Check for word completions (but not if this completes the entire puzzle)
+        if (!checkVictory()) {
+            // Check each word to see if it's now complete
+            for (let wordIndex = 0; wordIndex < currentHeadline.words.length; wordIndex++) {
+                if (!completedWords.has(wordIndex) && isWordComplete(wordIndex)) {
+                    completedWords.add(wordIndex);
+                    playWordCompletionAnimation(wordIndex);
+                }
+            }
+        }
+        
+        // Update debug panel if visible
+        if (debugPanelVisible) {
+            updateGridStateCode();
+        }
+        
+        // Check for victory
+        if (checkVictory()) {
+            setTimeout(playVictoryAnimation, 300);
+        }
+    }, 500); // Full animation duration
+}
+
+// Reset completed words when starting a new game
+function resetCompletedWords() {
+    completedWords.clear();
+}
+
+// Position the moves counter to avoid intersections with grid elements
+function positionMovesCounter() {
+    const movesCounter = document.querySelector('.moves-counter-circle');
+    const mainContent = document.querySelector('.main-crossword-content');
+    const legend = document.querySelector('.color-legend');
+    const grid = document.querySelector('.crossword-grid');
+    
+    if (!movesCounter || !mainContent) {
+        return;
+    }
+    
+    // Get grid and legend dimensions
+    const containerRect = mainContent.getBoundingClientRect();
+    const legendRect = legend ? legend.getBoundingClientRect() : null;
+    const gridRect = grid ? grid.getBoundingClientRect() : null;
+    
+    // Counter dimensions
+    const counterSize = 80; // width and height of the circle
+    const margin = 16;
+    
+    // Get all filled grid cells
+    const filledCells = document.querySelectorAll('.grid-cell.filled');
+    const cellRects = Array.from(filledCells).map(cell => cell.getBoundingClientRect());
+    
+    // Define corner positions to try (in order: bottom-right, bottom-left, top-right, top-left)
+    const positions = [
+        { bottom: margin, right: margin, top: 'auto', left: 'auto', name: 'bottom-right' },
+        { bottom: margin, left: margin, top: 'auto', right: 'auto', name: 'bottom-left' },
+        { top: margin, right: margin, bottom: 'auto', left: 'auto', name: 'top-right' },
+        { top: margin, left: margin, bottom: 'auto', right: 'auto', name: 'top-left' }
+    ];
+    
+    // Check each position for intersections
+    for (let pos of positions) {
+        let hasIntersection = false;
+        
+        // Calculate position relative to container
+        let counterTop, counterLeft;
+        if (pos.top !== 'auto') {
+            counterTop = pos.top;
+        } else {
+            counterTop = containerRect.height - pos.bottom - counterSize;
+        }
+        if (pos.left !== 'auto') {
+            counterLeft = pos.left;
+        } else {
+            counterLeft = containerRect.width - pos.right - counterSize;
+        }
+        
+        const counterRect = {
+            top: counterTop,
+            left: counterLeft,
+            right: counterLeft + counterSize,
+            bottom: counterTop + counterSize
+        };
+        
+        // Check intersection with any filled grid cell (letters)
+        for (let cellRect of cellRects) {
+            // Convert cell coordinates to be relative to container
+            const cellRelativeToContainer = {
+                top: cellRect.top - containerRect.top,
+                left: cellRect.left - containerRect.left,
+                right: cellRect.right - containerRect.left,
+                bottom: cellRect.bottom - containerRect.top
+            };
+            
+            if (!(counterRect.right <= cellRelativeToContainer.left || 
+                  counterRect.left >= cellRelativeToContainer.right || 
+                  counterRect.bottom <= cellRelativeToContainer.top || 
+                  counterRect.top >= cellRelativeToContainer.bottom)) {
+                hasIntersection = true;
+                _log(`Position ${pos.name} would hide a letter`);
+                break;
+            }
+        }
+        
+        // If no intersection with letters, use this position
+        // Note: We allow intersection with legend at top-left position as per user request
+        if (!hasIntersection) {
+            movesCounter.style.top = counterTop + 'px';
+            movesCounter.style.left = counterLeft + 'px';
+            movesCounter.style.bottom = 'auto';
+            movesCounter.style.right = 'auto';
+            _log(`Moves counter positioned at: ${pos.name}`);
+            return;
+        }
+    }
+    
+    // If all positions hide letters, center in top toolbar as last resort
+    const toolbar = document.querySelector('.top-toolbar');
+    if (toolbar) {
+        const toolbarRect = toolbar.getBoundingClientRect();
+        const counterLeft = (toolbarRect.left - containerRect.left) + (toolbarRect.width / 2) - (counterSize / 2);
+        const counterTop = (toolbarRect.top - containerRect.top) + (toolbarRect.height / 2) - (counterSize / 2);
+        movesCounter.style.top = counterTop + 'px';
+        movesCounter.style.left = counterLeft + 'px';
+        movesCounter.style.bottom = 'auto';
+        movesCounter.style.right = 'auto';
+        _log('Moves counter positioned at: center of top toolbar (fallback - all positions hide letters)');
+    } else {
+        // Fallback to old behavior if toolbar not found
+        movesCounter.style.top = margin + 'px';
+        movesCounter.style.left = margin + 'px';
+        movesCounter.style.bottom = 'auto';
+        movesCounter.style.right = 'auto';
+        _log('Moves counter positioned at: top-left (fallback - toolbar not found)');
+    }
+}
+
+// Make functions globally available
+window.renderCrossword = renderCrossword;
+window.resetCompletedWords = resetCompletedWords;
+window.positionMovesCounter = positionMovesCounter;
+
+// Listen for new crossword creation events to update color legend
+window.addEventListener('headlines:newCrosswordCreated', () => {
+    updateColorLegend();
+});
+
+})();

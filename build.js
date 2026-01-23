@@ -93,7 +93,7 @@ async function buildWebStandalone() {
 async function buildGitHubPages() {
     const outDir = path.join(__dirname, 'dist', 'github-pages');
     const buildRelease = !dev;
-    const buildMinify = buildRelease;
+    const buildMinify = false; // Disable minification for GitHub Pages
     const buildDebugMode = dev;
 
     console.log('Building Headlines GitHub Pages to:', outDir);

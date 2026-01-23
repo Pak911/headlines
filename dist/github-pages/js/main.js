@@ -1,1 +1,314 @@
-let currentHeadline=null,crosswordLayout=null,grid=[],correctGrid=[],swapCount=0,selectedCell=null,gridSize={rows:0,cols:0},wordConnections={},givenUpPuzzles=new Set;function initToolbarButtons(){const t=document.getElementById("helpBtn");t&&t.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),window.HeadlinesTutorial&&"function"==typeof window.HeadlinesTutorial.showWelcomeTutorial&&window.HeadlinesTutorial.showWelcomeTutorial()});const e=document.getElementById("nextPuzzleBtn");e&&e.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),"function"==typeof skipToNextHeadline&&skipToNextHeadline()});const n=document.getElementById("hamburgerBtn");n&&n.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),window.HamburgerMenu&&"function"==typeof window.HamburgerMenu.open&&window.HamburgerMenu.open()});const o=document.getElementById("createPuzzleBtn");o&&o.addEventListener("click",()=>{window.dispatchEvent(new CustomEvent("headlines:buttonPress")),window.open("create-puzzle.html","_blank")})}function _log(t,e={always:!0}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("main",t,e):console.log("[main]",t)}function countCorrectCells(){let t=0,e=0;for(let n=0;n<grid.length;n++)for(let o=0;o<grid[n].length;o++)grid[n][o].letter&&(t++,grid[n][o].letter===grid[n][o].currentLetter&&e++);return{totalCells:t,correctCells:e,percentage:t>0?e/t*100:0}}async function enhancedInitGameWithReset(){"function"==typeof resetCompletedWords&&resetCompletedWords(),"function"==typeof enhancedInitGame&&await enhancedInitGame()}function initLanguageSelector(){if("undefined"!=typeof i18n&&document.getElementById("languageSelect")){document.getElementById("languageSelect").value=i18n.currentLanguage}}function updateLocalizedText(){if("undefined"!=typeof t){const e=document.querySelector("h1"),n=document.querySelector(".instructions");e&&(e.textContent=t("game.title")),n&&(n.innerHTML=t("game.instructions"));const o=document.querySelector(".swap-counter");if(o){const e=document.getElementById("swapCount").textContent;o.innerHTML=`${t("ui.swaps")}: <span id="swapCount">${e}</span>`}const i=document.querySelector(".moves-label");i&&(i.textContent=t("ui.moves",swapCount)||"moves");const l=document.getElementById("hintTitle");l&&(l.textContent=t("hints.hintTitle")||"News Description");const c=document.querySelector(".next-headline-btn");c&&(c.textContent=t("ui.nextHeadline"));const r=document.querySelector(".give-up-btn");r&&(r.textContent=t("ui.giveUp"));const d=document.querySelector(".new-game-btn-header");d&&(d.textContent=t("ui.nextHeadline"));const u=document.getElementById("finalSwaps");if(u){const e=parseInt(u.textContent)||0,n=u.parentElement.querySelector(".stat-label"),o=document.querySelector("#performanceRating")?.parentElement.querySelector(".stat-label");n&&(n.textContent=t("victory.stats.swaps",e)),o&&(o.textContent=t("victory.stats.rating"))}const a=document.querySelectorAll(".legend-item .legend-text");a.length>=4&&(a[0].textContent=t("legend.correct"),a[1].textContent=t("legend.wrongPosition"),a[2].textContent=t("legend.connectedWord"),a[3].textContent=t("legend.otherWord")),setTimeout(()=>{const e=document.querySelector(".color-legend");if(e){e.offsetHeight>76&&a.length>=4&&(a[0].textContent=t("legend.correctShort"),a[1].textContent=t("legend.wrongPositionShort"),a[2].textContent=t("legend.connectedWordShort"),a[3].textContent=t("legend.otherWordShort"))}},100);const s=document.querySelector(".debug-toggle-hint small");s&&(s.textContent=t("debug.toggleHint"));const m=document.getElementById("headlineDescription");if(m){const e=t("hints.tipPrefix").replace("💡 ","").replace(":","");m.setAttribute("data-tip-prefix",e)}const g=document.getElementById("hamburgerBtn");g&&g.setAttribute("title",t("toolbar.menu"));const f=document.getElementById("helpBtn");f&&f.setAttribute("title",t("toolbar.howToPlay"));const w=document.getElementById("nextPuzzleBtn");w&&w.setAttribute("title",t("toolbar.nextPuzzle"));const y=document.getElementById("createPuzzleBtn");y&&y.setAttribute("title",t("toolbar.createOwnPuzzle")),window.HamburgerMenu&&"function"==typeof window.HamburgerMenu.updateLanguage&&window.HamburgerMenu.updateLanguage()}}function initDifficultySelector(){if("undefined"!=typeof currentDifficulty&&document.getElementById("difficultySelect")){document.getElementById("difficultySelect").value=currentDifficulty}}document.addEventListener("DOMContentLoaded",async function(){if(document.addEventListener("click",function(t){"BUTTON"===t.target.tagName&&window.dispatchEvent(new CustomEvent("headlines:buttonPress"))}),"undefined"!=typeof Platform){_log("Initializing platform...");const t=await Platform.init();t.success?(_log("Platform initialized successfully"),window.dispatchEvent(new CustomEvent("headlines:platform:ready"))):console.error("Platform initialization failed:",t.error)}else console.error("[Main] Platform object not found");"undefined"!=typeof i18n&&"function"==typeof i18n.init&&await i18n.init(),"function"==typeof initDifficultySystem&&await initDifficultySystem(),"function"==typeof initCategorySystem&&await initCategorySystem(),initLanguageSelector(),initDifficultySelector(),initToolbarButtons(),document.getElementById("crosswordGrid")&&enhancedInitGameWithReset()}),document.addEventListener("dragstart",function(t){"IMG"!==t.target.tagName&&"A"!==t.target.tagName||t.preventDefault()},!1);
+// Main Script - Entry Point and Global State Management
+// Coordinates all modules and manages global game state
+
+// Global game state variables
+let currentHeadline = null;
+let crosswordLayout = null;
+let grid = [];
+let correctGrid = [];
+let swapCount = 0;
+let selectedCell = null;
+let gridSize = { rows: 0, cols: 0 };
+let wordConnections = {};
+// Track puzzles that have been given up (in-memory only, not persistent)
+let givenUpPuzzles = new Set();
+
+// Initialize toolbar buttons
+function initToolbarButtons() {
+    // Help button - show welcome tutorial
+    const helpBtn = document.getElementById('helpBtn');
+    if (helpBtn) {
+        helpBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            if (window.HeadlinesTutorial && typeof window.HeadlinesTutorial.showWelcomeTutorial === 'function') {
+                window.HeadlinesTutorial.showWelcomeTutorial();
+            }
+        });
+    }
+    
+    // Next puzzle button
+    const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
+    if (nextPuzzleBtn) {
+        nextPuzzleBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            if (typeof skipToNextHeadline === 'function') {
+                skipToNextHeadline();
+            }
+        });
+    }
+    
+    // Hamburger button - opens menu
+    const hamburgerBtn = document.getElementById('hamburgerBtn');
+    if (hamburgerBtn) {
+        hamburgerBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            if (window.HamburgerMenu && typeof window.HamburgerMenu.open === 'function') {
+                window.HamburgerMenu.open();
+            }
+        });
+    }
+    
+    // Create Own Puzzle button - opens create-puzzle.html in new tab
+    const createPuzzleBtn = document.getElementById('createPuzzleBtn');
+    if (createPuzzleBtn) {
+        createPuzzleBtn.addEventListener('click', () => {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+            window.open('create-puzzle.html', '_blank');
+        });
+    }
+}
+
+// Helper function to use flog from debug
+function _log(message, options = {always:true}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('main', message, options);
+    } else {
+        // Fallback if debug.js not loaded yet
+        console.log('[main]', message);
+    }
+}
+
+// Count total filled cells and correct cells
+function countCorrectCells() {
+    let totalCells = 0;
+    let correctCells = 0;
+    
+    for (let r = 0; r < grid.length; r++) {
+        for (let c = 0; c < grid[r].length; c++) {
+            if (grid[r][c].letter) {
+                totalCells++;
+                if (grid[r][c].letter === grid[r][c].currentLetter) {
+                    correctCells++;
+                }
+            }
+        }
+    }
+    
+    return { totalCells, correctCells, percentage: totalCells > 0 ? (correctCells / totalCells) * 100 : 0 };
+}
+
+// Enhanced initialization that also resets word completion tracking
+async function enhancedInitGameWithReset() {
+    // Reset completed words tracking
+    if (typeof resetCompletedWords === 'function') {
+        resetCompletedWords();
+    }
+    
+    // Call the enhanced init game
+    if (typeof enhancedInitGame === 'function') {
+        await enhancedInitGame();
+    }
+}
+
+// Initialize language selector with current language
+function initLanguageSelector() {
+    if (typeof i18n !== 'undefined' && document.getElementById('languageSelect')) {
+        const languageSelect = document.getElementById('languageSelect');
+        languageSelect.value = i18n.currentLanguage;
+    }
+}
+
+// Update page text with localized content
+function updateLocalizedText() {
+    if (typeof t !== 'undefined') {
+        // Update main title and instructions
+        const gameTitle = document.querySelector('h1');
+        const gameInstructions = document.querySelector('.instructions');
+        
+        if (gameTitle) {
+            gameTitle.textContent = t('game.title');
+        }
+        
+        if (gameInstructions) {
+            gameInstructions.innerHTML = t('game.instructions');
+        }
+        
+        // Update swap counter label (now in moves counter circle)
+        const swapCounter = document.querySelector('.swap-counter');
+        if (swapCounter) {
+            const currentSwaps = document.getElementById('swapCount').textContent;
+            swapCounter.innerHTML = `${t('ui.swaps')}: <span id="swapCount">${currentSwaps}</span>`;
+        }
+        
+        // Update moves label in the new circle counter
+        const movesLabel = document.querySelector('.moves-label');
+        if (movesLabel) {
+            movesLabel.textContent = t('ui.moves', swapCount) || 'moves';
+        }
+        
+        // Update hint title
+        const hintTitle = document.getElementById('hintTitle');
+        if (hintTitle) {
+            hintTitle.textContent = t('hints.hintTitle') || 'News Description';
+        }
+        
+        // Update next headline button (new location)
+        const nextHeadlineBtn = document.querySelector('.next-headline-btn');
+        if (nextHeadlineBtn) {
+            nextHeadlineBtn.textContent = t('ui.nextHeadline');
+        }
+        
+        // Update give up button
+        const giveUpBtn = document.querySelector('.give-up-btn');
+        if (giveUpBtn) {
+            giveUpBtn.textContent = t('ui.giveUp');
+        }
+        
+        // Update old button location for compatibility
+        const oldNextHeadlineBtn = document.querySelector('.new-game-btn-header');
+        if (oldNextHeadlineBtn) {
+            oldNextHeadlineBtn.textContent = t('ui.nextHeadline');
+        }
+        
+        // Update victory modal stat labels if modal exists
+        const finalSwaps = document.getElementById('finalSwaps');
+        if (finalSwaps) {
+            const swapCount = parseInt(finalSwaps.textContent) || 0;
+            const swapsLabel = finalSwaps.parentElement.querySelector('.stat-label');
+            const ratingLabel = document.querySelector('#performanceRating')?.parentElement.querySelector('.stat-label');
+            
+            if (swapsLabel) swapsLabel.textContent = t('victory.stats.swaps', swapCount);
+            if (ratingLabel) ratingLabel.textContent = t('victory.stats.rating');
+        }
+        
+        // Update color legend text
+        const legendItems = document.querySelectorAll('.legend-item .legend-text');
+        if (legendItems.length >= 4) {
+            legendItems[0].textContent = t('legend.correct');
+            legendItems[1].textContent = t('legend.wrongPosition');
+            legendItems[2].textContent = t('legend.connectedWord');
+            legendItems[3].textContent = t('legend.otherWord');
+        }
+        
+        // Check legend height after a short delay and switch to shorter translations if needed
+        setTimeout(() => {
+            const colorLegend = document.querySelector('.color-legend');
+            if (colorLegend) {
+                const legendHeight = colorLegend.offsetHeight;
+                if (legendHeight > 76 && legendItems.length >= 4) {
+                    // Switch to shorter translations
+                    legendItems[0].textContent = t('legend.correctShort');
+                    legendItems[1].textContent = t('legend.wrongPositionShort');
+                    legendItems[2].textContent = t('legend.connectedWordShort');
+                    legendItems[3].textContent = t('legend.otherWordShort');
+                }
+            }
+        }, 100);
+        
+        // Update debug panel text
+        const debugToggleHint = document.querySelector('.debug-toggle-hint small');
+        if (debugToggleHint) {
+            debugToggleHint.textContent = t('debug.toggleHint');
+        }
+        
+        // Update headline description tip prefix
+        const descriptionElement = document.getElementById('headlineDescription');
+        if (descriptionElement) {
+            const tipPrefix = t('hints.tipPrefix').replace('💡 ', '').replace(':', '');
+            descriptionElement.setAttribute('data-tip-prefix', tipPrefix);
+        }
+        
+        // Update toolbar button tooltips
+        const hamburgerBtn = document.getElementById('hamburgerBtn');
+        if (hamburgerBtn) {
+            hamburgerBtn.setAttribute('title', t('toolbar.menu'));
+        }
+        
+        const helpBtn = document.getElementById('helpBtn');
+        if (helpBtn) {
+            helpBtn.setAttribute('title', t('toolbar.howToPlay'));
+        }
+        
+        const nextPuzzleBtn = document.getElementById('nextPuzzleBtn');
+        if (nextPuzzleBtn) {
+            nextPuzzleBtn.setAttribute('title', t('toolbar.nextPuzzle'));
+        }
+        
+        const createPuzzleBtn = document.getElementById('createPuzzleBtn');
+        if (createPuzzleBtn) {
+            createPuzzleBtn.setAttribute('title', t('toolbar.createOwnPuzzle'));
+        }
+        
+        // Update menu language
+        if (window.HamburgerMenu && typeof window.HamburgerMenu.updateLanguage === 'function') {
+            window.HamburgerMenu.updateLanguage();
+        }
+    }
+}
+
+// Initialize difficulty selector with current difficulty from data.js
+function initDifficultySelector() {
+    if (typeof currentDifficulty !== 'undefined' && document.getElementById('difficultySelect')) {
+        const difficultySelect = document.getElementById('difficultySelect');
+        difficultySelect.value = currentDifficulty;
+    }
+}
+
+// Initialize the game when DOM is loaded
+document.addEventListener('DOMContentLoaded', async function() {
+    // Add sound effects for UI button clicks
+    document.addEventListener('click', function(event) {
+        if (event.target.tagName === 'BUTTON') {
+            window.dispatchEvent(new CustomEvent('headlines:buttonPress'));
+        }
+    });
+
+    // Initialize platform first
+    if (typeof Platform !== 'undefined') {
+        _log('Initializing platform...');
+        const platformResult = await Platform.init();
+        if (!platformResult.success) {
+            console.error('Platform initialization failed:', platformResult.error);
+        } else {
+            _log('Platform initialized successfully');
+            // Signal that platform is ready
+            window.dispatchEvent(new CustomEvent('headlines:platform:ready'));
+        }
+    } else {
+        console.error('[Main] Platform object not found');
+    }
+    
+    // Initialize localization
+    if (typeof i18n !== 'undefined' && typeof i18n.init === 'function') {
+        await i18n.init();
+    }
+    
+    // Initialize difficulty system
+    if (typeof initDifficultySystem === 'function') {
+        await initDifficultySystem();
+    }
+    
+    // Initialize category system
+    if (typeof initCategorySystem === 'function') {
+        await initCategorySystem();
+    }
+    
+    // Initialize language selector
+    initLanguageSelector();
+    
+    // Initialize difficulty selector
+    initDifficultySelector();
+    
+    // Initialize toolbar buttons
+    initToolbarButtons();
+    
+    // Only initialize if we're on the main game page (not test page)
+    if (document.getElementById('crosswordGrid')) {
+        // Use the enhanced initialization that resets word tracking
+        enhancedInitGameWithReset();
+    }
+});
+
+// // Disable the right-click context menu
+// document.addEventListener('contextmenu', function(event) {
+//   event.preventDefault();
+// }, false);
+// BUILD_RELEASE_START
+// 
+// // Disable dragging of images and links
+// document.addEventListener('dragstart', function(event) {
+//   if (event.target.tagName === 'IMG' || event.target.tagName === 'A') {
+//     event.preventDefault();
+//   }
+// }, false);
+// // BUILD_RELEASE_END

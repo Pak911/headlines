@@ -1,1 +1,270 @@
-!function(){"use strict";function e(e,t={always:!0}){window.__cosic&&"function"==typeof window.__cosic.flog?window.__cosic.flog("custom-puzzle-loader",e,t):console.log("[custom-puzzle-loader]",e)}let n=null,o=!1,l=null;function u(){return new URLSearchParams(window.location.search).has("p")}function r(){try{const t=new URLSearchParams(window.location.search).get("p");if(!t)return e("No custom puzzle parameter found"),null;if(e("Loading custom puzzle from URL..."),"undefined"==typeof LZString)return console.error("LZString library not loaded"),c("Failed to load puzzle decoder"),null;const l=LZString.decompressFromEncodedURIComponent(t);if(!l)return console.error("Failed to decompress puzzle data"),c("Invalid or corrupted puzzle link"),null;const u=JSON.parse(l);if(!u.h||!u.d||!u.l)return console.error("Invalid puzzle data structure:",u),c("Invalid puzzle data format"),null;if("en"!==u.l&&"ru"!==u.l&&"pt"!==u.l)return console.error("Invalid language:",u.l),c("Unsupported language in puzzle"),null;let r=null;return u.dfc&&("undefined"!=typeof difficultySettings&&difficultySettings[u.dfc]?(r=u.dfc,e(`Custom puzzle difficulty: ${r}`)):e(`Invalid difficulty '${u.dfc}' in custom puzzle, will use default`)),e(`✅ Successfully loaded custom puzzle (${u.l})`),n=u,o=!0,u}catch(e){return console.error("Error loading custom puzzle:",e),c("Failed to load puzzle: "+e.message),null}}function a(e){const t=e.h.split(/\s+/).filter(e=>e.length>0);let n=null;return e.dfc&&"undefined"!=typeof difficultySettings&&difficultySettings[e.dfc]&&(n=e.dfc),{text:e.h,words:t,description:e.d,language:e.l,customDifficulty:n,link:null,source:"custom",sourceName:"Custom Puzzle",category:"custom",pubDate:(new Date).toISOString(),djb2Hash:null,isCustomPuzzle:!0}}function i(){const t=new URL(window.location.href),u=t.toString();t.searchParams.delete("p");const r=t.toString();e(`URL change: ${u} -> ${r}`),window.history.replaceState({},"",r),o=!1,n=null,l=null,e(`Cleared custom puzzle URL parameters: ${u} -> ${r}`)}function c(e){if("function"==typeof showPopup&&"function"==typeof t){const e={type:"error",closeOnBackdrop:!1,title:t("puzzleError.title"),content:`<p style="line-height: 1.6;">${t("puzzleError.corruptedLink")}</p>`,buttons:[{text:t("puzzleError.startRegularGame"),className:"btn-primary",action:()=>{"function"==typeof skipToNextHeadline?skipToNextHeadline():(i(),window.location.reload())}}]};showPopup(e)}else alert(t("puzzleError.corruptedLink")),i(),window.location.reload()}window.CustomPuzzleLoader={checkForCustomPuzzle:u,loadCustomPuzzle:r,createCustomHeadlineObject:a,clearCustomPuzzleURL:i,initializeCustomPuzzle:async function(){if(l)return e("Returning cached custom puzzle headline"),l;if(!u())return null;const t=r();if(!t)return null;if("undefined"!=typeof Platform&&Platform.isAvailable())try{const n=await Platform.loadGameLanguage();n?e(`Player has saved language (${n}), keeping it`):(e(`Setting language to: ${t.l}`),"undefined"!=typeof i18n&&i18n.currentLanguage!==t.l&&(await i18n.setLanguage(t.l),e(`Language set and saved to: ${t.l}`),window.dispatchEvent(new CustomEvent("headlines:customPuzzle:languageChanged",{detail:{language:t.l}}))))}catch(e){console.error("Error checking saved language:",e)}return l=a(t),l},isInCustomPuzzleMode:function(){return o},getCustomPuzzleData:function(){return n}}}();
+// Custom Puzzle Loader - Load puzzles from URL parameters
+// Allows users to share custom puzzles via compressed URL links
+
+(function() {
+'use strict';
+
+// Helper function to use flog from debug.js
+function _log(message, options = {always:true}) {
+    if (window.__cosic && typeof window.__cosic.flog === 'function') {
+        window.__cosic.flog('custom-puzzle-loader', message, options);
+    } else {
+        console.log('[custom-puzzle-loader]', message);
+    }
+}
+
+// State
+let customPuzzleData = null;
+let isCustomPuzzleMode = false;
+let cachedHeadlineObject = null; // Cache the headline object to avoid re-processing
+
+/**
+ * Check if URL contains custom puzzle parameter
+ * @returns {boolean} True if custom puzzle parameter exists
+ */
+function checkForCustomPuzzle() {
+    const urlParams = new URLSearchParams(window.location.search);
+    return urlParams.has('p');
+}
+
+/**
+ * Load and decode custom puzzle from URL
+ * @returns {Object|null} Decoded puzzle data or null if invalid
+ */
+function loadCustomPuzzle() {
+    try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const compressed = urlParams.get('p');
+        
+        if (!compressed) {
+            _log('No custom puzzle parameter found');
+            return null;
+        }
+        
+        _log('Loading custom puzzle from URL...');
+        
+        // Decompress using LZ-String
+        if (typeof LZString === 'undefined') {
+            console.error('LZString library not loaded');
+            showCustomPuzzleError('Failed to load puzzle decoder');
+            return null;
+        }
+        
+        const jsonString = LZString.decompressFromEncodedURIComponent(compressed);
+        
+        if (!jsonString) {
+            console.error('Failed to decompress puzzle data');
+            showCustomPuzzleError('Invalid or corrupted puzzle link');
+            return null;
+        }
+        
+        // Parse JSON
+        const puzzleData = JSON.parse(jsonString);
+        
+        // Validate structure
+        if (!puzzleData.h || !puzzleData.d || !puzzleData.l) {
+            console.error('Invalid puzzle data structure:', puzzleData);
+            showCustomPuzzleError('Invalid puzzle data format');
+            return null;
+        }
+        
+        // Validate language
+        if (puzzleData.l !== 'en' && puzzleData.l !== 'ru' && puzzleData.l !== 'pt') {
+            console.error('Invalid language:', puzzleData.l);
+            showCustomPuzzleError('Unsupported language in puzzle');
+            return null;
+        }
+        
+        // Extract and validate difficulty (optional field)
+        let customDifficulty = null;
+        if (puzzleData.dfc) {
+            // Check if difficulty is valid
+            if (typeof difficultySettings !== 'undefined' && difficultySettings[puzzleData.dfc]) {
+                customDifficulty = puzzleData.dfc;
+                _log(`Custom puzzle difficulty: ${customDifficulty}`);
+            } else {
+                _log(`Invalid difficulty '${puzzleData.dfc}' in custom puzzle, will use default`);
+            }
+        }
+        
+        _log(`✅ Successfully loaded custom puzzle (${puzzleData.l})`);
+        
+        customPuzzleData = puzzleData;
+        isCustomPuzzleMode = true;
+        
+        return puzzleData;
+        
+    } catch (error) {
+        console.error('Error loading custom puzzle:', error);
+        showCustomPuzzleError('Failed to load puzzle: ' + error.message);
+        return null;
+    }
+}
+
+/**
+ * Create headline object from custom puzzle data
+ * @param {Object} puzzleData - Decoded puzzle data
+ * @returns {Object} Headline object compatible with game
+ */
+function createCustomHeadlineObject(puzzleData) {
+    // Split headline into words
+    const words = puzzleData.h.split(/\s+/).filter(w => w.length > 0);
+    
+    // Extract and validate difficulty
+    let customDifficulty = null;
+    if (puzzleData.dfc && typeof difficultySettings !== 'undefined' && difficultySettings[puzzleData.dfc]) {
+        customDifficulty = puzzleData.dfc;
+    }
+    
+    return {
+        text: puzzleData.h,
+        words: words,
+        description: puzzleData.d,
+        language: puzzleData.l,
+        customDifficulty: customDifficulty, // Custom difficulty from URL (null if not specified/invalid)
+        link: null, // Custom puzzles don't have article links
+        source: 'custom',
+        sourceName: 'Custom Puzzle',
+        category: 'custom',
+        pubDate: new Date().toISOString(),
+        djb2Hash: null, // No hash for custom puzzles
+        isCustomPuzzle: true
+    };
+}
+
+/**
+ * Clear custom puzzle URL parameters
+ */
+function clearCustomPuzzleURL() {
+    const url = new URL(window.location.href);
+    const originalUrl = url.toString();
+    url.searchParams.delete('p');
+    const newUrl = url.toString();
+    _log(`URL change: ${originalUrl} -> ${newUrl}`);
+    window.history.replaceState({}, '', newUrl);
+    isCustomPuzzleMode = false;
+    customPuzzleData = null;
+    cachedHeadlineObject = null; // Clear cache
+    _log(`Cleared custom puzzle URL parameters: ${originalUrl} -> ${newUrl}`);
+}
+
+/**
+ * Show error popup for custom puzzle loading failures
+ * @param {string} errorMessage - Error message to display (logged to console only)
+ */
+function showCustomPuzzleError(errorMessage) {
+    // Use the popup system if available
+    if (typeof showPopup === 'function' && typeof t === 'function') {
+        const popupOptions = {
+            type: 'error',
+            closeOnBackdrop: false,
+            title: t('puzzleError.title'),
+            content: `<p style="line-height: 1.6;">${t('puzzleError.corruptedLink')}</p>`,
+            buttons: [
+                {
+                    text: t('puzzleError.startRegularGame'),
+                    className: 'btn-primary',
+                    action: () => {
+                        if (typeof skipToNextHeadline === 'function') {
+                            skipToNextHeadline();
+                        } else {
+                            clearCustomPuzzleURL();
+                            window.location.reload();
+                        }
+                    }
+                }
+            ]
+        };
+        
+        showPopup(popupOptions);
+    } else {
+        // Fallback to alert
+        alert(t('puzzleError.corruptedLink'));
+        clearCustomPuzzleURL();
+        window.location.reload();
+    }
+}
+
+/**
+ * Initialize custom puzzle if present
+ * @returns {Object|null} Custom headline object or null
+ */
+async function initializeCustomPuzzle() {
+    // Return cached version if already initialized
+    if (cachedHeadlineObject) {
+        _log('Returning cached custom puzzle headline');
+        return cachedHeadlineObject;
+    }
+    
+    if (!checkForCustomPuzzle()) {
+        return null;
+    }
+    
+    const puzzleData = loadCustomPuzzle();
+    
+    if (!puzzleData) {
+        return null;
+    }
+    
+    // Set temporary language if player has no saved preference
+    // IMPORTANT: Do this BEFORE returning so language is set before tutorial checks
+    if (typeof Platform !== 'undefined' && Platform.isAvailable()) {
+        try {
+            const savedLanguage = await Platform.loadGameLanguage();
+            
+            if (!savedLanguage) {
+                // No saved language - use puzzle language and save it
+                _log(`Setting language to: ${puzzleData.l}`);
+                
+                // Use setLanguage to properly set and save the language
+                if (typeof i18n !== 'undefined' && i18n.currentLanguage !== puzzleData.l) {
+                    await i18n.setLanguage(puzzleData.l);
+                    
+                    _log(`Language set and saved to: ${puzzleData.l}`);
+                    
+                    // Dispatch event so tutorial can update its language
+                    window.dispatchEvent(new CustomEvent('headlines:customPuzzle:languageChanged', {
+                        detail: { language: puzzleData.l }
+                    }));
+                }
+            } else {
+                _log(`Player has saved language (${savedLanguage}), keeping it`);
+            }
+        } catch (error) {
+            console.error('Error checking saved language:', error);
+        }
+    }
+    
+    // Create and cache the headline object
+    cachedHeadlineObject = createCustomHeadlineObject(puzzleData);
+    return cachedHeadlineObject;
+}
+
+/**
+ * Check if currently in custom puzzle mode
+ * @returns {boolean}
+ */
+function isInCustomPuzzleMode() {
+    return isCustomPuzzleMode;
+}
+
+/**
+ * Get current custom puzzle data
+ * @returns {Object|null}
+ */
+function getCustomPuzzleData() {
+    return customPuzzleData;
+}
+
+// Expose functions globally
+window.CustomPuzzleLoader = {
+    checkForCustomPuzzle,
+    loadCustomPuzzle,
+    createCustomHeadlineObject,
+    clearCustomPuzzleURL,
+    initializeCustomPuzzle,
+    isInCustomPuzzleMode,
+    getCustomPuzzleData
+};
+
+})();

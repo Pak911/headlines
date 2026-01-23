@@ -1,1 +1,758 @@
-!function(){"use strict";class t{constructor(){this.currentPlatform=null,this.platformType="unknown",this.initialized=!1,this._setupGameReadyListener()}_log(...t){if(window.__cosic&&"function"==typeof window.__cosic.flog){const e=t.map(t=>"object"==typeof t?JSON.stringify(t):String(t)).join(" ");window.__cosic.flog("platform-adapter",e)}else console.log("[platform-adapter]",...t)}_setupGameReadyListener(){window.addEventListener("cosmic:platform:gameReady",async t=>{if(this.initialized){if(this.currentPlatform.signalGameReady)try{this._log("Signaling game ready to platform"),await this.currentPlatform.signalGameReady()}catch(t){console.error("[Platform] signalGameReady failed:",t)}}else console.warn("[Platform] Cannot signal game ready - platform not initialized")})}detectPlatform(){return this._log("Detecting platform..."),window.__cosmic_platform&&"function"==typeof window.__cosmic_platform.isAvailable?(this._log("Detected: y"),"y"):"undefined"!=typeof WebPlatform?(this._log("Detected: web"),"web"):(console.warn("[Platform Adapter] No platform detected!"),"unknown")}async init(){this._log("init() called");try{if(this.platformType=this.detectPlatform(),this._log(["Platform type:",this.platformType]),"unknown"===this.platformType)throw new Error("No platform implementation found");"y"===this.platformType?(this.currentPlatform=window.__cosmic_platform,this._log("Using Y platform implementation")):"web"===this.platformType&&(this.currentPlatform=new WebPlatform,this._log("Using Web platform implementation")),this._log(`Detected platform: ${this.platformType}`),this._log("Calling platform.init()...");const t=await this.currentPlatform.init();if(this._log(["platform.init() result:",t]),!t.success)throw new Error(t.reason||"Platform initialization failed");return this.initialized=!0,this._log("Platform adapter initialized successfully"),"number"!=typeof window.__cosmic_undoUsed&&(window.__cosmic_undoUsed=0,this._log("Initialized undoUsed counter to 0")),this._log("Dispatching headlines:platform:ready event"),window.dispatchEvent(new CustomEvent("headlines:platform:ready",{detail:{platformType:this.platformType}})),this._log("Event dispatched"),{success:!0}}catch(t){return console.error("[Platform] Initialization failed:",t),{success:!1,error:t}}}async cacheHeadlines(t,e){if(!this.initialized)return console.error("[Platform] Cannot cache headlines - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.cacheHeadlines(t,e)}catch(e){return console.error(`[Platform] cacheHeadlines failed for "${t}":`,e),{success:!1,error:e}}}async loadCachedHeadlines(t){if(!this.initialized)return console.error("[Platform] Cannot load cached headlines - platform not initialized"),null;try{return await this.currentPlatform.loadCachedHeadlines(t)}catch(e){return console.error(`[Platform] loadCachedHeadlines failed for "${t}":`,e),null}}async isCacheExpired(t){if(!this.initialized)return console.error("[Platform] Cannot check cache expiration - platform not initialized"),!0;try{return await this.currentPlatform.isCacheExpired(t)}catch(e){return console.error(`[Platform] isCacheExpired failed for "${t}":`,e),!0}}async saveGameLanguage(t){if(!this.initialized)return console.error("[Platform] Cannot save game language - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.saveGameLanguage(t)}catch(t){return console.error("[Platform] saveGameLanguage failed:",t),{success:!1,error:t}}}async loadGameLanguage(){if(!this.initialized)return console.error("[Platform] Cannot load game language - platform not initialized"),null;try{return await this.currentPlatform.loadGameLanguage()}catch(t){return console.error("[Platform] loadGameLanguage failed:",t),null}}async saveGameDifficulty(t){if(!this.initialized)return console.error("[Platform] Cannot save game difficulty - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.saveGameDifficulty(t)}catch(t){return console.error("[Platform] saveGameDifficulty failed:",t),{success:!1,error:t}}}async loadGameDifficulty(){if(!this.initialized)return console.error("[Platform] Cannot load game difficulty - platform not initialized"),null;try{return await this.currentPlatform.loadGameDifficulty()}catch(t){return console.error("[Platform] loadGameDifficulty failed:",t),null}}async saveGameCategory(t){if(!this.initialized)return console.error("[Platform] Cannot save game category - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.saveGameCategory(t)}catch(t){return console.error("[Platform] saveGameCategory failed:",t),{success:!1,error:t}}}async loadGameCategory(){if(!this.initialized)return console.error("[Platform] Cannot load game category - platform not initialized"),null;try{return await this.currentPlatform.loadGameCategory()}catch(t){return console.error("[Platform] loadGameCategory failed:",t),null}}async saveSoundEnabled(t){if(!this.initialized)return console.error("[Platform] Cannot save sound enabled - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.saveSoundEnabled(t)}catch(t){return console.error("[Platform] saveSoundEnabled failed:",t),{success:!1,error:t}}}loadSoundEnabled(){if(!this.initialized)return console.error("[Platform] Cannot load sound enabled - platform not initialized"),null;try{return this.currentPlatform.loadSoundEnabled()}catch(t){return console.error("[Platform] loadSoundEnabled failed:",t),null}}async save(t,e,r=!1){if(!this.initialized)return console.error("[Platform] Cannot save - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.save(t,e,r),{success:!0}}catch(e){e.message;return"NO_INTERNET_CONNECTION"===e.message?this._log(`[Platform] Save failed due to no internet connection for key "${t}"`):console.error(`[Platform] Save failed for key "${t}":`,e),{success:!1,error:e}}}async load(t){if(!this.initialized)return console.error("[Platform] Cannot load - platform not initialized"),null;try{return await this.currentPlatform.load(t)}catch(e){return console.error(`[Platform] Load failed for key "${t}":`,e),null}}async delete(t){if(!this.initialized)return console.error("[Platform] Cannot delete - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.delete(t),{success:!0}}catch(e){return console.error(`[Platform] Delete failed for key "${t}":`,e),{success:!1,error:e}}}async saveSeenHeadline(t,e,r=!0){if(!this.initialized)return console.error("[Platform] Cannot save seen headline - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};if(!this.currentPlatform.saveSeenHeadline)return console.warn("[Platform] saveSeenHeadline not supported on current platform"),{success:!1,error:new Error("Method not supported")};try{let a=null;if(r){const t="undefined"!=typeof headlineScoringConfig&&headlineScoringConfig.rssConfig&&headlineScoringConfig.rssConfig.seenHeadlinesTimeout?headlineScoringConfig.rssConfig.seenHeadlinesTimeout:48;a=Date.now()-60*t*60*1e3}const o=await this.currentPlatform.saveSeenHeadline(t,e,r,a);return o.success&&this._log(`Saved seen headline data for hash: ${t}`),o}catch(e){return console.error(`[Platform] saveSeenHeadline failed for hash "${t}":`,e),{success:!1,error:e}}}async loadSeenHeadline(t){if(!this.initialized)return console.error("[Platform] Cannot load seen headline - platform not initialized"),null;if(!this.currentPlatform.loadSeenHeadline)return this._log(`loadSeenHeadline not supported on current platform for hash: ${t}`),null;try{const e=await this.currentPlatform.loadSeenHeadline(t);return e?this._log(`Loaded seen headline data for hash: ${t}`):this._log(`No seen headline data found for hash: ${t}`),e}catch(e){return console.error(`[Platform] loadSeenHeadline failed for hash "${t}":`,e),null}}async loadAllSeenHeadlines(){if(!this.initialized)return console.error("[Platform] Cannot load seen headlines - platform not initialized"),{};if(!this.currentPlatform.loadAllSeenHeadlines)return this._log("loadAllSeenHeadlines not supported on current platform"),{};try{const t=await this.currentPlatform.loadAllSeenHeadlines();return this._log(`Loaded ${Object.keys(t).length} seen headlines`),t}catch(t){return console.error("[Platform] loadAllSeenHeadlines failed:",t),{}}}async incrementPuzzleSolvedStat(){if(!this.initialized)return console.error("[Platform] Cannot increment solved stat - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};if(!this.currentPlatform.incrementPuzzleSolvedStat)return console.warn("[Platform] incrementPuzzleSolvedStat not supported on current platform"),{success:!1,error:new Error("Method not supported")};try{const t=await this.currentPlatform.incrementPuzzleSolvedStat();return t.success&&this._log("Puzzle solved stat incremented"),t}catch(t){return console.error("[Platform] incrementPuzzleSolvedStat failed:",t),{success:!1,error:t}}}async incrementPuzzleSkippedStat(){if(!this.initialized)return console.error("[Platform] Cannot increment skipped stat - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};if(!this.currentPlatform.incrementPuzzleSkippedStat)return console.warn("[Platform] incrementPuzzleSkippedStat not supported on current platform"),{success:!1,error:new Error("Method not supported")};try{const t=await this.currentPlatform.incrementPuzzleSkippedStat();return t.success&&this._log("Puzzle skipped stat incremented"),t}catch(t){return console.error("[Platform] incrementPuzzleSkippedStat failed:",t),{success:!1,error:t}}}async getPuzzleSolvedStat(){if(!this.initialized)return console.error("[Platform] Cannot get solved stat - platform not initialized"),0;if(!this.currentPlatform.getPuzzleSolvedStat)return this._log("getPuzzleSolvedStat not supported on current platform"),0;try{const t=await this.currentPlatform.getPuzzleSolvedStat();return this._log(`Retrieved puzzle solved stat: ${t}`),t||0}catch(t){return console.error("[Platform] getPuzzleSolvedStat failed:",t),0}}async getPuzzleSkippedStat(){if(!this.initialized)return console.error("[Platform] Cannot get skipped stat - platform not initialized"),0;if(!this.currentPlatform.getPuzzleSkippedStat)return this._log("getPuzzleSkippedStat not supported on current platform"),0;try{const t=await this.currentPlatform.getPuzzleSkippedStat();return this._log(`Retrieved puzzle skipped stat: ${t}`),t||0}catch(t){return console.error("[Platform] getPuzzleSkippedStat failed:",t),0}}async saveTutorialState(t){if(!this.initialized)return console.error("[Platform] Cannot save tutorial state - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};try{return await this.currentPlatform.saveTutorialState(t)}catch(t){return console.error("[Platform] saveTutorialState failed:",t),{success:!1,error:t}}}async loadTutorialState(){if(!this.initialized)return console.error("[Platform] Cannot load tutorial state - platform not initialized"),{};try{return await this.currentPlatform.loadTutorialState()}catch(t){return console.error("[Platform] loadTutorialState failed:",t),{}}}async hasSeenTutorial(t){if(!this.initialized)return console.error("[Platform] Cannot check tutorial state - platform not initialized"),!1;try{return!!(await this.loadTutorialState())[t]}catch(t){return console.error("[Platform] hasSeenTutorial failed:",t),!1}}async incrementStarRatingStat(t){if(!this.initialized)return console.error("[Platform] Cannot increment star rating stat - platform not initialized"),{success:!1,error:new Error("Platform not initialized")};if(!this.currentPlatform.incrementStarRatingStat)return console.warn("[Platform] incrementStarRatingStat not supported on current platform"),{success:!1,error:new Error("Method not supported")};try{const e=await this.currentPlatform.incrementStarRatingStat(t);return e.success&&this._log(`Star rating stat incremented for ${t} stars`),e}catch(t){return console.error("[Platform] incrementStarRatingStat failed:",t),{success:!1,error:t}}}async getStarRatingStats(){if(!this.initialized)return console.error("[Platform] Cannot get star rating stats - platform not initialized"),{1:0,2:0,3:0,4:0,5:0};if(!this.currentPlatform.getStarRatingStats)return this._log("getStarRatingStats not supported on current platform"),{1:0,2:0,3:0,4:0,5:0};try{const t=await this.currentPlatform.getStarRatingStats();return this._log(`Retrieved star rating stats: ${JSON.stringify(t)}`),t}catch(t){return console.error("[Platform] getStarRatingStats failed:",t),{1:0,2:0,3:0,4:0,5:0}}}isAvailable(){return this.initialized&&this.currentPlatform&&this.currentPlatform.isAvailable()}}"undefined"!=typeof window&&(window.Platform=new t)}();
+/**
+ * Platform Adapter - Strategy Pattern for Cross-Platform Support
+ *
+ * Provides unified API for platform-specific operations (init, save, load, cache).
+ * Automatically detects the current platform and routes calls to appropriate
+ * implementation (Y Games, local web, etc.).
+ *
+ * Usage:
+ *   await Platform.init();
+ *   await Platform.save('seamless_standard', gameData);
+ *   const data = await Platform.load('seamless_standard');
+ *   await Platform.cacheHeadlines('BBC News', headlines);
+ */
+
+(function() {
+    'use strict';
+
+    /**
+     * Platform detection and routing coordinator
+     */
+    class PlatformAdapter {
+        constructor() {
+            this.currentPlatform = null;
+            this.platformType = 'unknown';
+            this.initialized = false;
+
+            // Listen for game ready event to signal platform
+            this._setupGameReadyListener();
+        }
+
+        /**
+         * Helper method for logging with debug system support
+         * @private
+         * @param {...any} args - Arguments to log
+         */
+        _log(...args) {
+            // Use formatted logging from debug.js if available
+            if (window.__cosic && typeof window.__cosic.flog === 'function') {
+                // Join strings, but keep objects separate for proper logging
+                const message = args.map(arg =>
+                    typeof arg === 'object' ? JSON.stringify(arg) : String(arg)
+                ).join(' ');
+                window.__cosic.flog('platform-adapter', message);
+            } else {
+                console.log('[platform-adapter]', ...args);
+            }
+        }
+
+        /**
+         * Setup listener for cosmic:platform:gameReady event
+         * @private
+         */
+        _setupGameReadyListener() {
+            window.addEventListener('cosmic:platform:gameReady', async (event) => {
+                if (!this.initialized) {
+                    console.warn('[Platform] Cannot signal game ready - platform not initialized');
+                    return;
+                }
+
+                if (!this.currentPlatform.signalGameReady) {
+                    // Platform doesn't support game ready signaling (e.g., web platform)
+                    return;
+                }
+
+                try {
+                    this._log('Signaling game ready to platform');
+                    await this.currentPlatform.signalGameReady();
+                } catch (err) {
+                    console.error(`[Platform] signalGameReady failed:`, err);
+                }
+            });
+        }
+
+        /**
+         * Detect which platform we're running on
+         * @returns {string} Platform type: 'y' or 'web'
+         */
+        detectPlatform() {
+            this._log('Detecting platform...');
+
+            // Check if Y Games integration is available
+            if (window.__cosmic_platform &&
+                typeof window.__cosmic_platform.isAvailable === 'function') {
+                this._log('Detected: y');
+                return 'y';
+            }
+
+            // Check if web platform implementation is available
+            if (typeof WebPlatform !== 'undefined') {
+                this._log('Detected: web');
+                return 'web';
+            }
+
+            console.warn('[Platform Adapter] No platform detected!');
+            return 'unknown';
+        }
+
+        /**
+         * Initialize the platform adapter and underlying platform
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async init() {
+            this._log('init() called');
+            try {
+                // Detect platform
+                this.platformType = this.detectPlatform();
+                this._log(['Platform type:', this.platformType]);
+
+                if (this.platformType === 'unknown') {
+                    throw new Error('No platform implementation found');
+                }
+
+                // Get platform implementation
+                if (this.platformType === 'y') {
+                    this.currentPlatform = window.__cosmic_platform;
+                    this._log('Using Y platform implementation');
+                } else if (this.platformType === 'web') {
+                    this.currentPlatform = new WebPlatform();
+                    this._log('Using Web platform implementation');
+                }
+
+                this._log(`Detected platform: ${this.platformType}`);
+
+                // Initialize the platform
+                this._log('Calling platform.init()...');
+                const result = await this.currentPlatform.init();
+                this._log(['platform.init() result:', result]);
+
+                if (!result.success) {
+                    throw new Error(result.reason || 'Platform initialization failed');
+                }
+
+                this.initialized = true;
+                this._log('Platform adapter initialized successfully');
+
+                // Initialize global game state variables
+                if (typeof window.__cosmic_undoUsed !== 'number') {
+                    window.__cosmic_undoUsed = 0;
+                    this._log('Initialized undoUsed counter to 0');
+                }
+
+                this._log('Dispatching headlines:platform:ready event');
+                // Dispatch event so other systems can wait for platform readiness
+                window.dispatchEvent(new CustomEvent('headlines:platform:ready', {
+                    detail: { platformType: this.platformType }
+                }));
+                this._log('Event dispatched');
+
+                return { success: true };
+
+            } catch (err) {
+                console.error('[Platform] Initialization failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Cache headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @param {Array} headlines - Array of headline objects
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async cacheHeadlines(sourceName, headlines) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot cache headlines - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.cacheHeadlines(sourceName, headlines);
+            } catch (err) {
+                console.error(`[Platform] cacheHeadlines failed for "${sourceName}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load cached headlines for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<Array|null>} Array of headlines or null
+         */
+        async loadCachedHeadlines(sourceName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load cached headlines - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadCachedHeadlines(sourceName);
+            } catch (err) {
+                console.error(`[Platform] loadCachedHeadlines failed for "${sourceName}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Check if cache is expired for a specific source
+         * @param {string} sourceName - Name of the RSS source
+         * @returns {Promise<boolean>} True if expired
+         */
+        async isCacheExpired(sourceName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot check cache expiration - platform not initialized');
+                return true;
+            }
+
+            try {
+                return await this.currentPlatform.isCacheExpired(sourceName);
+            } catch (err) {
+                console.error(`[Platform] isCacheExpired failed for "${sourceName}":`, err);
+                return true;
+            }
+        }
+
+        /**
+         * Save game language setting
+         * @param {string} language - Language code ('en' or 'ru')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameLanguage(language) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save game language - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveGameLanguage(language);
+            } catch (err) {
+                console.error(`[Platform] saveGameLanguage failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game language setting
+         * @returns {Promise<string|null>} Language code or null
+         */
+        async loadGameLanguage() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load game language - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadGameLanguage();
+            } catch (err) {
+                console.error(`[Platform] loadGameLanguage failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save game difficulty setting
+         * @param {string} difficulty - Difficulty key ('easy', 'mediumEasy', 'medium', 'mediumHard', 'hard')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameDifficulty(difficulty) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save game difficulty - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveGameDifficulty(difficulty);
+            } catch (err) {
+                console.error(`[Platform] saveGameDifficulty failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game difficulty setting
+         * @returns {Promise<string|null>} Difficulty key or null
+         */
+        async loadGameDifficulty() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load game difficulty - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadGameDifficulty();
+            } catch (err) {
+                console.error(`[Platform] loadGameDifficulty failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save game category setting
+         * @param {string} category - Category key ('all', 'general', 'economy', 'technology', 'sports')
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveGameCategory(category) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save game category - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveGameCategory(category);
+            } catch (err) {
+                console.error(`[Platform] saveGameCategory failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load game category setting
+         * @returns {Promise<string|null>} Category key or null
+         */
+        async loadGameCategory() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load game category - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.loadGameCategory();
+            } catch (err) {
+                console.error(`[Platform] loadGameCategory failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save sound enabled setting
+         * @param {boolean} enabled - Whether sound is enabled
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSoundEnabled(enabled) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save sound enabled - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveSoundEnabled(enabled);
+            } catch (err) {
+                console.error(`[Platform] saveSoundEnabled failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load sound enabled setting
+         * @returns {boolean|null} Sound enabled state or null if not set
+         */
+        loadSoundEnabled() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load sound enabled - platform not initialized');
+                return null;
+            }
+
+            try {
+                return this.currentPlatform.loadSoundEnabled();
+            } catch (err) {
+                console.error(`[Platform] loadSoundEnabled failed:`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Save data to platform storage
+         * @param {string} key - Storage key
+         * @param {any} data - Data to save
+         * @param {boolean} immediate - If true, bypasses rate limiting
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async save(key, data, immediate = false) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                await this.currentPlatform.save(key, data, immediate);
+
+                return { success: true };
+            } catch (err) {
+                // Check for specific network error
+                const errorType = err.message === 'NO_INTERNET_CONNECTION' ? 'no_internet_connection' : 'general_error';
+
+                if (err.message === 'NO_INTERNET_CONNECTION') {
+                    this._log(`[Platform] Save failed due to no internet connection for key "${key}"`);
+                } else {
+                    console.error(`[Platform] Save failed for key "${key}":`, err);
+                }
+
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load data from platform storage
+         * @param {string} key - Storage key
+         * @returns {Promise<any|null>} Loaded data or null
+         */
+        async load(key) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load - platform not initialized');
+                return null;
+            }
+
+            try {
+                return await this.currentPlatform.load(key);
+            } catch (err) {
+                console.error(`[Platform] Load failed for key "${key}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Delete data from platform storage
+         * @param {string} key - Storage key to delete
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async delete(key) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot delete - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                await this.currentPlatform.delete(key);
+                return { success: true };
+            } catch (err) {
+                console.error(`[Platform] Delete failed for key "${key}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Save seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @param {Object} data - Seen headline data {isSolved, movesUsed, link, timestamp}
+         * @param {boolean} [cleanupOldEntries=true] - Whether to delete old entries based on config timeout
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveSeenHeadline(hash, data, cleanupOldEntries = true) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save seen headline - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.saveSeenHeadline) {
+                console.warn('[Platform] saveSeenHeadline not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                // Calculate maxAge if cleanup is requested
+                let maxAge = null;
+                if (cleanupOldEntries) {
+                    // Get timeout from config (assuming headlineScoringConfig is available globally)
+                    const seenHeadlinesTimeoutHours = (typeof headlineScoringConfig !== 'undefined' &&
+                                                      headlineScoringConfig.rssConfig &&
+                                                      headlineScoringConfig.rssConfig.seenHeadlinesTimeout)
+                                                    ? headlineScoringConfig.rssConfig.seenHeadlinesTimeout
+                                                    : 48; // Default to 48 hours
+                    maxAge = Date.now() - (seenHeadlinesTimeoutHours * 60 * 60 * 1000);
+                }
+
+                const result = await this.currentPlatform.saveSeenHeadline(hash, data, cleanupOldEntries, maxAge);
+                if (result.success) {
+                    this._log(`Saved seen headline data for hash: ${hash}`);
+                }
+                return result;
+            } catch (err) {
+                console.error(`[Platform] saveSeenHeadline failed for hash "${hash}":`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load seen headline data
+         * @param {string} hash - djb2 hash of the headline
+         * @returns {Promise<Object|null>} Seen headline data or null if not found
+         */
+        async loadSeenHeadline(hash) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load seen headline - platform not initialized');
+                return null;
+            }
+
+            if (!this.currentPlatform.loadSeenHeadline) {
+                this._log(`loadSeenHeadline not supported on current platform for hash: ${hash}`);
+                return null;
+            }
+
+            try {
+                const data = await this.currentPlatform.loadSeenHeadline(hash);
+                if (data) {
+                    this._log(`Loaded seen headline data for hash: ${hash}`);
+                } else {
+                    this._log(`No seen headline data found for hash: ${hash}`);
+                }
+                return data;
+            } catch (err) {
+                console.error(`[Platform] loadSeenHeadline failed for hash "${hash}":`, err);
+                return null;
+            }
+        }
+
+        /**
+         * Load all seen headlines data
+         * @returns {Promise<Object>} Object with all seen headlines data (hash -> data mapping)
+         */
+        async loadAllSeenHeadlines() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load seen headlines - platform not initialized');
+                return {};
+            }
+
+            if (!this.currentPlatform.loadAllSeenHeadlines) {
+                this._log('loadAllSeenHeadlines not supported on current platform');
+                return {};
+            }
+
+            try {
+                const data = await this.currentPlatform.loadAllSeenHeadlines();
+                this._log(`Loaded ${Object.keys(data).length} seen headlines`);
+                return data;
+            } catch (err) {
+                console.error('[Platform] loadAllSeenHeadlines failed:', err);
+                return {};
+            }
+        }
+
+        /**
+         * Increment puzzle solved stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSolvedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment solved stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementPuzzleSolvedStat) {
+                console.warn('[Platform] incrementPuzzleSolvedStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementPuzzleSolvedStat();
+                if (result.success) {
+                    this._log('Puzzle solved stat incremented');
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementPuzzleSolvedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Increment puzzle skipped stat
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementPuzzleSkippedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment skipped stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementPuzzleSkippedStat) {
+                console.warn('[Platform] incrementPuzzleSkippedStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementPuzzleSkippedStat();
+                if (result.success) {
+                    this._log('Puzzle skipped stat incremented');
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementPuzzleSkippedStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get puzzle solved stat
+         * @returns {Promise<number>} Current solved count (0 if not found)
+         */
+        async getPuzzleSolvedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get solved stat - platform not initialized');
+                return 0;
+            }
+
+            if (!this.currentPlatform.getPuzzleSolvedStat) {
+                this._log('getPuzzleSolvedStat not supported on current platform');
+                return 0;
+            }
+
+            try {
+                const count = await this.currentPlatform.getPuzzleSolvedStat();
+                this._log(`Retrieved puzzle solved stat: ${count}`);
+                return count || 0;
+            } catch (err) {
+                console.error('[Platform] getPuzzleSolvedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Get puzzle skipped stat
+         * @returns {Promise<number>} Current skipped count (0 if not found)
+         */
+        async getPuzzleSkippedStat() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get skipped stat - platform not initialized');
+                return 0;
+            }
+
+            if (!this.currentPlatform.getPuzzleSkippedStat) {
+                this._log('getPuzzleSkippedStat not supported on current platform');
+                return 0;
+            }
+
+            try {
+                const count = await this.currentPlatform.getPuzzleSkippedStat();
+                this._log(`Retrieved puzzle skipped stat: ${count}`);
+                return count || 0;
+            } catch (err) {
+                console.error('[Platform] getPuzzleSkippedStat failed:', err);
+                return 0;
+            }
+        }
+
+        /**
+         * Save tutorial state
+         * @param {Object} state - Tutorial state object {tutorialName: boolean}
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async saveTutorialState(state) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot save tutorial state - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            try {
+                return await this.currentPlatform.saveTutorialState(state);
+            } catch (err) {
+                console.error(`[Platform] saveTutorialState failed:`, err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Load tutorial state
+         * @returns {Promise<Object>} Tutorial state object or empty object
+         */
+        async loadTutorialState() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot load tutorial state - platform not initialized');
+                return {};
+            }
+
+            try {
+                return await this.currentPlatform.loadTutorialState();
+            } catch (err) {
+                console.error(`[Platform] loadTutorialState failed:`, err);
+                return {};
+            }
+        }
+
+        /**
+         * Check if a specific tutorial has been seen
+         * @param {string} tutorialName - Name of the tutorial to check
+         * @returns {Promise<boolean>} True if tutorial has been seen
+         */
+        async hasSeenTutorial(tutorialName) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot check tutorial state - platform not initialized');
+                return false;
+            }
+
+            try {
+                const tutorialState = await this.loadTutorialState();
+                return !!tutorialState[tutorialName];
+            } catch (err) {
+                console.error(`[Platform] hasSeenTutorial failed:`, err);
+                return false;
+            }
+        }
+
+        /**
+         * Increment star rating stat for a specific star count
+         * @param {number} starCount - Number of stars earned (1-5)
+         * @returns {Promise<{success: boolean, error?: Error}>}
+         */
+        async incrementStarRatingStat(starCount) {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot increment star rating stat - platform not initialized');
+                return { success: false, error: new Error('Platform not initialized') };
+            }
+
+            if (!this.currentPlatform.incrementStarRatingStat) {
+                console.warn('[Platform] incrementStarRatingStat not supported on current platform');
+                return { success: false, error: new Error('Method not supported') };
+            }
+
+            try {
+                const result = await this.currentPlatform.incrementStarRatingStat(starCount);
+                if (result.success) {
+                    this._log(`Star rating stat incremented for ${starCount} stars`);
+                }
+                return result;
+            } catch (err) {
+                console.error('[Platform] incrementStarRatingStat failed:', err);
+                return { success: false, error: err };
+            }
+        }
+
+        /**
+         * Get star rating statistics
+         * @returns {Promise<Object>} Object with star counts {1: count, 2: count, 3: count, 4: count, 5: count}
+         */
+        async getStarRatingStats() {
+            if (!this.initialized) {
+                console.error('[Platform] Cannot get star rating stats - platform not initialized');
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+
+            if (!this.currentPlatform.getStarRatingStats) {
+                this._log('getStarRatingStats not supported on current platform');
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+
+            try {
+                const stats = await this.currentPlatform.getStarRatingStats();
+                this._log(`Retrieved star rating stats: ${JSON.stringify(stats)}`);
+                return stats;
+            } catch (err) {
+                console.error('[Platform] getStarRatingStats failed:', err);
+                return {1: 0, 2: 0, 3: 0, 4: 0, 5: 0};
+            }
+        }
+
+        /**
+         * Check if platform is available and initialized
+         * @returns {boolean}
+         */
+        isAvailable() {
+            return this.initialized && this.currentPlatform && this.currentPlatform.isAvailable();
+        }
+    }
+
+    // Create global instance
+    if (typeof window !== 'undefined') {
+        window.Platform = new PlatformAdapter();
+    }
+
+})();
