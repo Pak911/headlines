@@ -149,11 +149,13 @@ const portugueseRssNewsSources = [
         url: "https://placar.com/feed/",
         category: "sports"
     },
-    {
-        name: "Rio Times",
-        url: "https://www.riotimesonline.com/brazil-news/category/rio-business/feed/",
-        category: "economy"
-    }
+    
+    // English :(
+    // {
+    //     name: "Rio Times",
+    //     url: "https://www.riotimesonline.com/brazil-news/category/rio-business/feed/",
+    //     category: "economy"
+    // }
 ];
 
 // Russian RSS News Sources
