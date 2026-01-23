@@ -232,11 +232,14 @@
             languageDropdown = document.createElement('div');
             languageDropdown.className = 'language-dropdown-panel';
             
-            // Language options
-            const languages = [
-                { code: 'en', name: 'English' },
-                { code: 'ru', name: 'Русский' }
-            ];
+            // Language options - get from i18n if available
+            const languages = typeof i18n !== 'undefined' && i18n.getAvailableLanguages
+                ? i18n.getAvailableLanguages()
+                : [
+                    { code: 'en', name: 'English' },
+                    { code: 'ru', name: 'Русский' },
+                    { code: 'pt', name: 'Português' }
+                ];
             
             languages.forEach(lang => {
                 const option = document.createElement('div');
@@ -292,9 +295,10 @@
         function updateLanguageDisplay() {
             const languageText = document.getElementById('languageText');
             if (!languageText || typeof i18n === 'undefined') return;
-            
+
             const currentLang = i18n.currentLanguage;
-            const displayName = currentLang === 'en' ? 'English' : 'Русский';
+            const langMap = { 'en': 'English', 'ru': 'Русский', 'pt': 'Português' };
+            const displayName = langMap[currentLang] || 'English';
             languageText.textContent = displayName;
         }
 
