@@ -16,8 +16,8 @@ yarn-error.log*
 headlines-game/.env
 
 # Build outputs
-dist/
-!dist/github-pages/
+dist/web-standalone/
+dist/*.zip
 build/
 out/
 test/to_extract/
