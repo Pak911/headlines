@@ -10,8 +10,8 @@ const pt = {
     ui: {
         swaps: "Trocas",
         moves: {
-            one: "movimento",
-            other: "movimentos"
+            one: "jogada",
+            other: "jogadas"
         },
         giveUp: "Desistir",
         nextHeadline: "Próxima",
