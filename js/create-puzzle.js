@@ -28,6 +28,7 @@ const MIN_WORD_LENGTH = 4;
 // Regex for language detection
 const REGEX_EN = /^[a-zA-Z]+$/;
 const REGEX_RU = /^[а-яА-Я]+$/;
+const REGEX_PT = /^[a-zA-Zç]+$/;
 
 /**
  * Initialize DOM elements and event listeners
@@ -88,17 +89,42 @@ function initializeEventListeners() {
  */
 function validateHeadline(showUiErrors = false) {
     let text = headlineInput.value;
-    
-    // 1. Normalize: Replace ё with е for Russian consistency
-    text = text.replace(/ё/g, 'е').replace(/Ё/g, 'Е');
-    
-    // 2. Strict Filtering: Remove everything EXCEPT letters (Eng/Rus) and spaces
-    const cleanText = text.replace(/[^a-zA-Zа-яА-Я\s]/g, '');
 
-    // 3. Capitalize all letters before tokenizing
+    // 1. Detect language BEFORE normalization (based on original input)
+    const originalText = text;
+    let detectedLang = null;
+    if (/[а-яА-ЯёЁ]/.test(originalText)) {
+        detectedLang = 'ru';
+    } else if (/[çÇáàãâéêíóõôú]/.test(originalText)) {
+        detectedLang = 'pt';
+    } else if (/[a-zA-Z]/.test(originalText)) {
+        detectedLang = 'en';
+    }
+
+    // 2. Normalize based on detected language
+    if (detectedLang === 'ru') {
+        // Russian normalization
+        text = text.replace(/ё/g, 'е').replace(/Ё/g, 'Е');
+    } else if (detectedLang === 'pt') {
+        // Portuguese normalization (preserve ç)
+        text = text.split('').map(char => {
+            if (/[çÇ]/.test(char)) return char;
+            if (/[áàãâÁÀÃÂ]/.test(char)) return char.toLowerCase() === char ? 'a' : 'A';
+            if (/[éêÉÊ]/.test(char)) return char.toLowerCase() === char ? 'e' : 'E';
+            if (/[íÍ]/.test(char)) return char.toLowerCase() === char ? 'i' : 'I';
+            if (/[óõôÓÕÔ]/.test(char)) return char.toLowerCase() === char ? 'o' : 'O';
+            if (/[úÚ]/.test(char)) return char.toLowerCase() === char ? 'u' : 'U';
+            return char;
+        }).join('');
+    }
+
+    // 3. Strict Filtering: Remove everything EXCEPT letters (Eng/Rus/Portuguese) and spaces
+    const cleanText = text.replace(/[^a-zA-Zа-яА-Яç\s]/g, '');
+
+    // 4. Capitalize all letters before tokenizing
     cleanedWordsArray = cleanText.trim().toUpperCase().split(/\s+/).filter(w => w.length > 0);
 
-    // 4. Update Visual Display (Colored Badges)
+    // 5. Update Visual Display (Colored Badges) - Shows normalized words
     if (cleanedWordsArray.length > 0) {
         const badgesHTML = cleanedWordsArray.map(word => {
             const len = word.length;
@@ -121,7 +147,7 @@ function validateHeadline(showUiErrors = false) {
         cleanedWordsDisplay.classList.remove('visible');
     }
 
-    // 5. Check Word Count
+    // 6. Check Word Count
     if (cleanedWordsArray.length < MIN_WORDS) {
         if (showUiErrors) {
             showError(headlineError, t('createPuzzle.errors.minWords', cleanedWordsArray.length).replace('{count}', MIN_WORDS).replace('{current}', cleanedWordsArray.length));
@@ -129,7 +155,7 @@ function validateHeadline(showUiErrors = false) {
         return false;
     }
 
-    // 6. Check Word Length
+    // 7. Check Word Length
     const shortWords = cleanedWordsArray.filter(w => w.length < MIN_WORD_LENGTH);
     if (shortWords.length > 0) {
         if (showUiErrors) {
@@ -138,18 +164,17 @@ function validateHeadline(showUiErrors = false) {
         return false;
     }
 
-    // 7. Check Language Consistency
-    const joinedWords = cleanedWordsArray.join('');
-    const isEn = REGEX_EN.test(joinedWords);
-    const isRu = REGEX_RU.test(joinedWords);
-
-    if (isEn && !isRu) {
+    // 8. Set Language (detected earlier from original input)
+    if (detectedLang === 'en') {
         currentLang = 'en';
         if (langIndicator) langIndicator.textContent = t('createPuzzle.language.english');
-    } else if (isRu && !isEn) {
+    } else if (detectedLang === 'ru') {
         currentLang = 'ru';
         if (langIndicator) langIndicator.textContent = t('createPuzzle.language.russian');
-    } else if (!isEn && !isRu && joinedWords.length > 0) {
+    } else if (detectedLang === 'pt') {
+        currentLang = 'pt';
+        if (langIndicator) langIndicator.textContent = t('createPuzzle.language.portuguese');
+    } else if (cleanedWordsArray.length > 0) {
         if (showUiErrors) {
             showError(headlineError, t('createPuzzle.errors.mixedLanguages'));
         }

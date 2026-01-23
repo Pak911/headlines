@@ -69,7 +69,7 @@ function loadCustomPuzzle() {
         }
         
         // Validate language
-        if (puzzleData.l !== 'en' && puzzleData.l !== 'ru') {
+        if (puzzleData.l !== 'en' && puzzleData.l !== 'ru' && puzzleData.l !== 'pt') {
             console.error('Invalid language:', puzzleData.l);
             showCustomPuzzleError('Unsupported language in puzzle');
             return null;

@@ -151,10 +151,13 @@ function getRSSSourcesForCurrentLanguage() {
     _log(`📡 RSS language: ${rssLanguage}`);
     
     let sources;
-    // Return Russian sources if language is Russian
+    // Return sources based on language
     if (rssLanguage === 'ru') {
         sources = validatedSourcesCache?.russianSources || russianRssNewsSources || [];
         _log(`🇷🇺 Using Russian RSS sources (${sources.length} sources)`);
+    } else if (rssLanguage === 'pt') {
+        sources = validatedSourcesCache?.portugueseSources || portugueseRssNewsSources || [];
+        _log(`🇧🇷 Using Portuguese RSS sources (${sources.length} sources)`);
     } else {
         // Default to English sources
         sources = validatedSourcesCache?.englishSources || englishRssNewsSources || [];

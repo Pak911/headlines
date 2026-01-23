@@ -54,6 +54,7 @@ function getCrosswordConfig() {
 // Alphabet detection
 const ALPHABET_RU = "абвгдежзийклмнопрстуфхцчшщъыьэюя";
 const ALPHABET_EN = "abcdefghijklmnopqrstuvwxyz";
+const ALPHABET_PT = "abcdefghijklmnopqrstuvwxyzç";  // Portuguese with cedilla
 let CURRENT_ALPHABET = ALPHABET_RU;
 
 function detectAndSetLanguage(words) {
@@ -61,6 +62,9 @@ function detectAndSetLanguage(words) {
     if (/[а-яА-ЯёЁ]/.test(combinedText)) {
         CURRENT_ALPHABET = ALPHABET_RU;
         return "RU";
+    } else if (/[çÇáàãâéêíóõôú]/.test(combinedText)) {
+        CURRENT_ALPHABET = ALPHABET_PT;
+        return "PT";
     } else {
         CURRENT_ALPHABET = ALPHABET_EN;
         return "EN";
@@ -69,7 +73,23 @@ function detectAndSetLanguage(words) {
 
 function getBitIndex(char) {
     char = char.toLowerCase();
+
+    // Russian normalization
     if (CURRENT_ALPHABET === ALPHABET_RU && char === 'ё') char = 'е';
+
+    // Portuguese normalization
+    if (CURRENT_ALPHABET === ALPHABET_PT) {
+        // Preserve ç as unique character
+        if (char === 'ç') return ALPHABET_PT.indexOf('ç');
+
+        // Normalize diacritics
+        if (/[áàãâ]/.test(char)) char = 'a';
+        else if (/[éê]/.test(char)) char = 'e';
+        else if (char === 'í') char = 'i';
+        else if (/[óõô]/.test(char)) char = 'o';
+        else if (char === 'ú') char = 'u';
+    }
+
     const idx = CURRENT_ALPHABET.indexOf(char);
     return idx === -1 ? null : idx;
 }

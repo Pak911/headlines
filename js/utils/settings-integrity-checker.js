@@ -149,7 +149,8 @@ function validateRSSFetchingConfig() {
 function validateAllRSSSources() {
     const result = {
         englishSources: [],
-        russianSources: []
+        russianSources: [],
+        portugueseSources: []
     };
 
     // Validate English sources
@@ -166,7 +167,14 @@ function validateAllRSSSources() {
         console.warn(`⚠️ russianRssNewsSources not found, skipping Russian source validation`);
     }
 
-    _log(`📊 Validation complete: ${result.englishSources.length} English, ${result.russianSources.length} Russian valid sources`);
+    // Validate Portuguese sources
+    if (typeof portugueseRssNewsSources !== 'undefined') {
+        result.portugueseSources = validateRSSSourceCategories(portugueseRssNewsSources, 'portugueseRssNewsSources');
+    } else {
+        console.warn(`⚠️ portugueseRssNewsSources not found, skipping Portuguese source validation`);
+    }
+
+    _log(`📊 Validation complete: ${result.englishSources.length} English, ${result.russianSources.length} Russian, ${result.portugueseSources.length} Portuguese valid sources`);
 
     return result;
 }

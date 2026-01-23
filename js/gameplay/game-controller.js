@@ -19,6 +19,45 @@ function normalizeRussianWords(words) {
     return words.map(word => word.replace(/Ё/g, 'Е').replace(/ё/g, 'е'));
 }
 
+// Normalize Portuguese diacritics for crossword algorithm (27-letter alphabet)
+function normalizePortugueseWords(words) {
+    return words.map(word => {
+        let normalized = '';
+        for (let char of word) {
+            // Preserve ç
+            if (/[çÇ]/.test(char)) {
+                normalized += char;
+            }
+            // Normalize other diacritics
+            else if (/[áàãâÁÀÃÂ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'a' : 'A';
+            } else if (/[éêÉÊ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'e' : 'E';
+            } else if (/[íÍ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'i' : 'I';
+            } else if (/[óõôÓÕÔ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'o' : 'O';
+            } else if (/[úÚ]/.test(char)) {
+                normalized += char.toLowerCase() === char ? 'u' : 'U';
+            } else {
+                normalized += char;
+            }
+        }
+        return normalized;
+    });
+}
+
+// Unified normalization dispatcher
+function normalizeWordsByLanguage(words) {
+    const combinedText = words.join("");
+    if (/[а-яА-ЯёЁ]/.test(combinedText)) {
+        return normalizeRussianWords(words);
+    } else if (/[çÇáàãâéêíóõôú]/.test(combinedText)) {
+        return normalizePortugueseWords(words);
+    }
+    return words; // English - no normalization needed
+}
+
 function checkVictory() {
     // Check if all letters are in their correct positions
     for (let r = 0; r < grid.length; r++) {
@@ -485,7 +524,7 @@ async function enhancedInitGame() {
             }
             
             // Normalize Russian Ё → Е for crossword algorithm
-            const normalizedWords = normalizeRussianWords(currentHeadline.words);
+            const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
             
             _log(`🎯 Attempting layout for custom puzzle: "${currentHeadline.text}" (${normalizedWords.length} words)`);
             
@@ -532,9 +571,9 @@ async function enhancedInitGame() {
                 
                 // Use filtered words if available, otherwise fall back to original words
                 const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
-            
-            // Normalize Russian Ё → Е for crossword algorithm
-            const normalizedWords = normalizeRussianWords(wordsToUse);
+
+            // Normalize words for crossword algorithm (Russian Ё → Е, Portuguese diacritics)
+            const normalizedWords = normalizeWordsByLanguage(wordsToUse);
             
             _log(`🎯 Attempting layout for: "${currentHeadline.filteredText || currentHeadline.text}" (${normalizedWords.length} words)`);
             
@@ -574,7 +613,7 @@ async function enhancedInitGame() {
             
             if (currentHeadline) {
                 const wordsToUse = currentHeadline.filteredWords || currentHeadline.words;
-                const normalizedWords = normalizeRussianWords(wordsToUse);
+                const normalizedWords = normalizeWordsByLanguage(wordsToUse);
                 crosswordLayout = generateSimpleLayout(normalizedWords);
                 
                 if (crosswordLayout && crosswordLayout.words.length === normalizedWords.length) {
@@ -602,9 +641,16 @@ async function enhancedInitGame() {
         // Final fallback check (applies to both custom and RSS modes)
         if (!crosswordLayout || !currentHeadline) {
             console.error('🚨 Critical: No valid layout generated, falling back to emergency headline');
-            // Use a guaranteed working headline from mock data
-            currentHeadline = englishMockHeadlines[0];
-            const normalizedWords = normalizeRussianWords(currentHeadline.words);
+            // Use a guaranteed working headline from mock data based on language
+            const rssLang = typeof i18n !== 'undefined' ? i18n.getCurrentRSSLanguage() : 'en';
+            if (rssLang === 'ru' && typeof mockRussianHeadlines !== 'undefined') {
+                currentHeadline = mockRussianHeadlines[0];
+            } else if (rssLang === 'pt' && typeof mockPortugueseHeadlines !== 'undefined') {
+                currentHeadline = mockPortugueseHeadlines[0];
+            } else {
+                currentHeadline = englishMockHeadlines[0];
+            }
+            const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
             crosswordLayout = generateSimpleLayout(normalizedWords);
             normalizeLayout(crosswordLayout, normalizedWords);
             currentHeadline.words = normalizedWords;
@@ -613,13 +659,20 @@ async function enhancedInitGame() {
         
     } catch (error) {
         console.error('❌ Error in enhanced game initialization:', error);
-        
-        // Emergency fallback to old system
+
+        // Emergency fallback to old system - use mock headlines based on language
         _log('🔄 Falling back to legacy headline system');
-        currentHeadline = englishMockHeadlines[Math.floor(Math.random() * englishMockHeadlines.length)];
-        const normalizedWords = normalizeRussianWords(currentHeadline.words);
+        const rssLang = typeof i18n !== 'undefined' ? i18n.getCurrentRSSLanguage() : 'en';
+        let mockHeadlines = englishMockHeadlines;
+        if (rssLang === 'ru' && typeof mockRussianHeadlines !== 'undefined') {
+            mockHeadlines = mockRussianHeadlines;
+        } else if (rssLang === 'pt' && typeof mockPortugueseHeadlines !== 'undefined') {
+            mockHeadlines = mockPortugueseHeadlines;
+        }
+        currentHeadline = mockHeadlines[Math.floor(Math.random() * mockHeadlines.length)];
+        const normalizedWords = normalizeWordsByLanguage(currentHeadline.words);
         crosswordLayout = generateCrosswordLayout(normalizedWords);
-        
+
         if (!crosswordLayout) {
             crosswordLayout = generateSimpleLayout(normalizedWords);
             normalizeLayout(crosswordLayout, normalizedWords);

@@ -264,7 +264,8 @@ class HamburgerMenu {
         const languageValue = document.getElementById('menuLanguageText');
         if (languageValue && typeof i18n !== 'undefined') {
             const currentLang = i18n.currentLanguage;
-            const displayName = currentLang === 'ru' ? 'Русский' : 'English';
+            const langMap = { 'en': 'English', 'ru': 'Русский', 'pt': 'Português' };
+            const displayName = langMap[currentLang] || 'English';
             _log(`Language dropdown: current i18n language = '${currentLang}', setting display to '${displayName}'`);
             languageValue.textContent = displayName;
             
@@ -434,11 +435,14 @@ class HamburgerMenu {
         dropdownPanel.className = 'menu-dropdown-panel';
         dropdownPanel.id = 'languageDropdownPanel';
         
-        // Language options
-        const languages = [
-            { code: 'en', name: 'English' },
-            { code: 'ru', name: 'Русский' }
-        ];
+        // Language options - get from i18n if available
+        const languages = typeof i18n !== 'undefined' && i18n.getAvailableLanguages
+            ? i18n.getAvailableLanguages()
+            : [
+                { code: 'en', name: 'English' },
+                { code: 'ru', name: 'Русский' },
+                { code: 'pt', name: 'Português' }
+            ];
         
         languages.forEach(lang => {
             const option = document.createElement('div');

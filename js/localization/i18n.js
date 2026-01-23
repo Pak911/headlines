@@ -18,7 +18,8 @@ class LocalizationManager {
     constructor() {
         this.languages = {
             'en': en,
-            'ru': ru
+            'ru': ru,
+            'pt': pt
         };
         this.defaultLanguage = 'en';
         this.currentLanguage = this.detectLanguage();
@@ -42,6 +43,8 @@ class LocalizationManager {
             return 'en';
         } else if (browserLang.startsWith('ru')) {
             return 'ru';
+        } else if (browserLang.startsWith('pt')) {
+            return 'pt'; // Covers pt-BR, pt-PT, etc.
         }
         
         // Check if we have the exact language
@@ -206,7 +209,8 @@ class LocalizationManager {
     getAvailableLanguages() {
         return [
             { code: 'en', name: 'English' },
-            { code: 'ru', name: 'Русский' }
+            { code: 'ru', name: 'Русский' },
+            { code: 'pt', name: 'Português' }
         ];
     }
 

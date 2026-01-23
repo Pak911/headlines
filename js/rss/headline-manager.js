@@ -90,13 +90,24 @@ async function getNextHeadline() {
             console.warn('  - All Russian RSS feeds failed or returned no content');
             console.warn('  - Russian headlines were filtered out during processing');
             console.warn('  - Network issues specific to Russian RSS sources');
-            // Use Russian fallback headlines if RSS language is Russian
-            if (window.i18n.getCurrentRSSLanguage() === 'ru') {
+            // Use fallback headlines based on RSS language
+            const rssLang = window.i18n.getCurrentRSSLanguage();
+            if (rssLang === 'ru') {
                 _log('🇷🇺 Using Russian fallback headlines...');
                 const mockHeadlinesWithMetadata = mockRussianHeadlines.map(headline => ({
                     ...headline,
                     source: 'mock',
                     sourceName: 'Russian Mock Data',
+                    category: 'fallback',
+                    pubDate: new Date().toISOString()
+                }));
+                headlinePools = await HeadlineScorer.processAndGroupHeadlines(mockHeadlinesWithMetadata);
+            } else if (rssLang === 'pt') {
+                _log('🇧🇷 Using Portuguese fallback headlines...');
+                const mockHeadlinesWithMetadata = mockPortugueseHeadlines.map(headline => ({
+                    ...headline,
+                    source: 'mock',
+                    sourceName: 'Portuguese Mock Data',
                     category: 'fallback',
                     pubDate: new Date().toISOString()
                 }));
