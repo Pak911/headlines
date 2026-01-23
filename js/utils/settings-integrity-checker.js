@@ -143,7 +143,48 @@ function validateRSSFetchingConfig() {
 }
 
 /**
- * Validates all RSS sources (English and Russian)
+ * Validates that all RSS source names are unique across all language arrays
+ * @param {Array} englishSources - English RSS sources
+ * @param {Array} russianSources - Russian RSS sources  
+ * @param {Array} portugueseSources - Portuguese RSS sources
+ */
+function validateUniqueRSSSourceNames(englishSources, russianSources, portugueseSources) {
+    const allSources = [
+        ...(englishSources || []),
+        ...(russianSources || []),
+        ...(portugueseSources || [])
+    ];
+
+    const nameCounts = {};
+    const duplicates = [];
+
+    // Count occurrences of each name
+    allSources.forEach(source => {
+        if (source && source.name) {
+            const name = source.name.trim();
+            if (name) {
+                nameCounts[name] = (nameCounts[name] || 0) + 1;
+                if (nameCounts[name] === 2) {
+                    duplicates.push(name);
+                }
+            }
+        }
+    });
+
+    if (duplicates.length > 0) {
+        console.warn(`⚠️ Found ${duplicates.length} duplicate RSS source name(s): ${duplicates.join(', ')}`);
+        duplicates.forEach(duplicateName => {
+            const sourcesWithName = allSources.filter(source => source && source.name && source.name.trim() === duplicateName);
+            console.warn(`   - "${duplicateName}" appears in: ${sourcesWithName.map(s => `${s.category || 'unknown'} category`).join(', ')}`);
+        });
+        console.warn(`⚠️ Duplicate names may cause confusion but RSS fetching will continue normally`);
+    } else {
+        _log(`✅ All RSS source names are unique (${allSources.length} total sources)`);
+    }
+}
+
+/**
+ * Validates all RSS sources (English, Russian, and Portuguese)
  * @returns {Object} Object with validated source arrays
  */
 function validateAllRSSSources() {
@@ -173,6 +214,9 @@ function validateAllRSSSources() {
     } else {
         console.warn(`⚠️ portugueseRssNewsSources not found, skipping Portuguese source validation`);
     }
+
+    // Check for duplicate names across all sources
+    validateUniqueRSSSourceNames(result.englishSources, result.russianSources, result.portugueseSources);
 
     _log(`📊 Validation complete: ${result.englishSources.length} English, ${result.russianSources.length} Russian, ${result.portugueseSources.length} Portuguese valid sources`);
 
@@ -215,7 +259,8 @@ if (typeof window !== 'undefined') {
         runIntegrityChecks,
         validateRSSSourceCategories,
         validateRSSFetchingConfig,
-        validateAllRSSSources
+        validateAllRSSSources,
+        validateUniqueRSSSourceNames
     };
 }
 
